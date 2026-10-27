@@ -18,6 +18,7 @@ class BankPresetPage extends ConsumerStatefulWidget {
 }
 
 class _BankPresetPageState extends ConsumerState<BankPresetPage> {
+  final ScrollController _scroll = ScrollController();
   BankUnit? _unit;
   BankStyle? _style;
   BankStyle? _child;
@@ -25,6 +26,12 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
   String? _message;
   bool _messageIsError = false;
   bool _saving = false;
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +67,17 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
         ? null
         : ref.watch(examPapersProvider(_bank!.id));
     final canSave = papers?.value?.isNotEmpty ?? false;
+    final stage = _stage();
+    final breadcrumb = [
+      if (_unit != null) _unit!.name,
+      if (_style != null) _style!.name,
+      if (_child != null) _child!.name,
+    ].join(' / ');
 
     return Scaffold(
       appBar: AppBar(title: const Text('题库预设')),
       body: ListView(
+        controller: _scroll,
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
           _SummaryCard(
@@ -72,39 +86,55 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
             currentBankId: session?.examTypeId ?? '',
           ),
           const SizedBox(height: 20),
-          _sectionTitle(textTheme, scheme, '目标题库'),
+          _StepBar(stage: stage),
+          if (breadcrumb.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              breadcrumb,
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
           _SelectorRow(
             label: '单位',
             value: _unit?.name,
             placeholder: '选择单位',
-            onTap: () => _pickUnit(units.value ?? const []),
+            loading: units.isLoading,
+            onTap: units.value == null || units.value!.isEmpty
+                ? null
+                : () => _pickUnit(units.value!),
           ),
           if (_unit != null)
             _SelectorRow(
               label: '分类',
               value: _style?.name,
               placeholder: '选择分类',
-              onTap: styles == null
-                  ? null
-                  : () => _pickStyle(styles.value ?? const []),
+              loading: styles?.isLoading ?? false,
+              onTap: _hasItems(styles)
+                  ? () => _pickStyle(styles!.value!)
+                  : null,
             ),
           if (_style != null)
             _SelectorRow(
               label: '年份',
               value: _child?.name,
               placeholder: '选择年份',
-              onTap: children == null
-                  ? null
-                  : () => _pickChild(children.value ?? const []),
+              loading: children?.isLoading ?? false,
+              onTap: _hasItems(children)
+                  ? () => _pickChild(children!.value!)
+                  : null,
             ),
           if (_child != null)
             _SelectorRow(
               label: '题库',
               value: _bank?.name,
               placeholder: '选择题库',
-              onTap: options == null
-                  ? null
-                  : () => _pickBank(options.value ?? const []),
+              loading: options?.isLoading ?? false,
+              onTap: _hasItems(options)
+                  ? () => _pickBank(options!.value!)
+                  : null,
             ),
           if (_bank != null) ...[
             const SizedBox(height: 20),
@@ -132,12 +162,50 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       ),
       bottomNavigationBar: SafeArea(
         minimum: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-        child: FilledButton(
-          onPressed: canSave && !_saving ? _save : null,
-          child: Text(_saving ? '保存中...' : '保存为执行预设'),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              _saveHint(papers),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: canSave
+                    ? Theme.of(context).colorScheme.onSurfaceVariant
+                    : Theme.of(context).colorScheme.outline,
+              ),
+            ),
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: canSave && !_saving ? _save : null,
+                child: Text(_saving ? '保存中...' : '保存为执行预设'),
+              ),
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  int _stage() {
+    if (_bank != null) return 4;
+    if (_child != null) return 3;
+    if (_style != null) return 2;
+    if (_unit != null) return 1;
+    return 0;
+  }
+
+  bool _hasItems<T>(AsyncValue<List<T>>? value) =>
+      value?.value?.isNotEmpty ?? false;
+
+  String _saveHint(AsyncValue<List<ExamPaper>>? papers) {
+    if (_bank == null) return '请先依次选择单位、分类、年份和题库';
+    if (papers == null || papers.isLoading) return '正在检查该题库的可考试卷…';
+    if (papers.hasError) return '试卷检查失败，请重新选择题库';
+    final list = papers.value ?? const [];
+    if (list.isEmpty) return '该题库没有可考试卷，不能用于模拟/手机考试';
+    return '可考试卷 ${list.length} 份 · 保存后考试前会自动对齐';
   }
 
   Future<void> _pickUnit(List<BankUnit> units) async {
@@ -169,6 +237,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       builder: (_) => _ChoiceSheet<BankStyle>(
         title: '选择分类',
         items: styles,
+        contextLabel: _unit?.name ?? '',
         labelOf: (style) => style.name,
         subtitleOf: (style) => style.year.isEmpty ? '' : '${style.year} 年',
       ),
@@ -190,6 +259,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       builder: (_) => _ChoiceSheet<BankStyle>(
         title: '选择年份',
         items: children,
+        contextLabel: '${_unit?.name ?? ''} / ${_style?.name ?? ''}',
         labelOf: (child) => child.name,
         subtitleOf: (child) => child.year.isEmpty ? '' : '${child.year} 年',
       ),
@@ -207,12 +277,25 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => _BankSheet(options: options),
+      builder: (_) => _BankSheet(
+        options: options,
+        contextLabel:
+            '${_unit?.name ?? ''} / ${_style?.name ?? ''} / ${_child?.name ?? ''}',
+      ),
     );
     if (choice == null) return;
     setState(() {
       _bank = choice;
       _message = null;
+    });
+    // 选完题库后自动滚到详情，避免用户以为没有反应。
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      _scroll.animateTo(
+        _scroll.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeOut,
+      );
     });
   }
 
@@ -397,18 +480,21 @@ class _SelectorRow extends StatelessWidget {
     required this.value,
     required this.placeholder,
     required this.onTap,
+    this.loading = false,
   });
 
   final String label;
   final String? value;
   final String placeholder;
   final VoidCallback? onTap;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final hasValue = value != null && value!.isNotEmpty;
+    final enabled = onTap != null;
 
     return InkWell(
       onTap: onTap,
@@ -428,19 +514,93 @@ class _SelectorRow extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                hasValue ? value! : placeholder,
+                hasValue ? value! : (loading ? '加载中...' : placeholder),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: textTheme.bodyLarge?.copyWith(
-                  color: hasValue ? scheme.onSurface : scheme.outline,
+                  color: hasValue
+                      ? scheme.onSurface
+                      : enabled
+                      ? scheme.outline
+                      : scheme.outlineVariant,
                   fontWeight: hasValue ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ),
-            Icon(Icons.chevron_right, color: scheme.outlineVariant),
+            if (loading)
+              const SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            else
+              Icon(Icons.chevron_right, color: scheme.outlineVariant),
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 四步进度：单位 → 分类 → 年份 → 题库。
+class _StepBar extends StatelessWidget {
+  const _StepBar({required this.stage});
+
+  /// 已完成步骤数（0–4）。
+  final int stage;
+
+  static const _labels = ['单位', '分类', '年份', '题库'];
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Row(
+      children: [
+        for (var index = 0; index < _labels.length; index++) ...[
+          if (index > 0)
+            Expanded(
+              child: Container(
+                height: 2,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                color: stage > index ? scheme.primary : scheme.outlineVariant,
+              ),
+            ),
+          Column(
+            children: [
+              Container(
+                width: 24,
+                height: 24,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: stage > index
+                      ? scheme.primary
+                      : scheme.surfaceContainerHighest,
+                ),
+                child: stage > index
+                    ? Icon(Icons.check, size: 14, color: scheme.onPrimary)
+                    : Text(
+                        '${index + 1}',
+                        style: textTheme.labelSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _labels[index],
+                style: textTheme.labelSmall?.copyWith(
+                  color: stage > index
+                      ? scheme.onSurface
+                      : scheme.onSurfaceVariant,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
     );
   }
 }
@@ -619,19 +779,21 @@ class _NotesCard extends StatelessWidget {
   );
 }
 
-/// 通用单选弹层（带搜索）。
+/// 通用单选弹层（带搜索与层级上下文）。
 class _ChoiceSheet<T> extends StatefulWidget {
   const _ChoiceSheet({
     required this.title,
     required this.items,
     required this.labelOf,
     this.subtitleOf,
+    this.contextLabel = '',
   });
 
   final String title;
   final List<T> items;
   final String Function(T) labelOf;
   final String Function(T)? subtitleOf;
+  final String contextLabel;
 
   @override
   State<_ChoiceSheet<T>> createState() => _ChoiceSheetState<T>();
@@ -650,6 +812,8 @@ class _ChoiceSheetState<T> extends State<_ChoiceSheet<T>> {
               .contains(_query.trim().toLowerCase()),
         )
         .toList();
+    final textTheme = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.only(
@@ -660,7 +824,16 @@ class _ChoiceSheetState<T> extends State<_ChoiceSheet<T>> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(widget.title, style: Theme.of(context).textTheme.titleMedium),
+            Text(widget.title, style: textTheme.titleMedium),
+            const SizedBox(height: 2),
+            Text(
+              widget.contextLabel.isEmpty
+                  ? '共 ${widget.items.length} 项'
+                  : '${widget.contextLabel} · 共 ${widget.items.length} 项',
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 8),
             TextField(
               decoration: const InputDecoration(
@@ -695,19 +868,31 @@ class _ChoiceSheetState<T> extends State<_ChoiceSheet<T>> {
 
 /// 题库弹层：无试卷的题库灰显并禁用。
 class _BankSheet extends StatelessWidget {
-  const _BankSheet({required this.options});
+  const _BankSheet({required this.options, this.contextLabel = ''});
 
   final List<BankOption> options;
+  final String contextLabel;
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final scheme = Theme.of(context).colorScheme;
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text('选择题库', style: Theme.of(context).textTheme.titleMedium),
+            Text('选择题库', style: textTheme.titleMedium),
+            const SizedBox(height: 2),
+            Text(
+              contextLabel.isEmpty
+                  ? '共 ${options.length} 个'
+                  : '$contextLabel · 共 ${options.length} 个',
+              style: textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
             const SizedBox(height: 8),
             Flexible(
               child: ListView.builder(
