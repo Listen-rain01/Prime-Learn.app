@@ -10,8 +10,7 @@ import 'package:primelearn/features/tasks/domain/repositories/tasks_repository.d
 /// - 暂不执行：签到（尚未实现）、视频学习、练习时长、手机练习（v1 不做）；
 /// - 其余（知识学习、模拟考试、手机考试）视为可执行。
 ///
-/// 与 docs/ui/PURE_UI_SPEC.md §4.3 的清单略有差异：该规格把签到列为暂不执行、
-/// 未列手机练习；此处按 AGENTS.md v1 范围收敛，签到实现后移出暂不执行组。
+/// 清单按 AGENTS.md v1 范围收敛：手机练习不做；签到实现后移出暂不执行组。
 class LoadDailyBoard {
   /// 创建用例。
   LoadDailyBoard(this._repository);

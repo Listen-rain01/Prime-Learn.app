@@ -11,7 +11,7 @@ import 'package:primelearn/features/tasks/presentation/providers/daily_board_not
 import 'package:primelearn/features/tasks/presentation/widgets/daily_points_header.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_task_row.dart';
 
-/// 首页（指挥台），按 docs/ui/PURE_UI_SPEC.md §4 复刻。
+/// 首页：今日积分、当前题库与每日任务。
 class HomePage extends ConsumerWidget {
   /// 创建首页。
   const HomePage({super.key});
@@ -80,7 +80,7 @@ class HomePage extends ConsumerWidget {
   }
 }
 
-/// 每日任务分组块内容（§4.3 / §4.4 / §4.5）。
+/// 每日任务分组块内容。
 class _TasksSection extends StatelessWidget {
   const _TasksSection({required this.board, required this.onRetry});
 

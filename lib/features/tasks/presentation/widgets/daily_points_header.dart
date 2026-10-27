@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 首页顶部个人信息与积分块（规格 §4.2）。
+/// 首页顶部个人信息与积分块。
 class DailyPointsHeader extends StatelessWidget {
   /// 创建积分块。
   const DailyPointsHeader({

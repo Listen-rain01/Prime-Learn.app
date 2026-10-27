@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 通用文本输入框（设计系统基元，规格 §3.3）。
+/// 通用文本输入框（设计系统基元）。
 ///
 /// 统一 12dp 圆角、primary 描边、无填充、`label` + `hint`、浮动 label 为 primary；
 /// 字段级错误走 `errorText`（就近内联，不用 SnackBar）。

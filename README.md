@@ -71,14 +71,15 @@ $env:PL_ID='...'; $env:PL_PWD='...'; dart run tool/live_probe.dart
 Remove-Item Env:PL_ID,Env:PL_PWD
 ```
 
-## UI 规格
+## UI 基线
 
-视觉基线以 `docs/ui/PURE_UI_SPEC.md` 为唯一依据（同步自 `F:\Web项目\docs\ui\PURE_UI_SPEC.md`）：
+当前实现即视觉基线，详见 `docs/ui/README.md`（早期从 Web 项目规格复刻的那份已归档到 `docs/ui/archive/`，不再作为依据）：
 
-- Material 3，`colorSchemeSeed: Colors.blue`（`#2196F3`），亮/暗色跟随系统；
+- Material 3，`colorSchemeSeed: Colors.blue`，亮/暗色跟随系统；
 - 全部使用主题语义令牌，不硬编码颜色；主分组块为 `surfaceContainerLow` + 20dp 圆角、无阴影；
-- 登录页：`FlutterLogo(size: 100, markOnly)`、输入框 12dp 圆角 + primary 描边、按钮 50dp；
-- 错误提示：就近内联（字段 `errorText` + 操作按钮上方 `InlineNotice`），不使用 SnackBar。
+- 通用组件：`core/widgets`（`AppTextField`、`PrimaryButton`、`InlineNotice`、`TonalBlock`）；
+- 错误提示：就近内联（字段 `errorText` + 操作按钮上方 `InlineNotice`），不使用 SnackBar；
+- 导航：底部 Tab 数量与命名未定，暂不实现 shell。
 
 ## 协议与证据等级
 
@@ -98,8 +99,9 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] `core/protocol`：Esdt 编码、竖线响应解析、黄金向量测试
 - [x] `core/network`：Dio + CookieJar、超时、错误映射、会话失效识别
 - [x] `features/auth`：登录全链路（预建会话 → 登录 → 校验会话/取题库）
-- [x] 登录页（按 `docs/ui/PURE_UI_SPEC.md` §3 复刻：Material 3 seed 蓝、FlutterLogo、字段内联校验）、类型化路由、登录态守卫
-- [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，只读）、首页 §4（积分块 + 每日任务分组 + 加载/错误/空态）、会话失效清理
+- [x] 登录页（Material 3 seed 蓝、FlutterLogo、字段内联校验）、类型化路由、登录态守卫
+- [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，真实环境验证通过）、首页（积分块 + 每日任务分组 + 加载/错误/空态）、会话失效清理
+- [ ] 底部导航结构（Tab 数量/命名待定，暂不实现）
 - [ ] 手机考试 / 模拟考试（需先完成协议取证）
 - [ ] 签到 / 阅读学习
 - [ ] 执行记录与审计日志

@@ -11,7 +11,7 @@ import 'package:primelearn/core/widgets/primary_button.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_state.dart';
 
-/// 登录页，按 docs/ui/PURE_UI_SPEC.md §3 复刻。
+/// 登录页。
 ///
 /// 错误提示采用「就近内联」：字段错误显示在对应输入框下方，
 /// 提交失败显示在按钮上方，不使用底部 SnackBar。
@@ -101,7 +101,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              // 键盘弹出时允许滚动，拖动时收起键盘（§3.1）。
+              // 键盘弹出时允许滚动，拖动时收起键盘。
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: ConstrainedBox(

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 跨 feature 的设计系统基元：Tonal 分组块（规格 §9.1）。
+/// 跨 feature 的设计系统基元：Tonal 分组块。
 ///
 /// `surfaceContainerLow` 背景、20dp 圆角、无阴影、无边框；
 /// 同一页面内分组块间距 16dp。

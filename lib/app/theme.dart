@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 
-/// 应用主题。
+/// 应用主题（当前视觉基线）。
 ///
-/// 按 docs/ui/PURE_UI_SPEC.md §1.1：
 /// Material 3、seed `Colors.blue`、亮/暗色均使用 `ColorScheme.fromSeed`、
 /// 主题模式跟随系统；页面背景使用 `colorScheme.surface`。
 abstract final class AppTheme {

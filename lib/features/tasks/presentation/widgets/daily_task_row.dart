@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 
-/// 今日任务行（规格 §4.3）。
+/// 今日任务行。
 ///
 /// 可执行任务显示名称/规则/进度 + 分数/状态；
 /// 暂不执行任务淡化显示，只保留名称与「暂不执行」。

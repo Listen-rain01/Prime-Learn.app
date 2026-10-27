@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// 登录主按钮（规格 §3.5）。
+/// 主操作按钮（设计系统基元）。
 ///
 /// 撑满容器宽度、高 50dp、FilledButton、12dp 圆角；
 /// 加载时禁用并显示 20×20dp 进度（strokeWidth 2，onPrimary）。
