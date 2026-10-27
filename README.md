@@ -91,8 +91,8 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] `core/protocol`：Esdt 编码、竖线响应解析、黄金向量测试
 - [x] `core/network`：Dio + CookieJar、超时、错误映射、会话失效识别
 - [x] `features/auth`：登录全链路（预建会话 → 登录 → 校验会话/取题库）
-- [x] 登录页（按 `docs/ui/PURE_UI_SPEC.md` §3 复刻：Material 3 seed 蓝、FlutterLogo、字段内联校验）、指挥台首页、类型化路由、登录态守卫
-- [ ] 今日任务 / 积分查询
+- [x] 登录页（按 `docs/ui/PURE_UI_SPEC.md` §3 复刻：Material 3 seed 蓝、FlutterLogo、字段内联校验）、类型化路由、登录态守卫
+- [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，只读）、首页 §4（积分块 + 每日任务分组 + 加载/错误/空态）、会话失效清理
 - [ ] 手机考试 / 模拟考试（需先完成协议取证）
 - [ ] 签到 / 阅读学习
 - [ ] 执行记录与审计日志

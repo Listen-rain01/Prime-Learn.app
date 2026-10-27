@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
+import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
+import 'package:primelearn/features/tasks/domain/entities/task_board.dart';
+import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
+import 'package:primelearn/features/tasks/presentation/widgets/daily_points_header.dart';
+import 'package:primelearn/features/tasks/presentation/widgets/daily_task_row.dart';
 
-/// 首页（指挥台）。
-///
-/// 目前只展示会话信息与占位结构；完整视觉见 docs/ui/PURE_UI_SPEC.md §4，
-/// 待今日任务接口接入后按规格补齐。
+/// 首页（指挥台），按 docs/ui/PURE_UI_SPEC.md §4 复刻。
 class HomePage extends ConsumerWidget {
   /// 创建首页。
   const HomePage({super.key});
@@ -19,6 +21,15 @@ class HomePage extends ConsumerWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final session = ref.watch(sessionStoreProvider);
+    final board = ref.watch(dailyBoardProvider);
+
+    // 会话失效（平台返回登录页/401）时清理会话，App 层监听后跳回登录页。
+    ref.listen<AsyncValue<TaskBoard>>(dailyBoardProvider, (_, next) {
+      final error = next.error;
+      if (error is UseCaseFailure && error.sessionExpired) {
+        ref.read(sessionStoreProvider.notifier).clear();
+      }
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -26,98 +37,18 @@ class HomePage extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
             TonalBlock(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          session == null ? '未登录' : session.userName,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: scheme.onSurface,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.stars_rounded,
-                            size: 20,
-                            color: scheme.primary,
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '今日积分',
-                            style: textTheme.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '—',
-                            style: textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w700,
-                              height: 1,
-                              color: scheme.onSurface,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '当前题库：${session?.bankName ?? '未设置'}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
+              child: DailyPointsHeader(
+                userName: session?.userName ?? '未登录',
+                bankName: session?.bankName ?? '未设置',
+                points: board.value?.currentPoints,
               ),
             ),
             const SizedBox(height: 16),
             TonalBlock(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '每日任务',
-                        style: textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          color: scheme.onSurface,
-                        ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '0/0 已完成',
-                        style: textTheme.labelMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 4),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    child: Text(
-                      '今日任务接口尚未接入',
-                      style: textTheme.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
+              child: _TasksSection(
+                board: board,
+                onRetry: () => ref.invalidate(dailyBoardProvider),
               ),
             ),
             const SizedBox(height: 16),
@@ -145,6 +76,141 @@ class HomePage extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// 每日任务分组块内容（§4.3 / §4.4 / §4.5）。
+class _TasksSection extends StatelessWidget {
+  const _TasksSection({required this.board, required this.onRetry});
+
+  final AsyncValue<TaskBoard> board;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return board.when(
+      loading: () => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: scheme.primary,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              '正在加载每日任务...',
+              style: textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+      ),
+      error: (error, _) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              '每日任务加载失败',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              error is UseCaseFailure ? error.message : '请稍后重试',
+              style: textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            TextButton.icon(
+              onPressed: onRetry,
+              icon: const Icon(Icons.refresh),
+              label: const Text('重试'),
+            ),
+          ],
+        ),
+      ),
+      data: (value) => _TasksData(board: value),
+    );
+  }
+}
+
+class _TasksData extends StatelessWidget {
+  const _TasksData({required this.board});
+
+  final TaskBoard board;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              '每日任务',
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${board.completedCount}/${board.all.length} 已完成',
+              style: textTheme.labelMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 4),
+        if (board.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              '暂无任务',
+              style: textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          )
+        else ...[
+          for (final task in board.actionable) DailyTaskRow(task: task),
+          if (board.pending.isNotEmpty) ...[
+            if (board.actionable.isNotEmpty) const SizedBox(height: 10),
+            Text(
+              '暂不执行 · 不获取积分',
+              style: textTheme.labelMedium?.copyWith(color: scheme.outline),
+            ),
+            for (var index = 0; index < board.pending.length; index++) ...[
+              if (index > 0)
+                Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  color: scheme.outlineVariant,
+                ),
+              DailyTaskRow(task: board.pending[index], pending: true),
+            ],
+          ],
+        ],
+      ],
     );
   }
 }

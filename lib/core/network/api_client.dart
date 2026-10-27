@@ -60,6 +60,20 @@ class ApiClient {
     }
   }
 
+  /// GET 请求，返回原始响应体。
+  ///
+  /// `path` 可自带**已编码**的 query：Esdt 参数本身就是转义后的字符串
+  /// （含 `%5E`、`%2C`），若交给 `queryParameters` 会被 `%` 再编码一次，
+  /// 平台将收到错误参数，因此这里直接传完整路径。
+  Future<String> getRaw(String path) async {
+    try {
+      final response = await _dio.get<String>(path);
+      return response.data ?? '';
+    } on DioException catch (error) {
+      throw _toApiException(error);
+    }
+  }
+
   /// 清空 Cookie（退出登录或会话失效时调用）。
   Future<void> clearCookies() => _cookieJar.deleteAll();
 
