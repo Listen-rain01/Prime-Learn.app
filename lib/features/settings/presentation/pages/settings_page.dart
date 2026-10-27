@@ -52,41 +52,18 @@ class SettingsPage extends ConsumerWidget {
               // 因此在这里补一层透明 Material。
               child: Material(
                 type: MaterialType.transparency,
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: Icon(
-                        Icons.rule_outlined,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      title: const Text('积分规则'),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      onTap: () => const RulesRoute().push<void>(context),
-                    ),
-                    Divider(
-                      height: 0.5,
-                      thickness: 0.5,
-                      indent: 16,
-                      endIndent: 16,
-                      color: scheme.outlineVariant,
-                    ),
-                    ListTile(
-                      enabled: false,
-                      leading: Icon(
-                        Icons.library_books_outlined,
-                        color: scheme.onSurfaceVariant,
-                      ),
-                      title: const Text('题库切换'),
-                      subtitle: const Text('待接入'),
-                      trailing: Icon(
-                        Icons.chevron_right,
-                        color: scheme.outlineVariant,
-                      ),
-                    ),
-                  ],
+                child: ListTile(
+                  enabled: false,
+                  leading: Icon(
+                    Icons.library_books_outlined,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  title: const Text('题库切换'),
+                  subtitle: const Text('待接入'),
+                  trailing: Icon(
+                    Icons.chevron_right,
+                    color: scheme.outlineVariant,
+                  ),
                 ),
               ),
             ),

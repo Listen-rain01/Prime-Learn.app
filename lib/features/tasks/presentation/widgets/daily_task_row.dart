@@ -1,19 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 
-/// 今日任务行。
-///
-/// 可执行任务显示名称/规则/进度 + 分数/状态；
-/// 暂不执行任务淡化显示，只保留名称与「暂不执行」。
+/// 今日任务行：直接展示接口字段（名称、规则、进度文案、今日得分/上限）。
 class DailyTaskRow extends StatelessWidget {
   /// 创建任务行。
-  const DailyTaskRow({required this.task, this.pending = false, super.key});
+  const DailyTaskRow({required this.task, super.key});
 
   /// 任务数据。
   final DailyTask task;
-
-  /// 是否属于「暂不执行」分组。
-  final bool pending;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +16,7 @@ class DailyTaskRow extends StatelessWidget {
     final secondary = scheme.onSurfaceVariant;
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: pending ? 10 : 14),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,26 +30,24 @@ class DailyTaskRow extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: pending ? secondary : scheme.onSurface,
+                    color: scheme.onSurface,
                   ),
                 ),
-                if (!pending) ...[
+                const SizedBox(height: 4),
+                Text(
+                  task.rule,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodySmall?.copyWith(color: secondary),
+                ),
+                if (task.progressText.isNotEmpty) ...[
                   const SizedBox(height: 4),
                   Text(
-                    task.rule,
-                    maxLines: 2,
+                    task.progressText,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: textTheme.bodySmall?.copyWith(color: secondary),
                   ),
-                  if (task.progressText.isNotEmpty) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      task.progressText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: textTheme.bodySmall?.copyWith(color: secondary),
-                    ),
-                  ],
                 ],
               ],
             ),
@@ -65,19 +57,17 @@ class DailyTaskRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                task.score.toString(),
+                '${task.currentScore}/${task.maxScore}',
                 style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: pending ? scheme.outline : scheme.onSurface,
+                  color: scheme.onSurface,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
-                pending ? '暂不执行' : (task.isCompleted ? '已完成' : '未完成'),
+                task.isCompleted ? '已完成' : '未完成',
                 style: textTheme.labelMedium?.copyWith(
-                  color: pending || task.isCompleted
-                      ? scheme.outline
-                      : scheme.primary,
+                  color: task.isCompleted ? scheme.outline : scheme.primary,
                 ),
               ),
             ],

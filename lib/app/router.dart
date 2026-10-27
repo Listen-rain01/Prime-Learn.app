@@ -4,7 +4,6 @@ import 'package:primelearn/app/app_shell.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
 import 'package:primelearn/features/records/presentation/pages/records_page.dart';
-import 'package:primelearn/features/settings/presentation/pages/rules_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
 import 'package:primelearn/features/tasks/presentation/pages/today_page.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -34,12 +33,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
     ),
     TypedStatefulShellBranch<SettingsBranchData>(
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<SettingsRoute>(
-          path: '/settings',
-          routes: <TypedRoute<RouteData>>[
-            TypedGoRoute<RulesRoute>(path: 'rules'),
-          ],
-        ),
+        TypedGoRoute<SettingsRoute>(path: '/settings'),
       ],
     ),
   ],
@@ -101,15 +95,6 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SettingsPage();
-}
-
-/// 积分规则页（在「我的」分支内 push）。
-class RulesRoute extends GoRouteData with $RulesRoute {
-  /// 创建规则路由。
-  const RulesRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) => const RulesPage();
 }
 
 /// 全局路由。

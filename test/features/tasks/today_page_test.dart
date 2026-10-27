@@ -79,7 +79,7 @@ Future<ProviderContainer> _pumpHome(
 }
 
 void main() {
-  testWidgets('展示积分、题库与任务分组', (tester) async {
+  testWidgets('展示积分、题库与任务列表', (tester) async {
     await _pumpHome(
       tester,
       _FakeTasksRepository([
@@ -121,11 +121,13 @@ void main() {
     expect(find.text('知识学习'), findsOneWidget);
     expect(find.text('手机考试'), findsOneWidget);
     expect(find.text('已考1个/获得4分'), findsOneWidget);
+    expect(find.text('1/1'), findsOneWidget);
+    expect(find.text('4/16'), findsOneWidget);
+    expect(find.text('2/3'), findsOneWidget);
     expect(find.text('已完成'), findsOneWidget);
-    expect(find.text('未完成'), findsOneWidget);
-    expect(find.text('暂不执行 · 不获取积分'), findsOneWidget);
-    expect(find.text('签到'), findsOneWidget);
-    expect(find.text('暂不执行'), findsOneWidget);
+    expect(find.text('未完成'), findsNWidgets(2));
+    expect(find.text('暂不执行 · 不获取积分'), findsNothing);
+    expect(find.text('暂不执行'), findsNothing);
   });
 
   testWidgets('加载中显示进度文案', (tester) async {

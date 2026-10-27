@@ -146,7 +146,7 @@ class _TasksData extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '${board.completedCount}/${board.all.length} 已完成',
+              '${board.completedCount}/${board.tasks.length} 已完成',
               style: textTheme.labelMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
@@ -164,25 +164,8 @@ class _TasksData extends StatelessWidget {
               ),
             ),
           )
-        else ...[
-          for (final task in board.actionable) DailyTaskRow(task: task),
-          if (board.pending.isNotEmpty) ...[
-            if (board.actionable.isNotEmpty) const SizedBox(height: 10),
-            Text(
-              '暂不执行 · 不获取积分',
-              style: textTheme.labelMedium?.copyWith(color: scheme.outline),
-            ),
-            for (var index = 0; index < board.pending.length; index++) ...[
-              if (index > 0)
-                Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  color: scheme.outlineVariant,
-                ),
-              DailyTaskRow(task: board.pending[index], pending: true),
-            ],
-          ],
-        ],
+        else
+          for (final task in board.tasks) DailyTaskRow(task: task),
       ],
     );
   }

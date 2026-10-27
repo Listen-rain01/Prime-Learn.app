@@ -21,12 +21,11 @@ class _FakeTasksRepository implements TasksRepository {
 
 DailyTask _task({
   required Criterion criterion,
+  required String name,
   required int sort,
-  String name = '任务',
   int score = 1,
   int maxScore = 1,
   int currentScore = 0,
-  String progress = '',
 }) => DailyTask(
   criterion: criterion,
   name: name,
@@ -34,39 +33,27 @@ DailyTask _task({
   score: score,
   maxScore: maxScore,
   currentScore: currentScore,
-  progressText: progress,
+  progressText: '',
   sort: sort,
 );
 
 void main() {
-  test('按 Sort 排序并分为可执行 / 暂不执行', () async {
+  test('保持接口返回的自然顺序，不做重排', () async {
     final board = await LoadDailyBoard(
       _FakeTasksRepository([
-        _task(criterion: Criterion.course, sort: 3, name: '视频学习'),
-        _task(criterion: Criterion.mobileExam, sort: 4, name: '手机考试'),
-        _task(criterion: Criterion.checkIn, sort: 1, name: '签到'),
-        _task(criterion: Criterion.studyKnowledge, sort: 2, name: '知识学习'),
+        _task(criterion: Criterion.course, name: '视频学习', sort: 3),
+        _task(criterion: Criterion.mobileExam, name: '手机考试', sort: 4),
+        _task(criterion: Criterion.checkIn, name: '签到', sort: 1),
+        _task(criterion: Criterion.studyKnowledge, name: '知识学习', sort: 2),
       ]),
     ).execute('u1');
 
-    expect(board.actionable.map((task) => task.name), ['知识学习', '手机考试']);
-    expect(board.pending.map((task) => task.name), ['签到', '视频学习']);
-  });
-
-  test('Sort 相同时保持服务端原始顺序（实测 Sort 不唯一）', () async {
-    // 2026-10-28 真实响应：签到与知识学习同为 Sort=1，手机考试与视频学习同为 Sort=3。
-    final board = await LoadDailyBoard(
-      _FakeTasksRepository([
-        _task(criterion: Criterion.checkIn, sort: 1, name: '签到'),
-        _task(criterion: Criterion.studyKnowledge, sort: 1, name: '知识学习'),
-        _task(criterion: Criterion.mockExam, sort: 2, name: '模拟考试'),
-        _task(criterion: Criterion.mobileExam, sort: 3, name: '手机考试'),
-        _task(criterion: Criterion.course, sort: 3, name: '视频学习'),
-      ]),
-    ).execute('u1');
-
-    expect(board.actionable.map((task) => task.name), ['知识学习', '模拟考试', '手机考试']);
-    expect(board.pending.map((task) => task.name), ['签到', '视频学习']);
+    expect(board.tasks.map((task) => task.name), [
+      '视频学习',
+      '手机考试',
+      '签到',
+      '知识学习',
+    ]);
   });
 
   test('统计已完成数与今日积分', () async {
@@ -74,26 +61,29 @@ void main() {
       _FakeTasksRepository([
         _task(
           criterion: Criterion.studyKnowledge,
+          name: '知识学习',
           sort: 1,
           currentScore: 1,
           maxScore: 1,
         ),
         _task(
           criterion: Criterion.mobileExam,
-          sort: 2,
+          name: '手机考试',
+          sort: 3,
           currentScore: 4,
           maxScore: 16,
         ),
         _task(
           criterion: Criterion.checkIn,
-          sort: 3,
+          name: '签到',
+          sort: 1,
           currentScore: 2,
           maxScore: 3,
         ),
       ]),
     ).execute('u1');
 
-    expect(board.all, hasLength(3));
+    expect(board.tasks, hasLength(3));
     expect(board.completedCount, 1);
     expect(board.currentPoints, 7);
     expect(board.maxPoints, 20);
