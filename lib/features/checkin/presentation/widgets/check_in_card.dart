@@ -56,7 +56,7 @@ class CheckInCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '平台要求：当日练习满 50 题后才能签到',
+                      '平台要求：当日完成 50 题（手机考试/模拟考试累计）才能签到',
                       style: textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
