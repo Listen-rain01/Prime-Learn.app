@@ -1,0 +1,9 @@
+{
+  "protocol": "esdt",
+  "source": "docs/api/登录接口文档.md §3（算法描述）",
+  "generatedBy": "docs/dev/esdt-vectors.mjs（独立 JavaScript 实现）",
+  "generatedAt": "2026-10-27T16:05:40.051Z",
+  "collectedBy": "agent",
+  "platformVersion": "未采集",
+  "note": "文档示例 123 / A1 与生成结果一致；其余为算法推导，未经真实平台请求验证。"
+}

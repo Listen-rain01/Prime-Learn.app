@@ -1,0 +1,30 @@
+# 静态分析配置。规则见 AGENTS.md §2.3、§4、§15。
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+  language:
+    # 严格模式：禁止隐式 downcast / 隐式动态类型推断 / 裸泛型。
+    strict-casts: true
+    strict-inference: true
+    strict-raw-types: true
+  errors:
+    # 生成代码与协议解析可能触发这些提示，但业务代码不应出现。
+    invalid_annotation_target: ignore
+
+# riverpod_lint 3.x 通过 analysis_server_plugin 机制加载。
+plugins:
+  riverpod_lint: ^3.1.9
+
+linter:
+  rules:
+    - always_declare_return_types
+    - avoid_dynamic_calls
+    - avoid_print
+    - prefer_single_quotes
+    - require_trailing_commas
+    - unawaited_futures
