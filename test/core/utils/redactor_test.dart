@@ -19,4 +19,14 @@ void main() {
     expect(Redactor.secret('p@ssw0rd'), '***');
     expect(Redactor.secret(''), '');
   });
+
+  test('手机号保留前 3 后 4', () {
+    expect(Redactor.phone('13812345678'), '138****5678');
+    expect(Redactor.phone(' 13812345678 '), '138****5678');
+  });
+
+  test('过短的手机号整体脱敏', () {
+    expect(Redactor.phone('123'), '***');
+    expect(Redactor.phone(''), '***');
+  });
 }

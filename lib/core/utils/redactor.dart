@@ -12,6 +12,15 @@ abstract final class Redactor {
     return '$head******$tail';
   }
 
+  /// 手机号脱敏：保留前 3 位与后 4 位。
+  static String phone(String value) {
+    final trimmed = value.trim();
+    if (trimmed.length < 7) return '***';
+    final head = trimmed.substring(0, 3);
+    final tail = trimmed.substring(trimmed.length - 4);
+    return '$head****$tail';
+  }
+
   /// 任意敏感值替换为固定占位符。
   static String secret(String value) => value.isEmpty ? '' : '***';
 }

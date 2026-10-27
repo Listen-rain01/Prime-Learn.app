@@ -1,0 +1,16 @@
+{
+  "endpoint": "/PersonWap/MyBaseInfo",
+  "method": "POST",
+  "contentType": "application/x-www-form-urlencoded",
+  "requestBody": "pid=<Esdt(pid)>&sstype=0",
+  "collectedAt": "2026-10-28T02:10:00+08:00",
+  "collectedBy": "agent（经账号持有人授权）",
+  "platformVersion": "未提供",
+  "account": "已脱敏",
+  "note": "真实响应约 15.5KB HTML，内嵌 vData 共 15 个键；本文件仅保留白名单字段，姓名/身份证/单位/电话/地址/GUID/图片路径均替换为占位符。",
+  "observations": [
+    "vData 键：pid、sstype、DepartmentId、photo、qrphoto、sfzphoto、byzphoto、pnum、idcard、pname、AllowChangeCurriculumVitae、punit、tel、address、Title",
+    "byzphoto 为空串，拼接图片 URL 时需要判空",
+    "接口返回 HTML 而非 JSON，客户端需从 HTML 中提取 vData"
+  ]
+}

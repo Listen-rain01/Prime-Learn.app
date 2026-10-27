@@ -1,0 +1,17 @@
+{
+  "pid": "<guid>",
+  "sstype": "0",
+  "DepartmentId": "<guid>",
+  "photo": "<path>",
+  "qrphoto": "<path>",
+  "sfzphoto": "<path>",
+  "byzphoto": "",
+  "pnum": "E1001",
+  "idcard": "<idcard>",
+  "pname": "张*",
+  "AllowChangeCurriculumVitae": false,
+  "punit": "<unit>",
+  "tel": "<phone>",
+  "address": "<address>",
+  "Title": "个人信息"
+}

@@ -50,12 +50,21 @@ class ApiClient {
   }
 
   /// 提交表单；返回原始响应体。
-  Future<String> postForm(String path, Map<String, String> data) async {
+  ///
+  /// [expectHtml] 同 [getRaw]：个人信息等接口本身就返回 HTML。
+  Future<String> postForm(
+    String path,
+    Map<String, String> data, {
+    bool expectHtml = false,
+  }) async {
     try {
       final response = await _dio.post<String>(
         path,
         data: data,
-        options: Options(contentType: Headers.formUrlEncodedContentType),
+        options: Options(
+          contentType: Headers.formUrlEncodedContentType,
+          extra: expectHtml ? const {_skipSessionCheckKey: true} : null,
+        ),
       );
       return response.data ?? '';
     } on DioException catch (error) {
