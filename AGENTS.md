@@ -283,7 +283,7 @@ class RunMobileExam {
 
 ### 3.7 命名与目录规则
 
-- feature 目录用业务名：`auth`、`tasks`、`records`、`exam`、`reading`、`stats`、`settings`、`agent`；
+- feature 目录用业务名：`auth`、`tasks`、`records`、`checkin`、`exam`、`reading`、`stats`、`settings`、`agent`；
 - 页面统一 `xxx_page.dart` / `XxxPage`，不要 `screens/`、`_screen.dart`；
 - 用例 `xxx_usecase.dart` / `XxxUseCase`；
 - Repository 接口 `xxx_repository.dart`，实现 `xxx_repository_impl.dart`；

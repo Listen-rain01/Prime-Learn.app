@@ -120,6 +120,7 @@ void main() {
       'auth',
       'tasks',
       'records',
+      'checkin',
       'exam',
       'reading',
       'stats',

@@ -3,12 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
+import 'package:primelearn/features/checkin/presentation/widgets/check_in_card.dart';
+import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 import 'package:primelearn/features/tasks/domain/entities/task_board.dart';
 import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_points_header.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_task_row.dart';
 
-/// 今日 Tab：今日积分、当前题库与每日任务。
+/// 今日 Tab：今日积分、当前题库、签到与每日任务。
 class TodayPage extends ConsumerWidget {
   /// 创建今日页。
   const TodayPage({super.key});
@@ -17,6 +19,12 @@ class TodayPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionStoreProvider);
     final board = ref.watch(dailyBoardProvider);
+    final checkedIn =
+        board.value?.tasks.any(
+          (task) =>
+              task.criterion == Criterion.checkIn && task.currentScore > 0,
+        ) ??
+        false;
 
     // 会话失效（平台返回登录页/401）时清理会话，App 层监听后跳回登录页。
     ref.listen<AsyncValue<TaskBoard>>(dailyBoardProvider, (_, next) {
@@ -37,6 +45,11 @@ class TodayPage extends ConsumerWidget {
                 bankName: session?.bankName ?? '未设置',
                 points: board.value?.currentPoints,
               ),
+            ),
+            const SizedBox(height: 16),
+            CheckInCard(
+              alreadyCheckedIn: checkedIn,
+              onSuccess: () => ref.invalidate(dailyBoardProvider),
             ),
             const SizedBox(height: 16),
             TonalBlock(
