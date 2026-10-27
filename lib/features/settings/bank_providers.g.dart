@@ -146,12 +146,12 @@ final class BankRepositoryProvider
 
 String _$bankRepositoryHash() => r'3beccab61ff3a44f2361f5e9dd84fc9d5347bcd3';
 
-/// 题库预设存储。
+/// 题库预设存储（底层偏好）。
 
 @ProviderFor(bankPresetStore)
 final bankPresetStoreProvider = BankPresetStoreProvider._();
 
-/// 题库预设存储。
+/// 题库预设存储（底层偏好）。
 
 final class BankPresetStoreProvider
     extends
@@ -161,7 +161,7 @@ final class BankPresetStoreProvider
           FutureOr<BankPresetStore>
         >
     with $FutureModifier<BankPresetStore>, $FutureProvider<BankPresetStore> {
-  /// 题库预设存储。
+  /// 题库预设存储（底层偏好）。
   BankPresetStoreProvider._()
     : super(
         from: null,
@@ -189,6 +189,53 @@ final class BankPresetStoreProvider
 }
 
 String _$bankPresetStoreHash() => r'34d3c27194586758d3aab6cc627b364f6c8d3fa6';
+
+/// 题库预设仓储。
+
+@ProviderFor(bankPresetRepository)
+final bankPresetRepositoryProvider = BankPresetRepositoryProvider._();
+
+/// 题库预设仓储。
+
+final class BankPresetRepositoryProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<BankPresetRepository>,
+          BankPresetRepository,
+          FutureOr<BankPresetRepository>
+        >
+    with
+        $FutureModifier<BankPresetRepository>,
+        $FutureProvider<BankPresetRepository> {
+  /// 题库预设仓储。
+  BankPresetRepositoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'bankPresetRepositoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$bankPresetRepositoryHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<BankPresetRepository> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<BankPresetRepository> create(Ref ref) {
+    return bankPresetRepository(ref);
+  }
+}
+
+String _$bankPresetRepositoryHash() =>
+    r'b9092facf47141da5648d127f23674e1f42b89a9';
 
 /// 当前预设；未设置时为 null。
 
@@ -232,7 +279,51 @@ final class BankPresetProvider
   }
 }
 
-String _$bankPresetHash() => r'e93b07578381059a2c79a3ddfd631c3eb5a971a0';
+String _$bankPresetHash() => r'04d30e735543687a3b06af4d36207df89ddb4525';
+
+/// 保存预设（先校验可考试卷）。
+
+@ProviderFor(saveBankPreset)
+final saveBankPresetProvider = SaveBankPresetProvider._();
+
+/// 保存预设（先校验可考试卷）。
+
+final class SaveBankPresetProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<SaveBankPreset>,
+          SaveBankPreset,
+          FutureOr<SaveBankPreset>
+        >
+    with $FutureModifier<SaveBankPreset>, $FutureProvider<SaveBankPreset> {
+  /// 保存预设（先校验可考试卷）。
+  SaveBankPresetProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'saveBankPresetProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$saveBankPresetHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<SaveBankPreset> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<SaveBankPreset> create(Ref ref) {
+    return saveBankPreset(ref);
+  }
+}
+
+String _$saveBankPresetHash() => r'b54fcbd5e0d22b5b4c06d312b4528ee9bb8314ce';
 
 /// 执行前的题库对齐用例。
 

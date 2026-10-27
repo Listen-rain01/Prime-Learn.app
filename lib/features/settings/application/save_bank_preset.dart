@@ -1,0 +1,37 @@
+import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/features/exam/domain/repositories/exam_repository.dart';
+import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
+import 'package:primelearn/features/settings/domain/repositories/bank_preset_repository.dart';
+
+/// 保存题库预设：先校验该题库有可考试卷，再落盘。
+class SaveBankPreset {
+  /// 创建用例。
+  SaveBankPreset(this._examRepository, this._presetRepository);
+
+  final ExamRepository _examRepository;
+  final BankPresetRepository _presetRepository;
+
+  /// 执行。
+  Future<void> execute({
+    required String userId,
+    required BankPreset preset,
+  }) async {
+    try {
+      final papers = await _examRepository.fetchPapers(
+        userId: userId,
+        bankId: preset.bankId,
+      );
+      if (papers.isEmpty) {
+        throw const UseCaseFailure('该题库没有可开考试卷，无法用于考试');
+      }
+      await _presetRepository.save(preset);
+    } on UseCaseFailure {
+      rethrow;
+    } on ApiException catch (error) {
+      throw UseCaseFailure.fromApi(error);
+    } on Object {
+      throw const UseCaseFailure('保存预设失败，请稍后重试');
+    }
+  }
+}

@@ -2,11 +2,15 @@ import 'package:primelearn/core/errors/no_retry.dart';
 import 'package:primelearn/core/evidence/write_gateway.dart';
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
+import 'package:primelearn/features/exam/exam_providers.dart';
 import 'package:primelearn/features/settings/application/ensure_bank_preset.dart';
+import 'package:primelearn/features/settings/application/save_bank_preset.dart';
+import 'package:primelearn/features/settings/data/repositories/bank_preset_repository_impl.dart';
 import 'package:primelearn/features/settings/data/repositories/bank_repository_impl.dart';
 import 'package:primelearn/features/settings/data/services/bank_api.dart';
 import 'package:primelearn/features/settings/data/services/bank_preset_store.dart';
 import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
+import 'package:primelearn/features/settings/domain/repositories/bank_preset_repository.dart';
 import 'package:primelearn/features/settings/domain/repositories/bank_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -43,17 +47,29 @@ BankApi bankApi(Ref ref) => BankApi(ref.watch(apiClientProvider));
 BankRepository bankRepository(Ref ref) =>
     BankRepositoryImpl(ref.watch(bankApiProvider));
 
-/// 题库预设存储。
+/// 题库预设存储（底层偏好）。
 @Riverpod(keepAlive: true)
 Future<BankPresetStore> bankPresetStore(Ref ref) async =>
     BankPresetStore(await ref.watch(sharedPreferencesProvider.future));
 
+/// 题库预设仓储。
+@Riverpod(keepAlive: true)
+Future<BankPresetRepository> bankPresetRepository(Ref ref) async =>
+    BankPresetRepositoryImpl(await ref.watch(bankPresetStoreProvider.future));
+
 /// 当前预设；未设置时为 null。
 @Riverpod(retry: noProviderRetry)
 Future<BankPreset?> bankPreset(Ref ref) async {
-  final store = await ref.watch(bankPresetStoreProvider.future);
-  return store.read();
+  final repository = await ref.watch(bankPresetRepositoryProvider.future);
+  return repository.read();
 }
+
+/// 保存预设（先校验可考试卷）。
+@Riverpod(keepAlive: true)
+Future<SaveBankPreset> saveBankPreset(Ref ref) async => SaveBankPreset(
+  ref.watch(examRepositoryProvider),
+  await ref.watch(bankPresetRepositoryProvider.future),
+);
 
 /// 执行前的题库对齐用例。
 @Riverpod(keepAlive: true)

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
+import 'package:primelearn/features/exam/exam_providers.dart';
 import 'package:primelearn/features/settings/bank_providers.dart';
 import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 
@@ -20,6 +22,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
   BankStyle? _child;
   BankOption? _bank;
   String? _message;
+  bool _messageIsError = false;
 
   @override
   Widget build(BuildContext context) {
@@ -54,7 +57,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
     return Scaffold(
       appBar: AppBar(title: const Text('题库预设')),
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
         children: [
           preset.when(
             loading: () => const _Loading(message: '正在读取预设...'),
@@ -173,6 +176,32 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
                     ),
             ),
           ],
+          if (_bank != null) ...[
+            _sectionTitle(textTheme, scheme, '可考试卷'),
+            ref
+                .watch(examPapersProvider(_bank!.id))
+                .when(
+                  loading: () => const _Loading(message: '正在加载试卷...'),
+                  error: (error, _) => _ErrorText(error),
+                  data: (papers) => papers.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Text('该题库没有可开考试卷，无法用于考试'),
+                        )
+                      : Column(
+                          children: [
+                            for (final paper in papers)
+                              ListTile(
+                                contentPadding: EdgeInsets.zero,
+                                title: Text(paper.name),
+                                subtitle: Text(
+                                  '总分 ${paper.totalScore} · 及格 ${paper.passingGrade}',
+                                ),
+                              ),
+                          ],
+                        ),
+                ),
+          ],
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _bank == null ? null : _save,
@@ -180,7 +209,12 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           ),
           if (_message != null) ...[
             const SizedBox(height: 12),
-            InlineNotice(message: _message!, tone: InlineNoticeTone.success),
+            InlineNotice(
+              message: _message!,
+              tone: _messageIsError
+                  ? InlineNoticeTone.error
+                  : InlineNoticeTone.success,
+            ),
           ],
         ],
       ),
@@ -189,11 +223,33 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
 
   Future<void> _save() async {
     final bank = _bank!;
-    final store = await ref.read(bankPresetStoreProvider.future);
-    await store.save(BankPreset(bankId: bank.id, bankName: bank.name));
-    ref.invalidate(bankPresetProvider);
-    if (!mounted) return;
-    setState(() => _message = '已保存预设：${bank.name}');
+    final session = ref.read(sessionStoreProvider);
+    if (session == null) {
+      setState(() {
+        _message = '未登录';
+        _messageIsError = true;
+      });
+      return;
+    }
+    try {
+      final useCase = await ref.read(saveBankPresetProvider.future);
+      await useCase.execute(
+        userId: session.userId,
+        preset: BankPreset(bankId: bank.id, bankName: bank.name),
+      );
+      ref.invalidate(bankPresetProvider);
+      if (!mounted) return;
+      setState(() {
+        _message = '已保存预设：${bank.name}';
+        _messageIsError = false;
+      });
+    } on UseCaseFailure catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _message = error.message;
+        _messageIsError = true;
+      });
+    }
   }
 
   Widget _sectionTitle(TextTheme textTheme, ColorScheme scheme, String text) =>
