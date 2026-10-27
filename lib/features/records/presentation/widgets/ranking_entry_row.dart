@@ -14,8 +14,8 @@ class RankingEntryRow extends StatelessWidget {
   /// 榜单条目。
   final RankingEntry entry;
 
-  /// 右侧数值文案（成绩榜为分数，学习时长榜为时长）。
-  final String valueText;
+  /// 右侧数值文案；为 null 时不显示（口径未确认的榜单）。
+  final String? valueText;
 
   /// 是否为当前用户（用于高亮）。
   final bool isMe;
@@ -68,14 +68,16 @@ class RankingEntryRow extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          Text(
-            valueText,
-            style: textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: scheme.onSurface,
+          if (valueText != null) ...[
+            const SizedBox(width: 12),
+            Text(
+              valueText!,
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
             ),
-          ),
+          ],
         ],
       ),
     );

@@ -182,9 +182,11 @@ void main() {
     expect(find.text('学习时长榜'), findsOneWidget);
     expect(find.text('单位'), findsOneWidget);
     expect(find.text('集团'), findsOneWidget);
-    expect(find.text('我的排名：第 12 名 · 96.5'), findsOneWidget);
+    expect(find.text('平台返回的数值未标注单位，暂不展示'), findsOneWidget);
+    expect(find.text('我的排名：第 12 名'), findsOneWidget);
     expect(find.text('田小平'), findsOneWidget);
-    expect(find.text('99.5'), findsOneWidget);
+    expect(find.text('99.5'), findsNothing);
+    expect(find.text('96.5'), findsNothing);
     expect(find.text('我的成绩趋势'), findsOneWidget);
     expect(find.text('2025陕西煤业手机考试'), findsOneWidget);
     expect(find.text('10-27'), findsOneWidget);
