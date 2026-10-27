@@ -96,6 +96,10 @@ mocktail
 
 不要建全局的 `models/`、`services/`、`widgets/`；所有业务代码都归属于某个 feature。
 
+例外（仅限无业务语义的视觉基元）：跨 feature 复用的通用 Widget 统一放 `core/widgets/`，不建 `lib/widgets/`；
+只给单个页面用的组件仍放 `features/<feature>/presentation/widgets/`。
+判断标准：**能不能不 import 任何 `features/` 就编译通过**。共享 Widget 里出现 provider、实体或接口调用，说明放错了，应回到对应 feature。
+
 ### 3.2 顶层只有三块
 
 ```text
@@ -115,7 +119,7 @@ lib/
 | `core/session` | 登录态、会话失效 | `SessionStore` |
 | `core/logging` | 执行记录、诊断日志 | `RunLogStore` |
 | `core/utils` | 纯工具 | 时间格式化、身份证脱敏 |
-| `core/ui` | 跨 feature 的设计系统基元（不含业务语义） | `InlineNotice`、`TonalBlock`、`StatusLabel` |
+| `core/widgets` | 跨 feature 的通用视觉基元（不含业务语义） | `InlineNotice`、`TonalBlock`、`StatusLabel` |
 
 规则：`core/` 不允许 import 任何 `features/`；`features/` 可以 import `core/`。
 
@@ -283,7 +287,7 @@ class RunMobileExam {
 - 用例 `xxx_usecase.dart` / `XxxUseCase`；
 - Repository 接口 `xxx_repository.dart`，实现 `xxx_repository_impl.dart`；
 - DTO 以 `_dto.dart` 结尾，Entity 不带后缀；
-- 禁止全局 `models/`、`services/`、`widgets/`；
+- 禁止全局 `models/`、`services/`、`widgets/`（跨 feature 的通用 Widget 放 `core/widgets/`）；
 - 非页面组件放 `presentation/widgets/`，不要放 `pages/`。
 
 ---

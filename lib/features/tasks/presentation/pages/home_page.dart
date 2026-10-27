@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
-import 'package:primelearn/core/ui/tonal_block.dart';
+import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_controller.dart';
 
 /// 首页（指挥台）。

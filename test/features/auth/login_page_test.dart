@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:primelearn/core/ui/inline_notice.dart';
 import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/features/auth/auth_providers.dart';
 import 'package:primelearn/features/auth/domain/entities/bank_context.dart';

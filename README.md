@@ -39,7 +39,7 @@ lib/
 │   ├── protocol/        # EsdtCodec、PipeResponse
 │   ├── session/         # Session、SessionStore、会话失效识别
 │   ├── logging/         # 脱敏工具
-│   └── ui/              # 设计系统基元：InlineNotice、TonalBlock
+│   └── widgets/         # 跨 feature 通用视觉基元：InlineNotice、TonalBlock
 ├── features/            # 业务功能，一个功能一个目录
 │   ├── auth/            # 登录与会话（data / domain / application / presentation）
 │   └── tasks/           # 指挥台（今日任务待接入）
