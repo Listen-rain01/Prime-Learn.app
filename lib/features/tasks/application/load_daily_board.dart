@@ -29,15 +29,26 @@ class LoadDailyBoard {
   /// 查询并组装看板。
   Future<TaskBoard> execute(String userId) async {
     try {
-      final tasks = [...await _repository.fetchDailyTasks(userId)]
-        ..sort((a, b) => a.sort.compareTo(b.sort));
+      final tasks = await _repository.fetchDailyTasks(userId);
+      // 平台实测：Sort 不唯一（签到/知识学习同为 1，模拟考试/手机考试/视频学习为 2/3/3）。
+      // 用「Sort + 原始下标」排序，保证同 Sort 时保持服务端顺序（Dart 的 sort 不稳定）。
+      final ordered =
+          <({int index, DailyTask task})>[
+            for (final (index, task) in tasks.indexed)
+              (index: index, task: task),
+          ]..sort((a, b) {
+            final bySort = a.task.sort.compareTo(b.task.sort);
+            return bySort != 0 ? bySort : a.index.compareTo(b.index);
+          });
 
       return TaskBoard(
-        actionable: tasks
-            .where((task) => !notActionable.contains(task.criterion))
+        actionable: ordered
+            .where((entry) => !notActionable.contains(entry.task.criterion))
+            .map((entry) => entry.task)
             .toList(growable: false),
-        pending: tasks
-            .where((task) => notActionable.contains(task.criterion))
+        pending: ordered
+            .where((entry) => notActionable.contains(entry.task.criterion))
+            .map((entry) => entry.task)
             .toList(growable: false),
       );
     } on ApiException catch (error) {

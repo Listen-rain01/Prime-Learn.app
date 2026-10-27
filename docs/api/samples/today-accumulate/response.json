@@ -1,0 +1,97 @@
+{
+  "success": true,
+  "data": [
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 1,
+      "AccumulateId": "<guid>",
+      "PersonId": "<guid>",
+      "AccumulateName": "签到",
+      "AccumulateRule": "每日签到1分，连续登录每日多1分，每日最多3分",
+      "Accumulate": 1,
+      "MaxAccumulate": 3,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "",
+      "Criterion": "CheckIn"
+    },
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 1,
+      "AccumulateId": "zsxxid",
+      "PersonId": "<guid>",
+      "AccumulateName": "知识学习",
+      "AccumulateRule": "每日学习1个知识点积1分，最多1分",
+      "Accumulate": 1,
+      "MaxAccumulate": 1,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "已阅读0秒/获得0分",
+      "Criterion": "StudyKnowledge"
+    },
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 2,
+      "AccumulateId": "<guid>",
+      "PersonId": "<guid>",
+      "AccumulateName": "模拟考试",
+      "AccumulateRule": "每日及格计3分，满分4分",
+      "Accumulate": 3,
+      "MaxAccumulate": 8,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "",
+      "Criterion": "MockExam"
+    },
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 3,
+      "AccumulateId": "<guid>",
+      "PersonId": "<guid>",
+      "AccumulateName": "手机考试",
+      "AccumulateRule": "每日及格计6分，满分8分",
+      "Accumulate": 6,
+      "MaxAccumulate": 16,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "已考0个/未考0个",
+      "Criterion": "MobileExam"
+    },
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 3,
+      "AccumulateId": "spxxid",
+      "PersonId": "<guid>",
+      "AccumulateName": "视频学习",
+      "AccumulateRule": "每日视频学习最低5分钟，每日最多1积分",
+      "Accumulate": 1,
+      "MaxAccumulate": 1,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "已观看0秒/获得0分",
+      "Criterion": "Course"
+    },
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 4,
+      "AccumulateId": "<guid>",
+      "PersonId": "<guid>",
+      "AccumulateName": "练习时长",
+      "AccumulateRule": "每日练习有效时长超过2小时加10分",
+      "Accumulate": 10,
+      "MaxAccumulate": 10,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "",
+      "Criterion": "StudyTime"
+    },
+    {
+      "AccumulateTypeName": "每日",
+      "Sort": 5,
+      "AccumulateId": "<guid>",
+      "PersonId": "<guid>",
+      "AccumulateName": "手机练习",
+      "AccumulateRule": "每日每练习50题加1分，最多6分",
+      "Accumulate": 1,
+      "MaxAccumulate": 6,
+      "CurAccumulate": 0,
+      "CurAccumulateState": "已答0题/获得0分",
+      "Criterion": "MobileExercises"
+    }
+  ],
+  "message": "获取成功"
+}

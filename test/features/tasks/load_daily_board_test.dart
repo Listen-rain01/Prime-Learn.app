@@ -53,6 +53,22 @@ void main() {
     expect(board.pending.map((task) => task.name), ['签到', '视频学习']);
   });
 
+  test('Sort 相同时保持服务端原始顺序（实测 Sort 不唯一）', () async {
+    // 2026-10-28 真实响应：签到与知识学习同为 Sort=1，手机考试与视频学习同为 Sort=3。
+    final board = await LoadDailyBoard(
+      _FakeTasksRepository([
+        _task(criterion: Criterion.checkIn, sort: 1, name: '签到'),
+        _task(criterion: Criterion.studyKnowledge, sort: 1, name: '知识学习'),
+        _task(criterion: Criterion.mockExam, sort: 2, name: '模拟考试'),
+        _task(criterion: Criterion.mobileExam, sort: 3, name: '手机考试'),
+        _task(criterion: Criterion.course, sort: 3, name: '视频学习'),
+      ]),
+    ).execute('u1');
+
+    expect(board.actionable.map((task) => task.name), ['知识学习', '模拟考试', '手机考试']);
+    expect(board.pending.map((task) => task.name), ['签到', '视频学习']);
+  });
+
   test('统计已完成数与今日积分', () async {
     final board = await LoadDailyBoard(
       _FakeTasksRepository([

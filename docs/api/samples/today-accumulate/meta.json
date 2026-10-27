@@ -1,0 +1,13 @@
+{
+  "endpoint": "/AccumulateManger/S_Accumulate/GetPersonTodayAccumulateOne",
+  "collectedAt": "2026-10-28T00:55:00+08:00",
+  "collectedBy": "agent（经账号持有人授权，由 tool/live_probe.dart 采集）",
+  "platformVersion": "未提供",
+  "account": "已脱敏",
+  "note": "GUID（AccumulateId/PersonId/examTypeId）与账号标识已替换为 <guid>；Cookie 与 pid 未记录。请求参数：pid=Esdt(userId)，GET。",
+  "observations": [
+    "Sort 不唯一：签到/知识学习=1，模拟考试=2，手机考试/视频学习=3，练习时长=4，手机练习=5",
+    "响应含额外字段 message=获取成功",
+    "7 个任务与 Criterion 对照表一致，手机考试 MaxAccumulate=16（规则页文案为 8）"
+  ]
+}

@@ -13,7 +13,7 @@
 | `/ArchiveManger/D_PersonAccumulate/CheckInOne` | 签到 | observed | 2026-10-26 | 待指定 | 真实环境实测 | `docs/api/samples/checkin/` | 平台版本变更 |
 | `/ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne` | 知识学习完成 | observed | 2026-10-26 | 待指定 | 真实环境实测 | `docs/api/samples/study-knowledge/` | 平台版本变更 |
 | `/ExamManger/P_ExamDetail/GetMyExamListOne` | type=2 → 手机自测；type=3 → 手机模拟；type=0 → 理论考试 | observed | 2026-10-27 | 待指定 | 真实环境实测 | `docs/api/samples/my-exam-list/` | 平台版本变更 |
-| `/AccumulateManger/S_Accumulate/GetPersonTodayAccumulateOne` | 今日任务 / 积分查询（只读） | observed | 2026-10-27 | 待指定 | 文档实测记录，待独立复核 | `docs/api/samples/today-accumulate/` | 平台版本变更 / 任务上限调整 |
+| `/AccumulateManger/S_Accumulate/GetPersonTodayAccumulateOne` | 今日任务 / 积分查询（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（登录→取 7 条任务，样本已脱敏） | `docs/api/samples/today-accumulate/` | 平台版本变更 / 任务上限调整 |
 | 会话失效 | 识别登录页/错误文案/状态码 | assumed | — | — | 待补信号表 | — | 首次实现前必须验证 |
 
 ## 字段说明

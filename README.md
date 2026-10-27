@@ -64,6 +64,13 @@ flutter test
 `core` 不依赖 `features`、`presentation`/`application` 不直接依赖 `data`、
 `domain` 不引入 Flutter/Dio/Riverpod、feature 目录名在约定集合内。
 
+真实环境探针（不参与 CI）：凭据只走环境变量，不落盘、不提交。
+
+```bash
+$env:PL_ID='...'; $env:PL_PWD='...'; dart run tool/live_probe.dart
+Remove-Item Env:PL_ID,Env:PL_PWD
+```
+
 ## UI 规格
 
 视觉基线以 `docs/ui/PURE_UI_SPEC.md` 为唯一依据（同步自 `F:\Web项目\docs\ui\PURE_UI_SPEC.md`）：
