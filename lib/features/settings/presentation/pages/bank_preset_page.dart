@@ -211,6 +211,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
   Future<void> _pickUnit(List<BankUnit> units) async {
     final choice = await showModalBottomSheet<BankUnit>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => _ChoiceSheet<BankUnit>(
@@ -227,11 +228,13 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       _bank = null;
       _message = null;
     });
+    await _advanceToStyles(choice);
   }
 
   Future<void> _pickStyle(List<BankStyle> styles) async {
     final choice = await showModalBottomSheet<BankStyle>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => _ChoiceSheet<BankStyle>(
@@ -239,7 +242,6 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
         items: styles,
         contextLabel: _unit?.name ?? '',
         labelOf: (style) => style.name,
-        subtitleOf: (style) => style.year.isEmpty ? '' : '${style.year} 年',
       ),
     );
     if (choice == null) return;
@@ -249,11 +251,13 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       _bank = null;
       _message = null;
     });
+    await _advanceToChildren(choice);
   }
 
   Future<void> _pickChild(List<BankStyle> children) async {
     final choice = await showModalBottomSheet<BankStyle>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => _ChoiceSheet<BankStyle>(
@@ -261,7 +265,6 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
         items: children,
         contextLabel: '${_unit?.name ?? ''} / ${_style?.name ?? ''}',
         labelOf: (child) => child.name,
-        subtitleOf: (child) => child.year.isEmpty ? '' : '${child.year} 年',
       ),
     );
     if (choice == null) return;
@@ -270,11 +273,70 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       _bank = null;
       _message = null;
     });
+    await _advanceToBanks(choice);
+  }
+
+  /// 选完单位后自动进入分类选择（等数据加载完，再略延迟让上一个弹层关闭）。
+  Future<void> _advanceToStyles(BankUnit unit) async {
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (!mounted || _unit?.id != unit.id) return;
+    try {
+      final styles = await ref.read(bankStylesProvider(unit.id).future);
+      if (!mounted || styles.isEmpty) return;
+      await _pickStyle(styles);
+    } on Object {
+      // 加载失败时停在当前步，用户可手动点选择器重试。
+    }
+  }
+
+  /// 选完分类后自动进入年份选择。
+  Future<void> _advanceToChildren(BankStyle style) async {
+    final unit = _unit;
+    if (unit == null) return;
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (!mounted || _style?.key != style.key) return;
+    try {
+      final children = await ref.read(
+        bankChildrenProvider((
+          unitId: unit.id,
+          styleId: style.styleId,
+          code: style.code,
+          departmentId: style.departmentId,
+        )).future,
+      );
+      if (!mounted || children.isEmpty) return;
+      await _pickChild(children);
+    } on Object {
+      // 同上，失败保留手动重试入口。
+    }
+  }
+
+  /// 选完年份后自动进入题库选择。
+  Future<void> _advanceToBanks(BankStyle child) async {
+    final unit = _unit;
+    if (unit == null) return;
+    await Future<void>.delayed(const Duration(milliseconds: 260));
+    if (!mounted || _child?.key != child.key) return;
+    try {
+      final options = await ref.read(
+        bankOptionsProvider((
+          unitId: unit.id,
+          styleId: child.styleId,
+          departmentId: child.departmentId,
+          year: child.year,
+        )).future,
+      );
+      if (!mounted || options.isEmpty) return;
+      await _pickBank(options);
+    } on Object {
+      // 同上。
+    }
   }
 
   Future<void> _pickBank(List<BankOption> options) async {
     final choice = await showModalBottomSheet<BankOption>(
       context: context,
+      useRootNavigator: true,
       isScrollControlled: true,
       showDragHandle: true,
       builder: (_) => _BankSheet(
