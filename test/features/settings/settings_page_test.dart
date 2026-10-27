@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
+import 'package:primelearn/features/settings/bank_providers.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
 import 'package:primelearn/features/settings/domain/repositories/profile_repository.dart';
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
@@ -51,6 +52,8 @@ Future<void> _pumpSettings(
       ),
       // 头像单独取；测试里不触网。
       profileAvatarProvider.overrideWith((ref) async => avatar),
+      // 预设读本地存储；测试里不触插件。
+      bankPresetProvider.overrideWith((ref) async => null),
     ],
   );
   addTearDown(container.dispose);
@@ -85,7 +88,8 @@ void main() {
     expect(find.text('138****5678'), findsOneWidget);
     expect(find.text('13812345678'), findsNothing);
     expect(find.text('家庭地址'), findsOneWidget);
-    expect(find.text('题库切换'), findsOneWidget);
+    expect(find.text('题库预设'), findsOneWidget);
+    expect(find.text('未设置'), findsOneWidget);
     expect(find.text('退出登录'), findsOneWidget);
   });
 

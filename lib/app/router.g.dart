@@ -61,6 +61,13 @@ RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
           path: '/settings',
           hasOverriddenOnExit: false,
           factory: $SettingsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'bank-preset',
+              hasOverriddenOnExit: false,
+              factory: $BankPresetRoute._fromState,
+            ),
+          ],
         ),
       ],
     ),
@@ -117,6 +124,27 @@ mixin $SettingsRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $BankPresetRoute on GoRouteData {
+  static BankPresetRoute _fromState(GoRouterState state) =>
+      const BankPresetRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/bank-preset');
 
   @override
   void go(BuildContext context) => context.go(location);

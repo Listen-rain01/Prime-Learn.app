@@ -4,6 +4,7 @@ import 'package:primelearn/app/app_shell.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
 import 'package:primelearn/features/records/presentation/pages/records_page.dart';
+import 'package:primelearn/features/settings/presentation/pages/bank_preset_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
 import 'package:primelearn/features/tasks/presentation/pages/today_page.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
@@ -33,7 +34,12 @@ class LoginRoute extends GoRouteData with $LoginRoute {
     ),
     TypedStatefulShellBranch<SettingsBranchData>(
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<SettingsRoute>(path: '/settings'),
+        TypedGoRoute<SettingsRoute>(
+          path: '/settings',
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<BankPresetRoute>(path: 'bank-preset'),
+          ],
+        ),
       ],
     ),
   ],
@@ -95,6 +101,16 @@ class SettingsRoute extends GoRouteData with $SettingsRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const SettingsPage();
+}
+
+/// 题库预设（「我的」分支内 push）。
+class BankPresetRoute extends GoRouteData with $BankPresetRoute {
+  /// 创建题库预设路由。
+  const BankPresetRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const BankPresetPage();
 }
 
 /// 全局路由。

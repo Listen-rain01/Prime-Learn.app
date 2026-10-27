@@ -8,10 +8,13 @@ class WriteEvidence {
   const WriteEvidence(this._levels);
 
   /// 默认登记：
-  /// - 签到：2026-10-28 经账号持有人授权，已完成真实环境签到实测
-  ///   （首次「操作成功」、任务进度与积分同步变化），按 §8.8 升级为 `verified`。
+  /// - 签到：2026-10-28 经账号持有人授权，已完成真实环境签到实测，
+  ///   按 §8.8 升级为 `verified`。
+  /// - 题库切换：文档有真实环境记录，但本客户端尚未实测，保持 `observed`
+  ///   → 运行时会被写网关拦截，待真实切换验证后再升级。
   factory WriteEvidence.defaults() => const WriteEvidence({
     '/ArchiveManger/D_PersonAccumulate/CheckInOne': WriteLevel.verified,
+    '/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne': WriteLevel.observed,
   });
 
   final Map<String, WriteLevel> _levels;

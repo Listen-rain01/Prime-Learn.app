@@ -18,6 +18,11 @@
 | `/PersonWap/MyRule` | 积分规则页（HTML，只读；当前客户端未使用） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（3033 字符 HTML → 588 字符文本） | `docs/api/samples/my-rule/` | 平台版本变更 |
 | `/PersonWap/MyBaseInfo` | 个人信息基础资料（HTML 内嵌 vData，只读） | observed | 2026-10-28 | 待独立复核 | 按接口手册实施 + 真实会话验证（15 个 vData 键，样本已脱敏） | `docs/api/samples/person-base-info/` | 平台版本变更 |
 | `/ArchiveManger/D_PersonManager/GetPersonPhoto` | 头像图片（`did`/`pid` 均 Esdt，只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测（JPEG 28.5KB，需会话 Cookie） | 二进制样本不入库 | 平台版本变更 |
+| `/PersonWap/SelectExamType` | 题库单位列表（HTML 内嵌 vData.Units，只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：3 个单位（股份/澄合矿业/西卓煤矿），格式 `id,路径,名称,编码`，`^` 分隔 | 未落盘样本 | 平台版本变更 |
+| `/ExamManger/P_ExamTypeStyle/GetAllTypeEx` | 题库大类（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：返回 14 条分类 | 未落盘样本 | 平台版本变更 |
+| `/ExamManger/P_ExamTypeStyle/GetAllChildTypeEx` | 题库子分类/年份（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：返回 2022 年层级（Level=3） | 未落盘样本 | 平台版本变更 |
+| `/ExamManger/P_ExamType/GetExamTypeListExOne` | 题库列表（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：单位=1、2022 年返回「刑法修正案十一」20 题；`Year`/`Style` 明文，其余 Esdt | 未落盘样本 | 平台版本变更 |
+| `/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne` | 保存/切换题库（写） | observed | 2026-10-28 | 待独立复核 | 文档有真实环境记录，本客户端尚未实测；写网关按 `observed` 拦截 | 未落盘样本 | 完成真实切换验证后升级 |
 | `/ExamManger/P_ExamDetail/GetMarkRankingList` | 成绩排名（单位/集团榜，只读） | observed | 2026-10-28 | 待独立复核 | 前端页面 POST `/PersonWap/ScoreList` 代码核对：标题「考试成绩排行榜」、渲染 `考试成绩 Mark`；`type=1/0` 为范围、`id=0/1` 为单位/集团；此前固定 `id=0` 导致的 4152 异常值已定位为参数错误 | 未落盘样本 | 平台版本变更 |
 | `/ArchiveManger/D_PersonStudyLog/GetStudyTimeRankingListOne` | 学习时长排名（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测 + 前端代码核对：`Mark` 为 null，时长在 `AllCount`（秒），页面渲染 `formatSeconds(AllCount)`；区间为本周 | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_ExamDetail/GetPersonExamAchievementListOne` | 个人成绩趋势（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（记录页排行，返回多期成绩与日期） | 未落盘样本 | 平台版本变更 |

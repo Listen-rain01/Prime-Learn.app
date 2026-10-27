@@ -1,0 +1,80 @@
+/// 题库选择链路中的单位。
+class BankUnit {
+  /// 创建单位。
+  const BankUnit({required this.id, required this.name});
+
+  /// 单位 ID。
+  final String id;
+
+  /// 单位名称。
+  final String name;
+}
+
+/// 题库分类（大类 / 中间层 / 年份）。
+class BankStyle {
+  /// 创建分类。
+  const BankStyle({
+    required this.level,
+    required this.styleId,
+    required this.name,
+    this.year = '',
+    this.departmentId = '',
+    this.code = '',
+  });
+
+  /// 层级：1 大类、2 中间层、3 年份。
+  final int level;
+
+  /// 分类 ID。
+  final String styleId;
+
+  /// 分类名称。
+  final String name;
+
+  /// 年份（层级 3 才有）。
+  final String year;
+
+  /// 单位 ID。
+  final String departmentId;
+
+  /// 分类编码。
+  final String code;
+
+  /// 唯一标识：同一层级下 `styleId` 可能重复（如各年份都是 0），必须组合判断。
+  String get key => '$level|$styleId|$code|$year|$departmentId';
+}
+
+/// 一个可选题库。
+class BankOption {
+  /// 创建题库。
+  const BankOption({
+    required this.id,
+    required this.name,
+    required this.questionCount,
+    required this.stateName,
+  });
+
+  /// 题库 ID（`ExamTypeId`）。
+  final String id;
+
+  /// 题库名称。
+  final String name;
+
+  /// 题目数量。
+  final int questionCount;
+
+  /// 状态，如「正常」。
+  final String stateName;
+}
+
+/// 预设置的题库。
+class BankPreset {
+  /// 创建预设。
+  const BankPreset({required this.bankId, required this.bankName});
+
+  /// 题库 ID。
+  final String bankId;
+
+  /// 题库名称。
+  final String bankName;
+}

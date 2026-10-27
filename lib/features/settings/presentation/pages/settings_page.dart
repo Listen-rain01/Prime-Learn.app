@@ -10,6 +10,7 @@ import 'package:primelearn/core/utils/redactor.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
+import 'package:primelearn/features/settings/bank_providers.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
 import 'package:primelearn/features/settings/profile_providers.dart';
 
@@ -25,6 +26,7 @@ class SettingsPage extends ConsumerWidget {
     final session = ref.watch(sessionStoreProvider);
     final profile = ref.watch(personProfileProvider);
     final avatar = ref.watch(profileAvatarProvider);
+    final preset = ref.watch(bankPresetProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -80,17 +82,21 @@ class SettingsPage extends ConsumerWidget {
               child: Material(
                 type: MaterialType.transparency,
                 child: ListTile(
-                  enabled: false,
                   leading: Icon(
                     Icons.library_books_outlined,
                     color: scheme.onSurfaceVariant,
                   ),
-                  title: const Text('题库切换'),
-                  subtitle: const Text('待接入'),
+                  title: const Text('题库预设'),
+                  subtitle: Text(
+                    preset.value?.bankName ?? '未设置',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   trailing: Icon(
                     Icons.chevron_right,
                     color: scheme.outlineVariant,
                   ),
+                  onTap: () => const BankPresetRoute().push<void>(context),
                 ),
               ),
             ),
