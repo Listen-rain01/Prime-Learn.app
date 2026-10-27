@@ -90,6 +90,7 @@ void main() {
     expect(find.text('家庭地址'), findsOneWidget);
     expect(find.text('题库预设'), findsOneWidget);
     expect(find.text('未设置'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '设置'), findsOneWidget);
     expect(find.text('退出登录'), findsOneWidget);
   });
 

@@ -27,3 +27,8 @@ Future<List<ExamPaper>> examPapers(Ref ref, String bankId) async {
       .watch(examRepositoryProvider)
       .fetchPapers(userId: session.userId, bankId: bankId);
 }
+
+/// 某题库的可考试卷数量（用于选择题库时的可用性判断）。
+@Riverpod(retry: noProviderRetry)
+Future<int> bankPaperCount(Ref ref, String bankId) async =>
+    (await ref.watch(examPapersProvider(bankId).future)).length;

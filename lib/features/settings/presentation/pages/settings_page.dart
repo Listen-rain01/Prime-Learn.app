@@ -92,9 +92,10 @@ class SettingsPage extends ConsumerWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  trailing: Icon(
-                    Icons.chevron_right,
-                    color: scheme.outlineVariant,
+                  trailing: OutlinedButton(
+                    onPressed: () =>
+                        const BankPresetRoute().push<void>(context),
+                    child: const Text('设置'),
                   ),
                   onTap: () => const BankPresetRoute().push<void>(context),
                 ),

@@ -183,3 +183,81 @@ final class ExamPapersFamily extends $Family
   @override
   String toString() => r'examPapersProvider';
 }
+
+/// 某题库的可考试卷数量（用于选择题库时的可用性判断）。
+
+@ProviderFor(bankPaperCount)
+final bankPaperCountProvider = BankPaperCountFamily._();
+
+/// 某题库的可考试卷数量（用于选择题库时的可用性判断）。
+
+final class BankPaperCountProvider
+    extends $FunctionalProvider<AsyncValue<int>, int, FutureOr<int>>
+    with $FutureModifier<int>, $FutureProvider<int> {
+  /// 某题库的可考试卷数量（用于选择题库时的可用性判断）。
+  BankPaperCountProvider._({
+    required BankPaperCountFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: noProviderRetry,
+         name: r'bankPaperCountProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$bankPaperCountHash();
+
+  @override
+  String toString() {
+    return r'bankPaperCountProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<int> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<int> create(Ref ref) {
+    final argument = this.argument as String;
+    return bankPaperCount(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is BankPaperCountProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$bankPaperCountHash() => r'bbacc52101a689e224f56b6ce3b878eac82bf03e';
+
+/// 某题库的可考试卷数量（用于选择题库时的可用性判断）。
+
+final class BankPaperCountFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<int>, String> {
+  BankPaperCountFamily._()
+    : super(
+        retry: noProviderRetry,
+        name: r'bankPaperCountProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// 某题库的可考试卷数量（用于选择题库时的可用性判断）。
+
+  BankPaperCountProvider call(String bankId) =>
+      BankPaperCountProvider._(argument: bankId, from: this);
+
+  @override
+  String toString() => r'bankPaperCountProvider';
+}
