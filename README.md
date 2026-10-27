@@ -58,6 +58,14 @@ flutter test
 
 提交前必须通过 `dart format --set-exit-if-changed .`、`flutter analyze`、`flutter test`。
 
+## UI 规格
+
+视觉基线以 `docs/ui/PURE_UI_SPEC.md` 为唯一依据（同步自 `F:\Web项目\docs\ui\PURE_UI_SPEC.md`）：
+
+- Material 3，`colorSchemeSeed: Colors.blue`（`#2196F3`），亮/暗色跟随系统；
+- 全部使用主题语义令牌，不硬编码颜色；主分组块为 `surfaceContainerLow` + 20dp 圆角、无阴影；
+- 登录页：`FlutterLogo(size: 100, markOnly)`、输入框 12dp 圆角 + primary 描边、按钮 50dp、校验错误用 SnackBar。
+
 ## 协议与证据等级
 
 - 接口文档：`docs/api/`
@@ -76,7 +84,7 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] `core/protocol`：Esdt 编码、竖线响应解析、黄金向量测试
 - [x] `core/network`：Dio + CookieJar、超时、错误映射、会话失效识别
 - [x] `features/auth`：登录全链路（预建会话 → 登录 → 校验会话/取题库）
-- [x] 登录页（对齐 `docs/01-login.png`）、指挥台首页、类型化路由、登录态守卫
+- [x] 登录页（按 `docs/ui/PURE_UI_SPEC.md` §3 复刻：Material 3 seed 蓝、FlutterLogo、SnackBar 校验）、指挥台首页、类型化路由、登录态守卫
 - [ ] 今日任务 / 积分查询
 - [ ] 手机考试 / 模拟考试（需先完成协议取证）
 - [ ] 签到 / 阅读学习

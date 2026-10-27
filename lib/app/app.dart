@@ -14,6 +14,8 @@ class PrimeLearnApp extends ConsumerWidget {
       title: 'Prime Learn',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
       routerConfig: ref.watch(routerProvider),
     );
   }

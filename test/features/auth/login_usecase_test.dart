@@ -54,7 +54,11 @@ void main() {
     await expectLater(
       useCase.execute(idCard: '  ', password: 'p'),
       throwsA(
-        isA<UseCaseFailure>().having((e) => e.message, 'message', '请输入身份证号和密码'),
+        isA<UseCaseFailure>().having(
+          (e) => e.message,
+          'message',
+          '请输入有效的 18 位身份证号',
+        ),
       ),
     );
     verifyNever(() => repository.ensureSessionCookie());
@@ -66,11 +70,25 @@ void main() {
     );
   });
 
-  test('身份证号格式不对：不触发请求', () async {
+  test('密码为空：提示请输入登录密码', () async {
+    await expectLater(
+      useCase.execute(idCard: '610525199001011234', password: ''),
+      throwsA(
+        isA<UseCaseFailure>().having((e) => e.message, 'message', '请输入登录密码'),
+      ),
+    );
+    verifyNever(() => repository.ensureSessionCookie());
+  });
+
+  test('身份证号不是 18 位：不触发请求', () async {
     await expectLater(
       useCase.execute(idCard: '12345', password: 'p'),
       throwsA(
-        isA<UseCaseFailure>().having((e) => e.message, 'message', '身份证号格式不正确'),
+        isA<UseCaseFailure>().having(
+          (e) => e.message,
+          'message',
+          '请输入有效的 18 位身份证号',
+        ),
       ),
     );
     verifyNever(() => repository.ensureSessionCookie());

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:primelearn/app/theme.dart';
 
-/// 登录主按钮，支持加载态。
+/// 登录主按钮（规格 §3.5）。
+///
+/// 撑满容器宽度、高 50dp、FilledButton、12dp 圆角；
+/// 加载时禁用并显示 20×20dp 进度（strokeWidth 2，onPrimary）。
 class PrimaryButton extends StatelessWidget {
   /// 创建主按钮。
   const PrimaryButton({
@@ -22,35 +24,34 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return SizedBox(
-      height: 54,
+      height: 50,
       width: double.infinity,
       child: FilledButton(
         onPressed: loading ? null : onPressed,
         style: FilledButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
-          foregroundColor: Colors.white,
-          disabledForegroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
         child: loading
-            ? const SizedBox(
-                width: 22,
-                height: 22,
+            ? SizedBox(
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
-                  strokeWidth: 2.2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  strokeWidth: 2,
+                  color: scheme.onPrimary,
                 ),
               )
             : Text(
                 label,
-                style: const TextStyle(
-                  fontSize: 17,
+                style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w600,
-                  letterSpacing: 4,
+                  letterSpacing: 2,
+                  color: scheme.onPrimary,
                 ),
               ),
       ),

@@ -18,7 +18,7 @@ class LoginUseCase {
   /// 预建会话失败后的重试间隔。
   final Duration retryDelay;
 
-  static final RegExp _idCardPattern = RegExp(r'^(?:\d{15}|\d{17}[\dXx])$');
+  static final RegExp _idCardPattern = RegExp(r'^\d{17}[\dXx]$');
 
   /// 执行登录，返回带题库信息的会话。
   Future<Session> execute({
@@ -26,11 +26,11 @@ class LoginUseCase {
     required String password,
   }) async {
     final normalized = idCard.trim();
-    if (normalized.isEmpty || password.isEmpty) {
-      throw const UseCaseFailure('请输入身份证号和密码');
-    }
     if (!_idCardPattern.hasMatch(normalized)) {
-      throw const UseCaseFailure('身份证号格式不正确');
+      throw const UseCaseFailure('请输入有效的 18 位身份证号');
+    }
+    if (password.isEmpty) {
+      throw const UseCaseFailure('请输入登录密码');
     }
     await _prepareSession();
     try {
