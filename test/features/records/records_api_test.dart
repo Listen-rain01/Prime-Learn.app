@@ -18,7 +18,7 @@ void main() {
     expect(path, contains('end=2026-10-31'));
   });
 
-  test('集团榜 type=0', () {
+  test('集团榜 type=0、id=1', () {
     final path = RecordsApi.markRankingPath(
       'u1',
       scope: RankingScope.group,
@@ -26,6 +26,7 @@ void main() {
       end: '2026-10-31',
     );
     expect(path, contains('type=0'));
+    expect(path, contains('id=1'));
   });
 
   test('学习时长排名表单：pid 做 Esdt 且不二次转义', () {
@@ -38,10 +39,22 @@ void main() {
     expect(form['pid'], '495051%5E2%2C2%2C2');
     expect(form['pid'], isNot(contains('%25')));
     expect(form['type'], '1');
+    expect(form['id'], '0');
     expect(form['begin'], '2026-10-01');
     expect(form['end'], '2026-10-31');
     expect(form['page'], '1');
     expect(form['rows'], '20');
+  });
+
+  test('学习时长集团榜 id=1', () {
+    final form = RecordsApi.studyTimeRankingForm(
+      'u1',
+      scope: RankingScope.group,
+      begin: '2026-10-01',
+      end: '2026-10-31',
+    );
+    expect(form['type'], '0');
+    expect(form['id'], '1');
   });
 
   test('成绩趋势路径：pid 明文、类型做 URL 编码', () {

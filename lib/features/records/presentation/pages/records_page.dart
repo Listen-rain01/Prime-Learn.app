@@ -167,7 +167,11 @@ class _RankingTabState extends ConsumerState<_RankingTab> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final range = DateFormatter.monthRange(DateTime.now());
+    // 平台页面：成绩排行按本月统计，学习时长排行按本周统计。
+    final now = DateTime.now();
+    final range = _kind == RankingKind.mark
+        ? DateFormatter.monthRange(now)
+        : DateFormatter.weekRange(now);
     final query = (
       kind: _kind,
       scope: _scope,
@@ -207,7 +211,15 @@ class _RankingTabState extends ConsumerState<_RankingTab> {
         if (_kind == RankingKind.mark) ...[
           const SizedBox(height: 8),
           Text(
-            '平台返回的数值未标注单位，暂不展示',
+            '考试成绩 · 本月',
+            style: textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ] else ...[
+          const SizedBox(height: 8),
+          Text(
+            '学习时长 · 本周',
             style: textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
@@ -335,22 +347,25 @@ class _RankingTabState extends ConsumerState<_RankingTab> {
   }
 }
 
-/// 我的排名文案；成绩榜数值口径未确认，只显示名次。
+/// 我的排名文案；成绩榜数值为考试成绩，学习时长榜为时长。
 String _myRankText(RankingKind kind, int? rank, double? value) {
   if (rank == null) return '我的排名：暂无';
-  final suffix = _myValueText(kind, value);
-  return suffix == null ? '我的排名：第 $rank 名' : '我的排名：第 $rank 名 · $suffix';
+  final label = switch (kind) {
+    RankingKind.mark => '考试成绩',
+    RankingKind.studyTime => '学习时长',
+  };
+  return '我的排名：第 $rank 名 · $label ${_myValueText(kind, value)}';
 }
 
-/// 我的排名数值：成绩榜口径未确认返回 null；学习时长榜按秒展示。
-String? _myValueText(RankingKind kind, double? value) => switch (kind) {
-  RankingKind.mark => null,
+/// 我的排名数值：成绩榜为 `Mark`，学习时长榜按秒展示。
+String _myValueText(RankingKind kind, double? value) => switch (kind) {
+  RankingKind.mark => value == null ? '暂无' : RecordFormat.score(value),
   RankingKind.studyTime => value == null ? '暂无' : RecordFormat.duration(value),
 };
 
-/// 榜单行数值：成绩榜口径未确认返回 null；学习时长榜取 `AllCount`（秒）。
-String? _entryValueText(RankingKind kind, RankingEntry entry) => switch (kind) {
-  RankingKind.mark => null,
+/// 榜单行数值：成绩榜取 `Mark`，学习时长榜取 `AllCount`（秒）。
+String _entryValueText(RankingKind kind, RankingEntry entry) => switch (kind) {
+  RankingKind.mark => RecordFormat.score(entry.mark),
   RankingKind.studyTime => RecordFormat.duration(entry.allCount),
 };
 

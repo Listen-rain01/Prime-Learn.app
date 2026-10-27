@@ -20,5 +20,16 @@ abstract final class DateFormatter {
     return (begin: date(begin), end: date(now));
   }
 
+  /// 本周区间：周一 → 周日（学习时长榜的默认口径）。
+  static ({String begin, String end}) weekRange(DateTime now) {
+    final monday = DateTime(
+      now.year,
+      now.month,
+      now.day,
+    ).subtract(Duration(days: now.weekday - 1));
+    final sunday = monday.add(const Duration(days: 6));
+    return (begin: date(monday), end: date(sunday));
+  }
+
   static String _two(int value) => value.toString().padLeft(2, '0');
 }

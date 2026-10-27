@@ -182,11 +182,10 @@ void main() {
     expect(find.text('学习时长榜'), findsOneWidget);
     expect(find.text('单位'), findsOneWidget);
     expect(find.text('集团'), findsOneWidget);
-    expect(find.text('平台返回的数值未标注单位，暂不展示'), findsOneWidget);
-    expect(find.text('我的排名：第 12 名'), findsOneWidget);
+    expect(find.text('考试成绩 · 本月'), findsOneWidget);
+    expect(find.text('我的排名：第 12 名 · 考试成绩 96.5'), findsOneWidget);
     expect(find.text('田小平'), findsOneWidget);
-    expect(find.text('99.5'), findsNothing);
-    expect(find.text('96.5'), findsNothing);
+    expect(find.text('99.5'), findsOneWidget);
     expect(find.text('我的成绩趋势'), findsOneWidget);
     expect(find.text('2025陕西煤业手机考试'), findsOneWidget);
     expect(find.text('10-27'), findsOneWidget);
@@ -201,7 +200,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('李四'), findsOneWidget);
-    expect(find.text('我的排名：第 3 名 · 2 小时'), findsOneWidget);
+    expect(find.text('学习时长 · 本周'), findsOneWidget);
+    expect(find.text('我的排名：第 3 名 · 学习时长 2 小时'), findsOneWidget);
     expect(find.text('2 小时'), findsOneWidget);
     expect(find.text('田小平'), findsNothing);
   });

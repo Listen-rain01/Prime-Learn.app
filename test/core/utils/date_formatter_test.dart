@@ -23,4 +23,11 @@ void main() {
     expect(range.begin, '2026-10-01');
     expect(range.end, '2026-10-27');
   });
+
+  test('weekRange 返回本周一到周日', () {
+    // 2026-10-28 是周三
+    final range = DateFormatter.weekRange(DateTime(2026, 10, 28, 9, 30));
+    expect(range.begin, '2026-10-26');
+    expect(range.end, '2026-11-01');
+  });
 }

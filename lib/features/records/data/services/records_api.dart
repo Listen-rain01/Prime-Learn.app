@@ -30,7 +30,10 @@ class RecordsApi {
       '/ArchiveManger/D_PersonAccumulate/GetMyAccumulateListOne'
       '?pid=${_esdt.encode(userId)}&page=$page&rows=$rows';
 
-  /// 成绩排名路径；`pid` 为明文，`type` 为榜单范围（1 单位 / 0 集团）。
+  /// 榜单类别：平台页面用 `id` 区分（0 本单位 / 1 集团）。
+  static int _scopeId(RankingScope scope) => scope == RankingScope.unit ? 0 : 1;
+
+  /// 成绩排名路径；`pid` 为明文，`type` 为范围（1 单位 / 0 集团），`id` 为类别（0/1）。
   static String markRankingPath(
     String userId, {
     required RankingScope scope,
@@ -41,7 +44,7 @@ class RecordsApi {
   }) =>
       '/ExamManger/P_ExamDetail/GetMarkRankingList'
       '?rows=$rows&page=$page&begin=$begin&end=$end'
-      '&type=${scope.wireType}&id=0&pid=$userId';
+      '&type=${scope.wireType}&id=${_scopeId(scope)}&pid=$userId';
 
   /// 学习时长排名的表单；`pid` 需 Esdt 编码。
   static Map<String, String> studyTimeRankingForm(
@@ -54,6 +57,7 @@ class RecordsApi {
   }) => {
     'pid': _esdt.encode(userId),
     'type': '${scope.wireType}',
+    'id': '${_scopeId(scope)}',
     'page': '$page',
     'rows': '$rows',
     'begin': begin,
