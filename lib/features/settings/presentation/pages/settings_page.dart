@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
@@ -22,6 +24,7 @@ class SettingsPage extends ConsumerWidget {
     final textTheme = Theme.of(context).textTheme;
     final session = ref.watch(sessionStoreProvider);
     final profile = ref.watch(personProfileProvider);
+    final avatar = ref.watch(profileAvatarProvider);
 
     return Scaffold(
       body: SafeArea(
@@ -29,23 +32,33 @@ class SettingsPage extends ConsumerWidget {
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
             TonalBlock(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(
-                    session?.userName ?? '未登录',
-                    style: textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: scheme.onSurface,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    '当前题库：${session?.bankName ?? '未设置'}',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: textTheme.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  _Avatar(bytes: avatar.value, name: session?.userName ?? ''),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          session?.userName ?? '未登录',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: scheme.onSurface,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          '当前题库：${session?.bankName ?? '未设置'}',
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -253,6 +266,37 @@ class _InfoRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 圆形头像：有头像字节用图片，否则回退姓名首字。
+class _Avatar extends StatelessWidget {
+  const _Avatar({required this.bytes, required this.name});
+
+  final Uint8List? bytes;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final imageBytes = bytes;
+    final initial = name.isEmpty ? '?' : name.substring(0, 1);
+
+    return CircleAvatar(
+      radius: 28,
+      backgroundColor: scheme.primaryContainer,
+      backgroundImage: imageBytes == null ? null : MemoryImage(imageBytes),
+      child: imageBytes == null
+          ? Text(
+              initial,
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: scheme.onPrimaryContainer,
+              ),
+            )
+          : null,
     );
   }
 }

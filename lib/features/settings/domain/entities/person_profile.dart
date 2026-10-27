@@ -29,7 +29,7 @@ class PersonProfile {
   /// 家庭地址（`vData.address`）。
   final String address;
 
-  /// 部门 ID（`vData.DepartmentId`），头像等资源需要。
+  /// 部门 ID（`vData.DepartmentId`），头像接口需要。
   final String? departmentId;
 
   /// 是否所有字段都为空（用于隐藏卡片）。

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
@@ -89,6 +91,19 @@ class ApiClient {
             : null,
       );
       return response.data ?? '';
+    } on DioException catch (error) {
+      throw _toApiException(error);
+    }
+  }
+
+  /// 下载二进制资源（头像等图片），复用同一 Cookie 容器。
+  Future<Uint8List> getBytes(String path) async {
+    try {
+      final response = await _dio.get<List<int>>(
+        path,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      return Uint8List.fromList(response.data ?? const []);
     } on DioException catch (error) {
       throw _toApiException(error);
     }

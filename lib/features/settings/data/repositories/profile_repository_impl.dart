@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:primelearn/features/settings/data/parsers/person_profile_parser.dart';
 import 'package:primelearn/features/settings/data/services/profile_api.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
@@ -25,4 +27,8 @@ class ProfileRepositoryImpl implements ProfileRepository {
       departmentId: dto.departmentId,
     );
   }
+
+  @override
+  Future<Uint8List> fetchAvatar(String userId, String departmentId) =>
+      _api.fetchAvatar(userId, departmentId);
 }

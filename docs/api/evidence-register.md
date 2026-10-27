@@ -17,6 +17,7 @@
 | `/ArchiveManger/D_PersonAccumulate/GetMyAccumulateListOne` | 积分明细（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（记录页展示，未落盘样本） | `docs/api/samples/points-ledger/` | 平台版本变更 |
 | `/PersonWap/MyRule` | 积分规则页（HTML，只读；当前客户端未使用） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（3033 字符 HTML → 588 字符文本） | `docs/api/samples/my-rule/` | 平台版本变更 |
 | `/PersonWap/MyBaseInfo` | 个人信息基础资料（HTML 内嵌 vData，只读） | observed | 2026-10-28 | 待独立复核 | 按接口手册实施 + 真实会话验证（15 个 vData 键，样本已脱敏） | `docs/api/samples/person-base-info/` | 平台版本变更 |
+| `/ArchiveManger/D_PersonManager/GetPersonPhoto` | 头像图片（`did`/`pid` 均 Esdt，只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测（JPEG 28.5KB，需会话 Cookie） | 二进制样本不入库 | 平台版本变更 |
 | 会话失效 | 识别登录页/错误文案/状态码 | assumed | — | — | 待补信号表 | — | 首次实现前必须验证 |
 
 ## 字段说明

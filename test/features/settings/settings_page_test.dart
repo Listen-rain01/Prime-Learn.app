@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,6 +11,12 @@ import 'package:primelearn/features/settings/domain/repositories/profile_reposit
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
 import 'package:primelearn/features/settings/profile_providers.dart';
 
+/// 1×1 PNG，仅用于让 `MemoryImage` 能在测试里正常解码。
+final Uint8List _pngBytes = base64Decode(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAA'
+  'DUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+);
+
 class _FakeProfileRepository implements ProfileRepository {
   _FakeProfileRepository(this.profile);
 
@@ -15,6 +24,10 @@ class _FakeProfileRepository implements ProfileRepository {
 
   @override
   Future<PersonProfile> fetchProfile(String userId) async => profile;
+
+  @override
+  Future<Uint8List> fetchAvatar(String userId, String departmentId) async =>
+      Uint8List(0);
 }
 
 const _profile = PersonProfile(
@@ -26,12 +39,18 @@ const _profile = PersonProfile(
   address: '陕西省澄城县某村一组',
 );
 
-Future<void> _pumpSettings(WidgetTester tester, PersonProfile profile) async {
+Future<void> _pumpSettings(
+  WidgetTester tester,
+  PersonProfile profile, {
+  Uint8List? avatar,
+}) async {
   final container = ProviderContainer(
     overrides: [
       profileRepositoryProvider.overrideWithValue(
         _FakeProfileRepository(profile),
       ),
+      // 头像单独取；测试里不触网。
+      profileAvatarProvider.overrideWith((ref) async => avatar),
     ],
   );
   addTearDown(container.dispose);
@@ -85,5 +104,34 @@ void main() {
 
     expect(find.text('610525******1234'), findsNWidgets(2));
     expect(find.text('610525199001011234'), findsNothing);
+  });
+
+  testWidgets('有头像字节时显示图片', (tester) async {
+    await _pumpSettings(
+      tester,
+      const PersonProfile(
+        employeeNo: 'E1001',
+        name: '张小赞',
+        idCard: '610525199001011234',
+        department: '某单位',
+        phone: '13812345678',
+        address: '某地址',
+      ),
+      avatar: _pngBytes,
+    );
+
+    final withImage = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+    expect(withImage.backgroundImage, isA<MemoryImage>());
+    expect(withImage.child, isNull);
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets('没有头像字节时回退姓名首字', (tester) async {
+    await _pumpSettings(tester, _profile);
+
+    final fallback = tester.widget<CircleAvatar>(find.byType(CircleAvatar));
+    expect(fallback.backgroundImage, isNull);
+    expect(fallback.child, isA<Text>());
+    expect(find.text('张'), findsOneWidget);
   });
 }
