@@ -106,7 +106,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 64,
+                  // 键盘弹出或首帧高度为 0 时 maxHeight 可能小于 64，
+                  // 直接相减会产生负的 minHeight 断言，必须夹到 0 以上。
+                  minHeight: (constraints.maxHeight - 64).clamp(
+                    0.0,
+                    double.infinity,
+                  ),
                 ),
                 child: Center(
                   child: ConstrainedBox(
