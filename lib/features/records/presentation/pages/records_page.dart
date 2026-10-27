@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/utils/date_formatter.dart';
 import 'package:primelearn/features/records/domain/entities/exam_record.dart';
+import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
 import 'package:primelearn/features/records/presentation/widgets/exam_record_row.dart';
 import 'package:primelearn/features/records/presentation/widgets/point_entry_row.dart';
+import 'package:primelearn/features/records/presentation/widgets/ranking_entry_row.dart';
+import 'package:primelearn/features/records/presentation/widgets/record_format.dart';
 import 'package:primelearn/features/records/records_providers.dart';
 
-/// 记录 Tab：考试记录 + 积分明细（均为只读）。
+/// 记录 Tab：考试记录 + 积分明细 + 排名/成绩趋势（均为只读）。
 class RecordsPage extends StatelessWidget {
   /// 创建记录页。
   const RecordsPage({super.key});
@@ -17,7 +21,7 @@ class RecordsPage extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,11 +43,16 @@ class RecordsPage extends StatelessWidget {
               tabs: const [
                 Tab(text: '考试'),
                 Tab(text: '积分'),
+                Tab(text: '排行'),
               ],
             ),
             const Expanded(
               child: TabBarView(
-                children: [_ExamRecordsTab(), _PointsLedgerTab()],
+                children: [
+                  _ExamRecordsTab(),
+                  _PointsLedgerTab(),
+                  _RankingTab(),
+                ],
               ),
             ),
           ],
@@ -142,9 +151,201 @@ class _PointsLedgerTab extends ConsumerWidget {
   }
 }
 
+/// 排行 Tab：成绩榜 / 学习时长榜（单位 / 集团）+ 个人成绩趋势。
+class _RankingTab extends ConsumerStatefulWidget {
+  const _RankingTab();
+
+  @override
+  ConsumerState<_RankingTab> createState() => _RankingTabState();
+}
+
+class _RankingTabState extends ConsumerState<_RankingTab> {
+  RankingKind _kind = RankingKind.mark;
+  RankingScope _scope = RankingScope.unit;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final range = DateFormatter.monthRange(DateTime.now());
+    final query = (
+      kind: _kind,
+      scope: _scope,
+      begin: range.begin,
+      end: range.end,
+    );
+    final board = ref.watch(rankingProvider(query));
+    final trend = ref.watch(scoreTrendProvider);
+
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      children: [
+        SegmentedButton<RankingKind>(
+          showSelectedIcon: false,
+          segments: [
+            for (final kind in RankingKind.values)
+              ButtonSegment<RankingKind>(value: kind, label: Text(kind.label)),
+          ],
+          selected: {_kind},
+          onSelectionChanged: (selection) =>
+              setState(() => _kind = selection.first),
+        ),
+        const SizedBox(height: 8),
+        SegmentedButton<RankingScope>(
+          showSelectedIcon: false,
+          segments: [
+            for (final scope in RankingScope.values)
+              ButtonSegment<RankingScope>(
+                value: scope,
+                label: Text(scope.label),
+              ),
+          ],
+          selected: {_scope},
+          onSelectionChanged: (selection) =>
+              setState(() => _scope = selection.first),
+        ),
+        const SizedBox(height: 12),
+        board.when(
+          loading: () => const _Loading(message: '正在加载排名...'),
+          error: (error, _) => _ErrorView(
+            message: error is UseCaseFailure ? error.message : '加载失败',
+            onRetry: () => ref.invalidate(rankingProvider(query)),
+          ),
+          data: (value) => value.isEmpty
+              ? const _Empty(message: '暂无排名数据')
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: scheme.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        value.myRank == null
+                            ? '我的排名：暂无'
+                            : '我的排名：第 ${value.myRank} 名'
+                                  ' · ${_myValueText(_kind, value.myMark)}',
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: scheme.onPrimaryContainer,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    for (var index = 0; index < value.entries.length; index++)
+                      Column(
+                        children: [
+                          if (index > 0)
+                            Divider(
+                              height: 0.5,
+                              thickness: 0.5,
+                              color: scheme.outlineVariant,
+                            ),
+                          RankingEntryRow(
+                            entry: value.entries[index],
+                            valueText: _entryValueText(
+                              _kind,
+                              value.entries[index],
+                            ),
+                            isMe:
+                                value.entries[index].personName == value.myName,
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          '我的成绩趋势',
+          style: textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: scheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 4),
+        trend.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: _Loading(message: '正在加载成绩趋势...'),
+          ),
+          error: (error, _) => _ErrorView(
+            message: error is UseCaseFailure ? error.message : '加载失败',
+            onRetry: () => ref.invalidate(scoreTrendProvider),
+          ),
+          data: (points) => points.isEmpty
+              ? const _Empty(message: '暂无成绩记录')
+              : Column(
+                  children: [
+                    for (final point in points.take(5))
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                        child: Row(
+                          children: [
+                            SizedBox(
+                              width: 48,
+                              child: Text(
+                                DateFormatter.date(point.time).length >= 10
+                                    ? DateFormatter.date(point.time)
+                                          .substring(5)
+                                    : '',
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Text(
+                                point.examName,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodyMedium?.copyWith(
+                                  color: scheme.onSurface,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              RecordFormat.score(point.mark),
+                              style: textTheme.bodyMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: scheme.onSurface,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+        ),
+      ],
+    );
+  }
+}
+
+/// 我的排名数值：成绩榜为分数，学习时长榜为时长（秒）。
+String _myValueText(RankingKind kind, double? value) {
+  if (value == null) return '暂无';
+  return switch (kind) {
+    RankingKind.mark => RecordFormat.score(value),
+    RankingKind.studyTime => RecordFormat.duration(value),
+  };
+}
+
+/// 榜单行数值：成绩榜取 `Mark`，学习时长榜取 `AllCount`（秒）。
+String _entryValueText(RankingKind kind, RankingEntry entry) => switch (kind) {
+  RankingKind.mark => RecordFormat.score(entry.mark),
+  RankingKind.studyTime => RecordFormat.duration(entry.allCount),
+};
+
 class _Loading extends StatelessWidget {
   const _Loading({required this.message});
-
   final String message;
 
   @override

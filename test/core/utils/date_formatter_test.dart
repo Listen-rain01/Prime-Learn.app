@@ -17,4 +17,10 @@ void main() {
     expect(DateFormatter.dateTime(null), '');
     expect(DateFormatter.date(null), '');
   });
+
+  test('monthRange 返回本月 1 日到今天', () {
+    final range = DateFormatter.monthRange(DateTime(2026, 10, 27, 9, 30));
+    expect(range.begin, '2026-10-01');
+    expect(range.end, '2026-10-27');
+  });
 }

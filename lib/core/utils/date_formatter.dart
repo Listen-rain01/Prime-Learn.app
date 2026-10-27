@@ -14,5 +14,11 @@ abstract final class DateFormatter {
     return '${value.year}-${_two(value.month)}-${_two(value.day)}';
   }
 
+  /// 当月区间：本月 1 日 → 今天，供排名接口的 `begin`/`end` 使用。
+  static ({String begin, String end}) monthRange(DateTime now) {
+    final begin = DateTime(now.year, now.month, 1);
+    return (begin: date(begin), end: date(now));
+  }
+
   static String _two(int value) => value.toString().padLeft(2, '0');
 }

@@ -1,8 +1,9 @@
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/protocol/esdt_codec.dart';
 import 'package:primelearn/features/records/domain/entities/exam_record.dart';
+import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
 
-/// 记录端点（考试记录 + 积分明细）。
+/// 记录端点（考试记录 / 积分明细 / 排名 / 成绩趋势）。
 class RecordsApi {
   /// 创建 API 封装。
   RecordsApi(this._client);
@@ -29,6 +30,47 @@ class RecordsApi {
       '/ArchiveManger/D_PersonAccumulate/GetMyAccumulateListOne'
       '?pid=${_esdt.encode(userId)}&page=$page&rows=$rows';
 
+  /// 成绩排名路径；`pid` 为明文，`type` 为榜单范围（1 单位 / 0 集团）。
+  static String markRankingPath(
+    String userId, {
+    required RankingScope scope,
+    required String begin,
+    required String end,
+    int page = 1,
+    int rows = 20,
+  }) =>
+      '/ExamManger/P_ExamDetail/GetMarkRankingList'
+      '?rows=$rows&page=$page&begin=$begin&end=$end'
+      '&type=${scope.wireType}&id=0&pid=$userId';
+
+  /// 学习时长排名的表单；`pid` 需 Esdt 编码。
+  static Map<String, String> studyTimeRankingForm(
+    String userId, {
+    required RankingScope scope,
+    required String begin,
+    required String end,
+    int page = 1,
+    int rows = 20,
+  }) => {
+    'pid': _esdt.encode(userId),
+    'type': '${scope.wireType}',
+    'page': '$page',
+    'rows': '$rows',
+    'begin': begin,
+    'end': end,
+  };
+
+  /// 个人成绩趋势路径；`pid` 为明文，`type` 为考试类型（中文需编码）。
+  static String scoreTrendPath(
+    String userId, {
+    String type = '理论考试',
+    int page = 1,
+    int rows = 20,
+  }) =>
+      '/ExamManger/P_ExamDetail/GetPersonExamAchievementListOne'
+      '?pid=$userId&rows=$rows&page=$page'
+      '&type=${Uri.encodeQueryComponent(type)}';
+
   /// 查询考试记录。
   Future<String> fetchExamRecords(String userId, ExamRecordCategory category) =>
       _client.getRaw(examRecordsPath(userId, category));
@@ -36,4 +78,29 @@ class RecordsApi {
   /// 查询积分明细。
   Future<String> fetchPointsLedger(String userId) =>
       _client.getRaw(pointsLedgerPath(userId));
+
+  /// 查询成绩排名。
+  Future<String> fetchMarkRanking(
+    String userId, {
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) => _client.getRaw(
+    markRankingPath(userId, scope: scope, begin: begin, end: end),
+  );
+
+  /// 查询学习时长排名。
+  Future<String> fetchStudyTimeRanking(
+    String userId, {
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) => _client.postForm(
+    '/ArchiveManger/D_PersonStudyLog/GetStudyTimeRankingListOne',
+    studyTimeRankingForm(userId, scope: scope, begin: begin, end: end),
+  );
+
+  /// 查询个人成绩趋势。
+  Future<String> fetchScoreTrend(String userId) =>
+      _client.getRaw(scoreTrendPath(userId));
 }

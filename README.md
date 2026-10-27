@@ -102,7 +102,7 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] 登录页（Material 3 seed 蓝、FlutterLogo、字段内联校验）、类型化路由、登录态守卫
 - [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，真实环境验证通过）、今日页（按接口自然顺序展示任务、今日得分/上限、加载/错误/空态）、会话失效清理
 - [x] 3 Tab shell（今日 / 记录 / 我的，`StatefulShellRoute.indexedStack`）
-- [x] `features/records`：考试记录（手机/模拟/理论，`GetMyExamListOne`）+ 积分明细（`GetMyAccumulateListOne`），真实环境验证通过
+- [x] `features/records`：考试记录（手机/模拟/理论，`GetMyExamListOne`）+ 积分明细（`GetMyAccumulateListOne`）+ 排行（成绩榜/学习时长榜，单位/集团）与个人成绩趋势，真实环境验证通过
 - [x] `features/settings`：账号与当前题库、个人信息（`MyBaseInfo` 的 vData：工号/身份证/单位/联系方式/地址，身份证与手机号脱敏展示）与头像（`GetPersonPhoto`，独立加载、失败回退姓名首字）、退出登录（题库切换待接入）
 - [ ] 排名与学习统计（`GetMarkRankingList` 等）
 - [ ] 手机考试 / 模拟考试流程（写操作需先完成协议取证 + 写网关）

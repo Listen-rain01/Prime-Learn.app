@@ -5,6 +5,8 @@ import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/records/domain/entities/exam_record.dart';
 import 'package:primelearn/features/records/domain/entities/point_entry.dart';
+import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/records/domain/entities/score_trend_point.dart';
 import 'package:primelearn/features/records/domain/repositories/records_repository.dart';
 import 'package:primelearn/features/records/presentation/pages/records_page.dart';
 import 'package:primelearn/features/records/records_providers.dart';
@@ -49,6 +51,69 @@ class _FakeRecordsRepository implements RecordsRepository {
   Future<List<PointEntry>> fetchPointsLedger(String userId) async => [
     PointEntry(name: '签到', amount: 2, date: DateTime(2026, 10, 27, 1, 45)),
     const PointEntry(name: '扣减', amount: -1),
+  ];
+
+  @override
+  Future<RankingBoard> fetchMarkRanking({
+    required String userId,
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) async => RankingBoard(
+    myName: '张小赞',
+    myRank: 12,
+    myMark: 96.5,
+    entries: const [
+      RankingEntry(
+        rank: 1,
+        personName: '田小平',
+        department: '澄合矿业/西卓煤矿/运输区',
+        mark: 99.5,
+      ),
+      RankingEntry(
+        rank: 2,
+        personName: '张小赞',
+        department: '澄合矿业/西卓煤矿/设备维修队',
+        mark: 96.5,
+      ),
+    ],
+  );
+
+  @override
+  Future<RankingBoard> fetchStudyTimeRanking({
+    required String userId,
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) async => const RankingBoard(
+    myName: '张小赞',
+    myRank: 3,
+    myMark: 7200,
+    entries: [
+      RankingEntry(
+        rank: 1,
+        personName: '李四',
+        department: '维修队',
+        mark: 0,
+        allCount: 7200,
+      ),
+    ],
+  );
+
+  @override
+  Future<List<ScoreTrendPoint>> fetchScoreTrend(String userId) async => [
+    ScoreTrendPoint(
+      examName: '2025陕西煤业手机考试',
+      examType: '手机考试',
+      mark: 100,
+      time: DateTime(2026, 10, 27, 1, 26),
+    ),
+    ScoreTrendPoint(
+      examName: '2025陕西煤业模拟考试',
+      examType: '模拟考试',
+      mark: 88,
+      time: DateTime(2026, 10, 20, 9, 0),
+    ),
   ];
 }
 
@@ -105,5 +170,37 @@ void main() {
     expect(find.text('+2'), findsOneWidget);
     expect(find.text('-1'), findsOneWidget);
     expect(find.text('2026-10-27 01:45'), findsOneWidget);
+  });
+
+  testWidgets('排行 Tab 展示成绩榜、我的排名与成绩趋势', (tester) async {
+    await pumpRecords(tester);
+
+    await tester.tap(find.text('排行'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('成绩榜'), findsOneWidget);
+    expect(find.text('学习时长榜'), findsOneWidget);
+    expect(find.text('单位'), findsOneWidget);
+    expect(find.text('集团'), findsOneWidget);
+    expect(find.text('我的排名：第 12 名 · 96.5'), findsOneWidget);
+    expect(find.text('田小平'), findsOneWidget);
+    expect(find.text('99.5'), findsOneWidget);
+    expect(find.text('我的成绩趋势'), findsOneWidget);
+    expect(find.text('2025陕西煤业手机考试'), findsOneWidget);
+    expect(find.text('10-27'), findsOneWidget);
+  });
+
+  testWidgets('切换学习时长榜后刷新榜单', (tester) async {
+    await pumpRecords(tester);
+
+    await tester.tap(find.text('排行'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('学习时长榜'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('李四'), findsOneWidget);
+    expect(find.text('我的排名：第 3 名 · 2 小时'), findsOneWidget);
+    expect(find.text('2 小时'), findsOneWidget);
+    expect(find.text('田小平'), findsNothing);
   });
 }

@@ -204,6 +204,98 @@ final class LoadPointsLedgerProvider
 
 String _$loadPointsLedgerHash() => r'a9582f630e17810296df2803c828ba133eb114c4';
 
+/// 加载榜单用例。
+
+@ProviderFor(loadRanking)
+final loadRankingProvider = LoadRankingProvider._();
+
+/// 加载榜单用例。
+
+final class LoadRankingProvider
+    extends $FunctionalProvider<LoadRanking, LoadRanking, LoadRanking>
+    with $Provider<LoadRanking> {
+  /// 加载榜单用例。
+  LoadRankingProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'loadRankingProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$loadRankingHash();
+
+  @$internal
+  @override
+  $ProviderElement<LoadRanking> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  LoadRanking create(Ref ref) {
+    return loadRanking(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LoadRanking value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LoadRanking>(value),
+    );
+  }
+}
+
+String _$loadRankingHash() => r'a15a3823c11acfbb88ce5ba73cfaf3772cd7d12b';
+
+/// 加载成绩趋势用例。
+
+@ProviderFor(loadScoreTrend)
+final loadScoreTrendProvider = LoadScoreTrendProvider._();
+
+/// 加载成绩趋势用例。
+
+final class LoadScoreTrendProvider
+    extends $FunctionalProvider<LoadScoreTrend, LoadScoreTrend, LoadScoreTrend>
+    with $Provider<LoadScoreTrend> {
+  /// 加载成绩趋势用例。
+  LoadScoreTrendProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'loadScoreTrendProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$loadScoreTrendHash();
+
+  @$internal
+  @override
+  $ProviderElement<LoadScoreTrend> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  LoadScoreTrend create(Ref ref) {
+    return loadScoreTrend(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(LoadScoreTrend value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<LoadScoreTrend>(value),
+    );
+  }
+}
+
+String _$loadScoreTrendHash() => r'd521f571e797c8b7d21b920a19a2ad37ec9c3afe';
+
 /// 指定分类的考试记录。
 
 @ProviderFor(examRecords)
@@ -335,3 +427,133 @@ final class PointsLedgerProvider
 }
 
 String _$pointsLedgerHash() => r'209906c8d8976e04840c80b0f9bf722c23102752';
+
+/// 榜单。
+
+@ProviderFor(ranking)
+final rankingProvider = RankingFamily._();
+
+/// 榜单。
+
+final class RankingProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<RankingBoard>,
+          RankingBoard,
+          FutureOr<RankingBoard>
+        >
+    with $FutureModifier<RankingBoard>, $FutureProvider<RankingBoard> {
+  /// 榜单。
+  RankingProvider._({
+    required RankingFamily super.from,
+    required RankingQuery super.argument,
+  }) : super(
+         retry: noProviderRetry,
+         name: r'rankingProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$rankingHash();
+
+  @override
+  String toString() {
+    return r'rankingProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<RankingBoard> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<RankingBoard> create(Ref ref) {
+    final argument = this.argument as RankingQuery;
+    return ranking(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is RankingProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$rankingHash() => r'c3c7baf3f9c5cd012237cd6c9fe15972e755bcbc';
+
+/// 榜单。
+
+final class RankingFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<RankingBoard>, RankingQuery> {
+  RankingFamily._()
+    : super(
+        retry: noProviderRetry,
+        name: r'rankingProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// 榜单。
+
+  RankingProvider call(RankingQuery query) =>
+      RankingProvider._(argument: query, from: this);
+
+  @override
+  String toString() => r'rankingProvider';
+}
+
+/// 个人成绩趋势。
+
+@ProviderFor(scoreTrend)
+final scoreTrendProvider = ScoreTrendProvider._();
+
+/// 个人成绩趋势。
+
+final class ScoreTrendProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<ScoreTrendPoint>>,
+          List<ScoreTrendPoint>,
+          FutureOr<List<ScoreTrendPoint>>
+        >
+    with
+        $FutureModifier<List<ScoreTrendPoint>>,
+        $FutureProvider<List<ScoreTrendPoint>> {
+  /// 个人成绩趋势。
+  ScoreTrendProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: noProviderRetry,
+        name: r'scoreTrendProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$scoreTrendHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<ScoreTrendPoint>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<ScoreTrendPoint>> create(Ref ref) {
+    return scoreTrend(ref);
+  }
+}
+
+String _$scoreTrendHash() => r'92ef755a17ddcc3f5e07f95988f8a3b1ce9e00df';

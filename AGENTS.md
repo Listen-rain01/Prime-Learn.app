@@ -513,7 +513,7 @@ class AgentEngine extends _$AgentEngine {
 ```text
 /login          登录（shell 之外）
 /               今日（Tab 1）：今日积分、每日任务（按接口顺序）、任务入口
-/records        记录（Tab 2）：考试记录、积分明细（只读）
+/records        记录（Tab 2）：考试记录、积分明细、排行/成绩趋势（只读）
 /settings       我的（Tab 3）：账号、当前题库、退出登录
 /run            执行中（push，暂未实现）
 /result         结果（push，暂未实现）
