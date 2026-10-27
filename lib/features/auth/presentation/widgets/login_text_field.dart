@@ -17,6 +17,7 @@ class LoginTextField extends StatelessWidget {
     this.textInputAction,
     this.maxLength,
     this.enabled = true,
+    this.errorText,
     this.onChanged,
     this.onSubmitted,
     super.key,
@@ -52,6 +53,9 @@ class LoginTextField extends StatelessWidget {
   /// 是否可用（加载中禁用）。
   final bool enabled;
 
+  /// 字段级错误文案；非空时显示红色描边与提示。
+  final String? errorText;
+
   /// 输入变化回调。
   final ValueChanged<String>? onChanged;
 
@@ -65,6 +69,10 @@ class LoginTextField extends StatelessWidget {
     final border = OutlineInputBorder(
       borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: scheme.primary),
+    );
+    final errorBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(12),
+      borderSide: BorderSide(color: scheme.error),
     );
 
     return TextField(
@@ -83,12 +91,15 @@ class LoginTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
+        errorText: errorText,
         counterText: '',
         filled: false,
         border: border,
         enabledBorder: border,
         focusedBorder: border,
         disabledBorder: border,
+        errorBorder: errorBorder,
+        focusedErrorBorder: errorBorder,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 18,

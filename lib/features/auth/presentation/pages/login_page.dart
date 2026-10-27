@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
+import 'package:primelearn/core/ui/inline_notice.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_controller.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_state.dart';
@@ -10,6 +11,9 @@ import 'package:primelearn/features/auth/presentation/widgets/login_text_field.d
 import 'package:primelearn/features/auth/presentation/widgets/primary_button.dart';
 
 /// 登录页，按 docs/ui/PURE_UI_SPEC.md §3 复刻。
+///
+/// 错误提示采用「就近内联」：字段错误显示在对应输入框下方，
+/// 提交失败显示在按钮上方，不使用底部 SnackBar。
 class LoginPage extends ConsumerStatefulWidget {
   /// 创建登录页。
   const LoginPage({super.key});
@@ -23,6 +27,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _rememberAccount = false;
+  String? _idCardError;
+  String? _passwordError;
 
   static final RegExp _idCardPattern = RegExp(r'^\d{17}[\dXx]$');
 
@@ -48,23 +54,20 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     });
   }
 
-  void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
-  }
-
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     final idCard = _idCardController.text.trim();
-    if (!_idCardPattern.hasMatch(idCard)) {
-      _showMessage('请输入有效的 18 位身份证号');
-      return;
-    }
-    if (_passwordController.text.isEmpty) {
-      _showMessage('请输入登录密码');
-      return;
-    }
+    final idCardError = _idCardPattern.hasMatch(idCard)
+        ? null
+        : '请输入有效的 18 位身份证号';
+    final passwordError = _passwordController.text.isEmpty ? '请输入登录密码' : null;
+
+    setState(() {
+      _idCardError = idCardError;
+      _passwordError = passwordError;
+    });
+    if (idCardError != null || passwordError != null) return;
+
     await ref
         .read(loginControllerProvider.notifier)
         .submit(
@@ -74,21 +77,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         );
   }
 
+  void _clearFailureOnEdit() {
+    if (ref.read(loginControllerProvider) is LoginFailed) {
+      ref.read(loginControllerProvider.notifier).reset();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final state = ref.watch(loginControllerProvider);
     final submitting = state is LoginSubmitting;
+    final failure = state is LoginFailed ? state : null;
 
     ref.listen<LoginState>(loginControllerProvider, (_, next) {
-      switch (next) {
-        case LoginSucceeded():
-          const HomeRoute().go(context);
-        case LoginFailed(:final message):
-          _showMessage(message);
-        case LoginIdle() || LoginSubmitting():
-          break;
+      if (next is LoginSucceeded) {
+        const HomeRoute().go(context);
       }
     });
 
@@ -149,15 +154,24 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               textInputAction: TextInputAction.next,
                               maxLength: 18,
                               enabled: !submitting,
+                              errorText: _idCardError,
                               suffix: value.text.isEmpty
                                   ? null
                                   : IconButton(
                                       tooltip: '清空身份证号',
                                       icon: const Icon(Icons.clear, size: 18),
                                       color: scheme.onSurfaceVariant,
-                                      onPressed: () =>
-                                          _idCardController.clear(),
+                                      onPressed: () {
+                                        _idCardController.clear();
+                                        setState(() => _idCardError = null);
+                                      },
                                     ),
+                              onChanged: (_) {
+                                if (_idCardError != null) {
+                                  setState(() => _idCardError = null);
+                                }
+                                _clearFailureOnEdit();
+                              },
                             );
                           },
                         ),
@@ -170,7 +184,14 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           obscureText: _obscurePassword,
                           textInputAction: TextInputAction.done,
                           enabled: !submitting,
+                          errorText: _passwordError,
                           onSubmitted: (_) => unawaited(_submit()),
+                          onChanged: (_) {
+                            if (_passwordError != null) {
+                              setState(() => _passwordError = null);
+                            }
+                            _clearFailureOnEdit();
+                          },
                           suffix: IconButton(
                             tooltip: _obscurePassword ? '显示密码' : '隐藏密码',
                             icon: Icon(
@@ -237,6 +258,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ),
                         const SizedBox(height: 24),
+                        if (failure != null) ...[
+                          InlineNotice(message: failure.message),
+                          const SizedBox(height: 12),
+                        ],
                         PrimaryButton(
                           label: '登 录',
                           loading: submitting,

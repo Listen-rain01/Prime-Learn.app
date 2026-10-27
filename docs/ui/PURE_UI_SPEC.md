@@ -311,7 +311,12 @@ Scaffold
 
 ### 3.6 登录页异常提示
 
-- 使用 SnackBar，位置和 Material 3 默认一致。
+> 本仓库修订（2026-10-28）：改用**就近内联**提示，不再使用 SnackBar。
+> 原因见 `docs/ui/PURE_UI_SPEC.md` §9.8：底部浮层离出错位置远、会被键盘遮挡、会自动消失。
+
+- 字段校验错误：直接显示在对应输入框下方（Material `errorText`），输入框描边转 `error`，文字为 `bodySmall` 的 `error` 色。
+- 提交失败（平台返回文案，如 `密码错误`）：显示在登录按钮上方，使用内联提示条（`errorContainer` 背景 + `onErrorContainer` 文字 + `Icons.error_outline`，12dp 圆角，内边距 12×10）。
+- 用户重新编辑任一项时，字段错误与提交失败提示同时清除。
 - 文案示例：
   - `请输入有效的 18 位身份证号`
   - `请输入登录密码`
@@ -1128,13 +1133,24 @@ Container
 - 可滚动内容使用 ListView / DraggableScrollableSheet。
 - 内容左右 20dp。
 
+### 9.8 内联提示（替代 SnackBar）
+
+用于表单校验与提交失败，原则是「错误出现在出错的位置」：
+
+- 字段级：`InputDecoration.errorText`，输入框描边转 `error`，提示文字 `bodySmall`。
+- 表单级：登录按钮等主操作上方，`errorContainer` 背景、`onErrorContainer` 文字、`Icons.error_outline`，12dp 圆角，内边距 12×10。
+- 语气：错误 / 说明 / 成功分别使用 `errorContainer`、`secondaryContainer`、`primaryContainer`。
+- 无障碍：容器使用 `Semantics(liveRegion: true)`，读屏器播报。
+- 不使用 SnackBar：底部浮层离错误位置远、会被键盘遮挡、会自动消失，且容易被忽略。
+- 成功类反馈（保存成功等）同样使用内联提示，不弹浮层。
+
 ---
 
 ## 10. 页面状态矩阵
 
 | 页面 | 正常 | 加载 | 空 | 失败 |
 |---|---|---|---|---|
-| 登录 | 表单可编辑 | 输入禁用、按钮转圈 | — | SnackBar |
+| 登录 | 表单可编辑 | 输入禁用、按钮转圈 | — | 字段内联错误 / 按钮上方内联提示 |
 | 首页 | 积分+任务分组 | 积分摘要/任务加载 | 暂无任务 | 每日任务加载失败 + 重试 |
 | 策略 | 配置分组 | 当前题库/策略加载 | 未配置 | 查询失败/加载失败 |
 | 自动化 | WebView+控制条 | 页面加载遮罩 | 未配置任务 | 状态条错误色 + 日志 |

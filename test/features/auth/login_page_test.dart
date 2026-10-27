@@ -1,7 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:primelearn/core/ui/inline_notice.dart';
+import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/session/session.dart';
+import 'package:primelearn/features/auth/auth_providers.dart';
+import 'package:primelearn/features/auth/domain/entities/bank_context.dart';
+import 'package:primelearn/features/auth/domain/repositories/auth_repository.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
+
+class _FailingAuthRepository implements AuthRepository {
+  @override
+  Future<void> ensureSessionCookie() async {}
+
+  @override
+  Future<Session> login({
+    required String idCard,
+    required String password,
+  }) async =>
+      throw const ApiException(kind: ApiErrorKind.protocol, message: '密码错误');
+
+  @override
+  Future<BankContext> fetchBankContext(String userId) async =>
+      const BankContext();
+}
 
 void main() {
   Future<void> pumpLoginPage(WidgetTester tester) async {
@@ -10,6 +32,9 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  TextField fieldAt(WidgetTester tester, int index) =>
+      tester.widget<TextField>(find.byType(TextField).at(index));
 
   testWidgets('登录页渲染关键元素', (tester) async {
     await pumpLoginPage(tester);
@@ -25,27 +50,17 @@ void main() {
     expect(find.text('© 2026 Prime Learn · 保留所有权利'), findsOneWidget);
   });
 
-  testWidgets('未填身份证号提交显示 SnackBar', (tester) async {
+  testWidgets('未填身份证号：错误显示在字段下方，不弹 SnackBar', (tester) async {
     await pumpLoginPage(tester);
 
     await tester.tap(find.text('登 录'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(SnackBar), findsOneWidget);
-    expect(
-      find.descendant(
-        of: find.byType(SnackBar),
-        matching: find.text('请输入有效的 18 位身份证号'),
-      ),
-      findsOneWidget,
-    );
-
-    // 让 SnackBar 计时器走完，避免测试结束时仍有挂起计时器。
-    await tester.pump(const Duration(seconds: 4));
-    await tester.pumpAndSettle();
+    expect(fieldAt(tester, 0).decoration?.errorText, '请输入有效的 18 位身份证号');
+    expect(find.byType(SnackBar), findsNothing);
   });
 
-  testWidgets('身份证号合法但密码为空时提示请输入登录密码', (tester) async {
+  testWidgets('身份证号合法但密码为空：密码字段报错', (tester) async {
     await pumpLoginPage(tester);
 
     await tester.enterText(find.byType(TextField).first, '610525199001011234');
@@ -53,16 +68,54 @@ void main() {
     await tester.tap(find.text('登 录'));
     await tester.pumpAndSettle();
 
+    expect(fieldAt(tester, 0).decoration?.errorText, isNull);
+    expect(fieldAt(tester, 1).decoration?.errorText, '请输入登录密码');
+  });
+
+  testWidgets('重新输入后字段错误消失', (tester) async {
+    await pumpLoginPage(tester);
+
+    await tester.tap(find.text('登 录'));
+    await tester.pumpAndSettle();
+    expect(fieldAt(tester, 0).decoration?.errorText, isNotNull);
+
+    await tester.enterText(find.byType(TextField).first, '610525199001011234');
+    await tester.pump();
+
+    expect(fieldAt(tester, 0).decoration?.errorText, isNull);
+  });
+
+  testWidgets('登录失败：按钮上方显示内联提示，不弹 SnackBar', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          authRepositoryProvider.overrideWithValue(_FailingAuthRepository()),
+        ],
+        child: const MaterialApp(home: LoginPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, '610525199001011234');
+    await tester.enterText(find.byType(TextField).at(1), 'wrong-password');
+    await tester.pump();
+    await tester.tap(find.text('登 录'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(InlineNotice), findsOneWidget);
     expect(
       find.descendant(
-        of: find.byType(SnackBar),
-        matching: find.text('请输入登录密码'),
+        of: find.byType(InlineNotice),
+        matching: find.text('密码错误'),
       ),
       findsOneWidget,
     );
+    expect(find.byType(SnackBar), findsNothing);
 
-    await tester.pump(const Duration(seconds: 4));
-    await tester.pumpAndSettle();
+    // 重新编辑后提示消失。
+    await tester.enterText(find.byType(TextField).at(1), 'another-password');
+    await tester.pump();
+    expect(find.byType(InlineNotice), findsNothing);
   });
 
   testWidgets('输入身份证号后出现清空按钮并可清空', (tester) async {
@@ -78,10 +131,7 @@ void main() {
     await tester.tap(find.byIcon(Icons.clear));
     await tester.pump();
 
-    expect(
-      tester.widget<TextField>(find.byType(TextField).first).controller?.text,
-      isEmpty,
-    );
+    expect(fieldAt(tester, 0).controller?.text, isEmpty);
   });
 
   testWidgets('密码可见性可切换', (tester) async {
@@ -100,8 +150,7 @@ void main() {
   testWidgets('记住账号可点击文字切换', (tester) async {
     await pumpLoginPage(tester);
 
-    final checkbox = tester.widget<Checkbox>(find.byType(Checkbox));
-    expect(checkbox.value, isFalse);
+    expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isFalse);
 
     await tester.tap(find.text('记住账号'));
     await tester.pump();

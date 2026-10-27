@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
+import 'package:primelearn/core/ui/tonal_block.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_controller.dart';
 
 /// 首页（指挥台）。
@@ -24,8 +25,7 @@ class HomePage extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
           children: [
-            _TonalBlock(
-              padding: const EdgeInsets.all(16),
+            TonalBlock(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -84,7 +84,7 @@ class HomePage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _TonalBlock(
+            TonalBlock(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +121,7 @@ class HomePage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            _TonalBlock(
+            TonalBlock(
               padding: EdgeInsets.zero,
               child: SizedBox(
                 height: 56,
@@ -145,28 +145,6 @@ class HomePage extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-/// Tonal 分组块（规格 §9.1）：surfaceContainerLow、20dp 圆角、无阴影无边框。
-class _TonalBlock extends StatelessWidget {
-  const _TonalBlock({required this.child, required this.padding});
-
-  final Widget child;
-  final EdgeInsets padding;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      width: double.infinity,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: scheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: child,
     );
   }
 }
