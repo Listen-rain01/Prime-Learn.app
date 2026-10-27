@@ -4,7 +4,7 @@ import 'package:primelearn/app/router.dart';
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
-import 'package:primelearn/features/auth/presentation/providers/login_controller.dart';
+import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
 
 /// 首页（指挥台）。
 ///
@@ -130,7 +130,7 @@ class HomePage extends ConsumerWidget {
                   onPressed: () async {
                     await ref.read(apiClientProvider).clearCookies();
                     ref.read(sessionStoreProvider.notifier).clear();
-                    ref.read(loginControllerProvider.notifier).reset();
+                    ref.read(loginProvider.notifier).reset();
                     if (context.mounted) {
                       const LoginRoute().go(context);
                     }

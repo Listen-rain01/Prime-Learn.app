@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-/// 登录页输入框（规格 §3.3）。
+/// 通用文本输入框（设计系统基元，规格 §3.3）。
 ///
-/// 两个输入框共用一个 decoration：12dp 圆角、primary 描边、无填充、
-/// 水平 16dp / 垂直 18dp 内边距、浮动 label 为 primary。
-class LoginTextField extends StatelessWidget {
-  /// 创建输入框。
-  const LoginTextField({
+/// 统一 12dp 圆角、primary 描边、无填充、`label` + `hint`、浮动 label 为 primary；
+/// 字段级错误走 `errorText`（就近内联，不用 SnackBar）。
+class AppTextField extends StatelessWidget {
+  /// 创建文本输入框。
+  const AppTextField({
     required this.controller,
     required this.labelText,
     required this.hintText,

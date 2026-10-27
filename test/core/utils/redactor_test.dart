@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:primelearn/core/logging/redactor.dart';
+import 'package:primelearn/core/utils/redactor.dart';
 
 void main() {
   test('身份证保留前 6 后 4', () {

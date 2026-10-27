@@ -1,6 +1,7 @@
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_exception.dart';
 import 'package:primelearn/core/session/session.dart';
+import 'package:primelearn/core/utils/id_card_validator.dart';
 import 'package:primelearn/features/auth/domain/repositories/auth_repository.dart';
 
 /// 登录用例：预建会话 → 登录 → 校验会话/读取题库。
@@ -18,15 +19,13 @@ class LoginUseCase {
   /// 预建会话失败后的重试间隔。
   final Duration retryDelay;
 
-  static final RegExp _idCardPattern = RegExp(r'^\d{17}[\dXx]$');
-
   /// 执行登录，返回带题库信息的会话。
   Future<Session> execute({
     required String idCard,
     required String password,
   }) async {
     final normalized = idCard.trim();
-    if (!_idCardPattern.hasMatch(normalized)) {
+    if (!IdCardValidator.isValid(normalized)) {
       throw const UseCaseFailure('请输入有效的 18 位身份证号');
     }
     if (password.isEmpty) {

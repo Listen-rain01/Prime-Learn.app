@@ -116,9 +116,10 @@ lib/
 |---|---|---|
 | `core/network` | Dio、Cookie、超时、错误映射 | `ApiClient`、`ApiException` |
 | `core/protocol` | 平台协议编解码 | `EsdtCodec`、`SettleCrypto`、`PipeResponse` |
-| `core/session` | 登录态、会话失效 | `SessionStore` |
+| `core/session` | 登录态、会话失效、账号记忆 | `SessionStore`、`AccountMemory` |
+| `core/errors` | 跨层错误分类 | `UseCaseFailure` |
 | `core/logging` | 执行记录、诊断日志 | `RunLogStore` |
-| `core/utils` | 纯工具 | 时间格式化、身份证脱敏 |
+| `core/utils` | 纯工具 | `Redactor`、`IdCardValidator`、时间格式化 |
 | `core/widgets` | 跨 feature 的通用视觉基元（不含业务语义） | `InlineNotice`、`TonalBlock`、`StatusLabel` |
 
 规则：`core/` 不允许 import 任何 `features/`；`features/` 可以 import `core/`。

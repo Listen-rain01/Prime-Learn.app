@@ -1,14 +1,15 @@
 import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/session/account_memory.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/auth_providers.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_state.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'login_controller.g.dart';
+part 'login_notifier.g.dart';
 
-/// 登录页控制器：负责状态迁移，不碰网络细节。
+/// 登录页状态机：负责状态迁移，不碰网络细节。
 @Riverpod(keepAlive: true)
-class LoginController extends _$LoginController {
+class LoginNotifier extends _$LoginNotifier {
   @override
   LoginState build() => const LoginIdle();
 

@@ -1,6 +1,7 @@
 /// 日志与展示脱敏工具。
 ///
 /// 规则见 AGENTS.md §9.4：身份证前 6 后 4，密码/Cookie/加密串不得出现在日志。
+/// 纯函数、无依赖，按 §3.2 归属 `core/utils`。
 abstract final class Redactor {
   /// 身份证脱敏：保留前 6 位与后 4 位。
   static String idCard(String value) {

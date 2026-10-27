@@ -1,12 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/session/account_memory.dart';
 import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/auth_providers.dart';
 import 'package:primelearn/features/auth/domain/entities/bank_context.dart';
 import 'package:primelearn/features/auth/domain/repositories/auth_repository.dart';
-import 'package:primelearn/features/auth/presentation/providers/login_controller.dart';
+import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_state.dart';
 
 class _FakeAuthRepository implements AuthRepository {
@@ -64,22 +65,22 @@ void main() {
   });
 
   test('初始为 LoginIdle', () {
-    expect(container.read(loginControllerProvider), isA<LoginIdle>());
+    expect(container.read(loginProvider), isA<LoginIdle>());
   });
 
   test('提交成功后保存会话并记住账号', () async {
-    final controller = container.read(loginControllerProvider.notifier);
+    final controller = container.read(loginProvider.notifier);
 
     final pending = controller.submit(
       idCard: '610525199001011234',
       password: 'p@ss',
       remember: true,
     );
-    expect(container.read(loginControllerProvider), isA<LoginSubmitting>());
+    expect(container.read(loginProvider), isA<LoginSubmitting>());
 
     await pending;
 
-    final state = container.read(loginControllerProvider);
+    final state = container.read(loginProvider);
     expect(state, isA<LoginSucceeded>());
     expect((state as LoginSucceeded).session.bankName, '题库A');
     expect(container.read(sessionStoreProvider)?.userId, 'u1');
@@ -103,17 +104,17 @@ void main() {
     addTearDown(container.dispose);
 
     await container
-        .read(loginControllerProvider.notifier)
+        .read(loginProvider.notifier)
         .submit(idCard: '610525199001011234', password: 'wrong');
 
-    final state = container.read(loginControllerProvider);
+    final state = container.read(loginProvider);
     expect(state, isA<LoginFailed>());
     expect((state as LoginFailed).message, '密码错误');
     expect(container.read(sessionStoreProvider), isNull);
   });
 
   test('重复提交在提交中会被忽略', () async {
-    final controller = container.read(loginControllerProvider.notifier);
+    final controller = container.read(loginProvider.notifier);
     final first = controller.submit(
       idCard: '610525199001011234',
       password: 'p',
@@ -121,16 +122,16 @@ void main() {
     await controller.submit(idCard: '610525199001011234', password: 'p');
     await first;
 
-    expect(container.read(loginControllerProvider), isA<LoginSucceeded>());
+    expect(container.read(loginProvider), isA<LoginSucceeded>());
     expect(repository.ensureCalls, 1);
   });
 
   test('reset 回到 LoginIdle', () async {
-    final controller = container.read(loginControllerProvider.notifier);
+    final controller = container.read(loginProvider.notifier);
     await controller.submit(idCard: 'bad', password: 'p');
-    expect(container.read(loginControllerProvider), isA<LoginFailed>());
+    expect(container.read(loginProvider), isA<LoginFailed>());
 
     controller.reset();
-    expect(container.read(loginControllerProvider), isA<LoginIdle>());
+    expect(container.read(loginProvider), isA<LoginIdle>());
   });
 }

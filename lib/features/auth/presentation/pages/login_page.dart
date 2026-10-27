@@ -3,12 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
-import 'package:primelearn/core/session/session_store.dart';
+import 'package:primelearn/core/session/account_memory.dart';
+import 'package:primelearn/core/utils/id_card_validator.dart';
+import 'package:primelearn/core/widgets/app_text_field.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
-import 'package:primelearn/features/auth/presentation/providers/login_controller.dart';
+import 'package:primelearn/core/widgets/primary_button.dart';
+import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_state.dart';
-import 'package:primelearn/features/auth/presentation/widgets/login_text_field.dart';
-import 'package:primelearn/features/auth/presentation/widgets/primary_button.dart';
 
 /// 登录页，按 docs/ui/PURE_UI_SPEC.md §3 复刻。
 ///
@@ -29,8 +30,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _rememberAccount = false;
   String? _idCardError;
   String? _passwordError;
-
-  static final RegExp _idCardPattern = RegExp(r'^\d{17}[\dXx]$');
 
   @override
   void initState() {
@@ -57,7 +56,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _submit() async {
     FocusScope.of(context).unfocus();
     final idCard = _idCardController.text.trim();
-    final idCardError = _idCardPattern.hasMatch(idCard)
+    final idCardError = IdCardValidator.isValid(idCard)
         ? null
         : '请输入有效的 18 位身份证号';
     final passwordError = _passwordController.text.isEmpty ? '请输入登录密码' : null;
@@ -69,7 +68,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     if (idCardError != null || passwordError != null) return;
 
     await ref
-        .read(loginControllerProvider.notifier)
+        .read(loginProvider.notifier)
         .submit(
           idCard: idCard,
           password: _passwordController.text,
@@ -78,8 +77,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   void _clearFailureOnEdit() {
-    if (ref.read(loginControllerProvider) is LoginFailed) {
-      ref.read(loginControllerProvider.notifier).reset();
+    if (ref.read(loginProvider) is LoginFailed) {
+      ref.read(loginProvider.notifier).reset();
     }
   }
 
@@ -87,11 +86,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final state = ref.watch(loginControllerProvider);
+    final state = ref.watch(loginProvider);
     final submitting = state is LoginSubmitting;
     final failure = state is LoginFailed ? state : null;
 
-    ref.listen<LoginState>(loginControllerProvider, (_, next) {
+    ref.listen<LoginState>(loginProvider, (_, next) {
       if (next is LoginSucceeded) {
         const HomeRoute().go(context);
       }
@@ -145,7 +144,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ValueListenableBuilder<TextEditingValue>(
                           valueListenable: _idCardController,
                           builder: (context, value, _) {
-                            return LoginTextField(
+                            return AppTextField(
                               controller: _idCardController,
                               labelText: '身份证号',
                               hintText: '请输入 18 位身份证号',
@@ -176,7 +175,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           },
                         ),
                         const SizedBox(height: 18),
-                        LoginTextField(
+                        AppTextField(
                           controller: _passwordController,
                           labelText: '密码',
                           hintText: '请输入登录密码',

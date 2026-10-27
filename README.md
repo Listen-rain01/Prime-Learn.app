@@ -34,12 +34,13 @@ flutter run --dart-define=API_BASE_URL=https://<domain>
 ```text
 lib/
 ├── app/                 # 装配：MaterialApp、路由、主题
-├── core/                # 基础设施：网络、协议、会话、日志
+├── core/                # 基础设施：网络、协议、会话、工具、通用组件
 │   ├── network/         # ApiClient、ApiException、超时与错误映射
 │   ├── protocol/        # EsdtCodec、PipeResponse
-│   ├── session/         # Session、SessionStore、会话失效识别
-│   ├── logging/         # 脱敏工具
-│   └── widgets/         # 跨 feature 通用视觉基元：InlineNotice、TonalBlock
+│   ├── session/         # Session、SessionStore、AccountMemory、会话失效识别
+│   ├── errors/          # UseCaseFailure
+│   ├── utils/           # Redactor、IdCardValidator
+│   └── widgets/         # AppTextField、PrimaryButton、InlineNotice、TonalBlock
 ├── features/            # 业务功能，一个功能一个目录
 │   ├── auth/            # 登录与会话（data / domain / application / presentation）
 │   └── tasks/           # 指挥台（今日任务待接入）
@@ -58,6 +59,10 @@ flutter test
 ```
 
 提交前必须通过 `dart format --set-exit-if-changed .`、`flutter analyze`、`flutter test`。
+
+`test/architecture/conventions_test.dart` 把约定变成测试：文件名 `lower_snake_case`、
+`core` 不依赖 `features`、`presentation`/`application` 不直接依赖 `data`、
+`domain` 不引入 Flutter/Dio/Riverpod、feature 目录名在约定集合内。
 
 ## UI 规格
 

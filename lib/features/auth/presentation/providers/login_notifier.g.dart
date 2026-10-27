@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'login_controller.dart';
+part of 'login_notifier.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -8,32 +8,32 @@ part of 'login_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// 登录页控制器：负责状态迁移，不碰网络细节。
+/// 登录页状态机：负责状态迁移，不碰网络细节。
 
-@ProviderFor(LoginController)
-final loginControllerProvider = LoginControllerProvider._();
+@ProviderFor(LoginNotifier)
+final loginProvider = LoginNotifierProvider._();
 
-/// 登录页控制器：负责状态迁移，不碰网络细节。
-final class LoginControllerProvider
-    extends $NotifierProvider<LoginController, LoginState> {
-  /// 登录页控制器：负责状态迁移，不碰网络细节。
-  LoginControllerProvider._()
+/// 登录页状态机：负责状态迁移，不碰网络细节。
+final class LoginNotifierProvider
+    extends $NotifierProvider<LoginNotifier, LoginState> {
+  /// 登录页状态机：负责状态迁移，不碰网络细节。
+  LoginNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'loginControllerProvider',
+        name: r'loginProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$loginControllerHash();
+  String debugGetCreateSourceHash() => _$loginNotifierHash();
 
   @$internal
   @override
-  LoginController create() => LoginController();
+  LoginNotifier create() => LoginNotifier();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(LoginState value) {
@@ -44,11 +44,11 @@ final class LoginControllerProvider
   }
 }
 
-String _$loginControllerHash() => r'ed7c1d8f199e39083e7026474c111d9295e94636';
+String _$loginNotifierHash() => r'631e2f9d005868787711431b8eeeb6fc5e68d94e';
 
-/// 登录页控制器：负责状态迁移，不碰网络细节。
+/// 登录页状态机：负责状态迁移，不碰网络细节。
 
-abstract class _$LoginController extends $Notifier<LoginState> {
+abstract class _$LoginNotifier extends $Notifier<LoginState> {
   LoginState build();
   @$mustCallSuper
   @override
