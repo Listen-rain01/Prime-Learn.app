@@ -31,5 +31,14 @@
 
 ## 待定：导航结构
 
-底部 Tab 的数量与命名**尚未确定**，因此暂不实现 `StatefulShellRoute`。
-在至少两个 Tab 有真实内容之前不搭 shell，避免空壳导航。
+## 导航结构
+
+已确定为 3 个 Tab（`StatefulShellRoute.indexedStack`，各分支保留导航栈）：
+
+| Tab | 路由 | 内容 |
+|---|---|---|
+| 今日 | `/` | 今日积分、每日任务、任务入口 |
+| 记录 | `/records` | 考试记录（手机/模拟/理论）、积分明细 |
+| 我的 | `/settings` | 账号与题库、积分规则、退出登录 |
+
+`/settings/rules` 为「我的」分支内的 push 页面。

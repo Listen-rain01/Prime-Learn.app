@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:primelearn/app/app_shell.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
-import 'package:primelearn/features/tasks/presentation/pages/home_page.dart';
+import 'package:primelearn/features/records/presentation/pages/records_page.dart';
+import 'package:primelearn/features/settings/presentation/pages/rules_page.dart';
+import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
+import 'package:primelearn/features/tasks/presentation/pages/today_page.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'router.g.dart';
 
-/// 登录路由。
+/// 登录路由（在 shell 之外）。
 @TypedGoRoute<LoginRoute>(path: '/login')
 class LoginRoute extends GoRouteData with $LoginRoute {
   /// 创建登录路由。
@@ -17,14 +21,95 @@ class LoginRoute extends GoRouteData with $LoginRoute {
   Widget build(BuildContext context, GoRouterState state) => const LoginPage();
 }
 
-/// 指挥台路由。
-@TypedGoRoute<HomeRoute>(path: '/')
-class HomeRoute extends GoRouteData with $HomeRoute {
-  /// 创建首页路由。
-  const HomeRoute();
+/// 三个 Tab 的 shell：今日 / 记录 / 我的。
+@TypedStatefulShellRoute<AppShellRouteData>(
+  branches: <TypedStatefulShellBranch<StatefulShellBranchData>>[
+    TypedStatefulShellBranch<TodayBranchData>(
+      routes: <TypedRoute<RouteData>>[TypedGoRoute<TodayRoute>(path: '/')],
+    ),
+    TypedStatefulShellBranch<RecordsBranchData>(
+      routes: <TypedRoute<RouteData>>[
+        TypedGoRoute<RecordsRoute>(path: '/records'),
+      ],
+    ),
+    TypedStatefulShellBranch<SettingsBranchData>(
+      routes: <TypedRoute<RouteData>>[
+        TypedGoRoute<SettingsRoute>(
+          path: '/settings',
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<RulesRoute>(path: 'rules'),
+          ],
+        ),
+      ],
+    ),
+  ],
+)
+class AppShellRouteData extends StatefulShellRouteData {
+  /// 创建 shell 路由。
+  const AppShellRouteData();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const HomePage();
+  Widget builder(
+    BuildContext context,
+    GoRouterState state,
+    StatefulNavigationShell navigationShell,
+  ) => AppShell(navigationShell: navigationShell);
+}
+
+/// 今日分支。
+class TodayBranchData extends StatefulShellBranchData {
+  /// 创建今日分支。
+  const TodayBranchData();
+}
+
+/// 记录分支。
+class RecordsBranchData extends StatefulShellBranchData {
+  /// 创建记录分支。
+  const RecordsBranchData();
+}
+
+/// 我的分支。
+class SettingsBranchData extends StatefulShellBranchData {
+  /// 创建我的分支。
+  const SettingsBranchData();
+}
+
+/// 今日 Tab。
+class TodayRoute extends GoRouteData with $TodayRoute {
+  /// 创建今日路由。
+  const TodayRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const TodayPage();
+}
+
+/// 记录 Tab。
+class RecordsRoute extends GoRouteData with $RecordsRoute {
+  /// 创建记录路由。
+  const RecordsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const RecordsPage();
+}
+
+/// 我的 Tab。
+class SettingsRoute extends GoRouteData with $SettingsRoute {
+  /// 创建我的路由。
+  const SettingsRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SettingsPage();
+}
+
+/// 积分规则页（在「我的」分支内 push）。
+class RulesRoute extends GoRouteData with $RulesRoute {
+  /// 创建规则路由。
+  const RulesRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const RulesPage();
 }
 
 /// 全局路由。

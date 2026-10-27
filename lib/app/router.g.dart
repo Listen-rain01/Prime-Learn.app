@@ -6,7 +6,7 @@ part of 'router.dart';
 // GoRouterGenerator
 // **************************************************************************
 
-List<RouteBase> get $appRoutes => [$loginRoute, $homeRoute];
+List<RouteBase> get $appRoutes => [$loginRoute, $appShellRouteData];
 
 RouteBase get $loginRoute => GoRouteData.$route(
   path: '/login',
@@ -34,17 +34,116 @@ mixin $LoginRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $homeRoute => GoRouteData.$route(
-  path: '/',
-  hasOverriddenOnExit: false,
-  factory: $HomeRoute._fromState,
+RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
+  factory: $AppShellRouteDataExtension._fromState,
+  branches: [
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/',
+          hasOverriddenOnExit: false,
+          factory: $TodayRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/records',
+          hasOverriddenOnExit: false,
+          factory: $RecordsRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
+          path: '/settings',
+          hasOverriddenOnExit: false,
+          factory: $SettingsRoute._fromState,
+          routes: [
+            GoRouteData.$route(
+              path: 'rules',
+              hasOverriddenOnExit: false,
+              factory: $RulesRoute._fromState,
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
 );
 
-mixin $HomeRoute on GoRouteData {
-  static HomeRoute _fromState(GoRouterState state) => const HomeRoute();
+extension $AppShellRouteDataExtension on AppShellRouteData {
+  static AppShellRouteData _fromState(GoRouterState state) =>
+      const AppShellRouteData();
+}
+
+mixin $TodayRoute on GoRouteData {
+  static TodayRoute _fromState(GoRouterState state) => const TodayRoute();
 
   @override
   String get location => GoRouteData.$location('/');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $RecordsRoute on GoRouteData {
+  static RecordsRoute _fromState(GoRouterState state) => const RecordsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/records');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SettingsRoute on GoRouteData {
+  static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $RulesRoute on GoRouteData {
+  static RulesRoute _fromState(GoRouterState state) => const RulesRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/rules');
 
   @override
   void go(BuildContext context) => context.go(location);

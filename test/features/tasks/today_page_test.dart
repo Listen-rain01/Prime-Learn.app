@@ -8,7 +8,7 @@ import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 import 'package:primelearn/features/tasks/domain/repositories/tasks_repository.dart';
-import 'package:primelearn/features/tasks/presentation/pages/home_page.dart';
+import 'package:primelearn/features/tasks/presentation/pages/today_page.dart';
 import 'package:primelearn/features/tasks/tasks_providers.dart';
 
 class _FakeTasksRepository implements TasksRepository {
@@ -72,7 +72,7 @@ Future<ProviderContainer> _pumpHome(
   await tester.pumpWidget(
     UncontrolledProviderScope(
       container: container,
-      child: const MaterialApp(home: HomePage()),
+      child: const MaterialApp(home: TodayPage()),
     ),
   );
   return container;

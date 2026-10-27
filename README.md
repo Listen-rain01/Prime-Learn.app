@@ -79,7 +79,7 @@ Remove-Item Env:PL_ID,Env:PL_PWD
 - 全部使用主题语义令牌，不硬编码颜色；主分组块为 `surfaceContainerLow` + 20dp 圆角、无阴影；
 - 通用组件：`core/widgets`（`AppTextField`、`PrimaryButton`、`InlineNotice`、`TonalBlock`）；
 - 错误提示：就近内联（字段 `errorText` + 操作按钮上方 `InlineNotice`），不使用 SnackBar；
-- 导航：底部 Tab 数量与命名未定，暂不实现 shell。
+- 导航：3 Tab（今日 / 记录 / 我的），`StatefulShellRoute.indexedStack`。
 
 ## 协议与证据等级
 
@@ -100,10 +100,13 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] `core/network`：Dio + CookieJar、超时、错误映射、会话失效识别
 - [x] `features/auth`：登录全链路（预建会话 → 登录 → 校验会话/取题库）
 - [x] 登录页（Material 3 seed 蓝、FlutterLogo、字段内联校验）、类型化路由、登录态守卫
-- [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，真实环境验证通过）、首页（积分块 + 每日任务分组 + 加载/错误/空态）、会话失效清理
-- [ ] 底部导航结构（Tab 数量/命名待定，暂不实现）
-- [ ] 手机考试 / 模拟考试（需先完成协议取证）
-- [ ] 签到 / 阅读学习
+- [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，真实环境验证通过）、今日页（积分块 + 每日任务分组 + 加载/错误/空态）、会话失效清理
+- [x] 3 Tab shell（今日 / 记录 / 我的，`StatefulShellRoute.indexedStack`）
+- [x] `features/records`：考试记录（手机/模拟/理论，`GetMyExamListOne`）+ 积分明细（`GetMyAccumulateListOne`），真实环境验证通过
+- [x] `features/settings`：账号与题库、积分规则（`MyRule` HTML→文本）、退出登录
+- [ ] 排名与学习统计（`GetMarkRankingList` 等）
+- [ ] 手机考试 / 模拟考试流程（写操作需先完成协议取证 + 写网关）
+- [ ] 签到 / 阅读学习（同上）
 - [ ] 执行记录与审计日志
 
 ## 免责声明

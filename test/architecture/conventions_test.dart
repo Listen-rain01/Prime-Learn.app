@@ -119,6 +119,7 @@ void main() {
     const allowed = {
       'auth',
       'tasks',
+      'records',
       'exam',
       'reading',
       'stats',

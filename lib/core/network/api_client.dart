@@ -13,6 +13,9 @@ part 'api_client.g.dart';
 /// 全流程复用同一 Cookie 容器（`ASP.NET_SessionId`），
 /// 并把 Dio 异常映射为 [ApiException]，UI 不再接触原始异常。
 class ApiClient {
+  /// 跳过登录页检测的请求标记（HTML 类接口使用）。
+  static const String _skipSessionCheckKey = 'skipSessionCheck';
+
   /// 创建客户端，可注入 Dio / CookieJar 便于测试。
   ApiClient({Dio? dio, CookieJar? cookieJar})
     : _cookieJar = cookieJar ?? CookieJar(),
@@ -65,9 +68,17 @@ class ApiClient {
   /// `path` 可自带**已编码**的 query：Esdt 参数本身就是转义后的字符串
   /// （含 `%5E`、`%2C`），若交给 `queryParameters` 会被 `%` 再编码一次，
   /// 平台将收到错误参数，因此这里直接传完整路径。
-  Future<String> getRaw(String path) async {
+  ///
+  /// [expectHtml] 为 true 时跳过「登录页 HTML → 会话失效」判断：
+  /// 积分规则、文章详情等接口本来就返回 HTML，不能当会话失效。
+  Future<String> getRaw(String path, {bool expectHtml = false}) async {
     try {
-      final response = await _dio.get<String>(path);
+      final response = await _dio.get<String>(
+        path,
+        options: expectHtml
+            ? Options(extra: const {_skipSessionCheckKey: true})
+            : null,
+      );
       return response.data ?? '';
     } on DioException catch (error) {
       throw _toApiException(error);
@@ -81,6 +92,10 @@ class ApiClient {
     Response<dynamic> response,
     ResponseInterceptorHandler handler,
   ) {
+    if (response.requestOptions.extra[_skipSessionCheckKey] == true) {
+      handler.next(response);
+      return;
+    }
     final contentType = response.headers.value(Headers.contentTypeHeader);
     final body = response.data is String ? response.data as String : null;
     if (!SessionDetector.looksLikeLoginPage(contentType, body)) {

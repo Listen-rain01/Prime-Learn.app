@@ -1,25 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:primelearn/app/router.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
-import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
-import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
 import 'package:primelearn/features/tasks/domain/entities/task_board.dart';
 import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_points_header.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_task_row.dart';
 
-/// 首页：今日积分、当前题库与每日任务。
-class HomePage extends ConsumerWidget {
-  /// 创建首页。
-  const HomePage({super.key});
+/// 今日 Tab：今日积分、当前题库与每日任务。
+class TodayPage extends ConsumerWidget {
+  /// 创建今日页。
+  const TodayPage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
     final session = ref.watch(sessionStoreProvider);
     final board = ref.watch(dailyBoardProvider);
 
@@ -49,28 +44,6 @@ class HomePage extends ConsumerWidget {
               child: _TasksSection(
                 board: board,
                 onRetry: () => ref.invalidate(dailyBoardProvider),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TonalBlock(
-              padding: EdgeInsets.zero,
-              child: SizedBox(
-                height: 56,
-                width: double.infinity,
-                child: TextButton(
-                  onPressed: () async {
-                    await ref.read(apiClientProvider).clearCookies();
-                    ref.read(sessionStoreProvider.notifier).clear();
-                    ref.read(loginProvider.notifier).reset();
-                    if (context.mounted) {
-                      const LoginRoute().go(context);
-                    }
-                  },
-                  child: Text(
-                    '退出登录',
-                    style: textTheme.labelLarge?.copyWith(color: scheme.error),
-                  ),
-                ),
               ),
             ),
           ],

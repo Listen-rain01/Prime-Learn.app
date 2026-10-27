@@ -283,7 +283,7 @@ class RunMobileExam {
 
 ### 3.7 命名与目录规则
 
-- feature 目录用业务名：`auth`、`tasks`、`exam`、`reading`、`stats`、`settings`、`agent`；
+- feature 目录用业务名：`auth`、`tasks`、`records`、`exam`、`reading`、`stats`、`settings`、`agent`；
 - 页面统一 `xxx_page.dart` / `XxxPage`，不要 `screens/`、`_screen.dart`；
 - 用例 `xxx_usecase.dart` / `XxxUseCase`；
 - Repository 接口 `xxx_repository.dart`，实现 `xxx_repository_impl.dart`；
@@ -508,16 +508,20 @@ class AgentEngine extends _$AgentEngine {
 
 ## 6. 路由
 
+三个 Tab（`StatefulShellRoute.indexedStack` 承载，各自保留导航栈）：
+
 ```text
-/login      登录
-/           指挥台
-/run        执行中
-/result     结果
-/records    记录
-/settings   设置
+/login          登录（shell 之外）
+/               今日（Tab 1）：今日积分、每日任务、任务入口
+/records        记录（Tab 2）：考试记录、积分明细（只读）
+/settings       我的（Tab 3）：账号、题库、积分规则、退出登录
+/settings/rules 积分规则（「我的」分支内 push）
+/run            执行中（push，暂未实现）
+/result         结果（push，暂未实现）
 ```
 
-- 使用 `@TypedGoRoute` + `GoRouteData`，禁止字符串路由；
+- 使用 `@TypedGoRoute` + `GoRouteData`，禁止字符串路由；shell 用 `@TypedStatefulShellRoute`；
+- Tab 顺序：今日 / 记录 / 我的；新增 Tab 需先改本节与 `lib/app/app_shell.dart`；
 - 执行中离开需二次确认；
 - 深链只开放 `/` 与 `/records`；
 - 会话失效统一跳 `/login`，登录后回原页。

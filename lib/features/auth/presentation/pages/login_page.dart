@@ -92,7 +92,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     ref.listen<LoginState>(loginProvider, (_, next) {
       if (next is LoginSucceeded) {
-        const HomeRoute().go(context);
+        const TodayRoute().go(context);
       }
     });
 

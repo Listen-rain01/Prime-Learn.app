@@ -21,7 +21,7 @@ final class DailyBoardNotifierProvider
     : super(
         from: null,
         argument: null,
-        retry: null,
+        retry: noProviderRetry,
         name: r'dailyBoardProvider',
         isAutoDispose: true,
         dependencies: null,
@@ -37,7 +37,7 @@ final class DailyBoardNotifierProvider
 }
 
 String _$dailyBoardNotifierHash() =>
-    r'b3e5da8dbe57633482756a95c897191ce5842612';
+    r'e02db01d9235d0206e387c5f7359a04a51f8903d';
 
 /// 今日任务看板状态：登录态变化时自动重新加载。
 

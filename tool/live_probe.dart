@@ -17,6 +17,7 @@ import 'package:primelearn/features/auth/data/parsers/exam_context_parser.dart';
 import 'package:primelearn/features/auth/data/parsers/login_response_parser.dart';
 import 'package:primelearn/features/tasks/data/parsers/daily_tasks_parser.dart';
 import 'package:primelearn/features/tasks/data/services/tasks_api.dart';
+import 'package:primelearn/features/settings/data/parsers/rules_html_parser.dart';
 
 Future<void> main() async {
   final id = Platform.environment['PL_ID'] ?? '';
@@ -70,6 +71,19 @@ Future<void> main() async {
     if (Platform.environment['PL_DUMP'] == '1') {
       stdout.writeln('--- redacted raw ---');
       stdout.writeln(_redact(raw));
+    }
+
+    // 积分规则页（HTML）：用于核对设置页数据源；HTML 接口需跳过登录页检测。
+    final rulesHtml = await client
+        .getRaw('/PersonWap/MyRule?pid=${login.userId}', expectHtml: true)
+        .timeout(const Duration(seconds: 20));
+    final rulesText = const RulesHtmlParser().parse(rulesHtml);
+    stdout.writeln(
+      '[5/5] 积分规则 OK：HTML ${rulesHtml.length} 字符 → 文本 '
+      '${rulesText.length} 字符',
+    );
+    if (Platform.environment['PL_DUMP'] == '1') {
+      stdout.writeln(_redact(rulesText).substring(0, 300));
     }
   } on Object catch (error) {
     stderr.writeln('FAILED: ${error.runtimeType}: $error');
