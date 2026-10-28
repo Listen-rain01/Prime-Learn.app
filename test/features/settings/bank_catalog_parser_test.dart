@@ -28,16 +28,19 @@ void main() {
     expect(styles.single.level, 3);
   });
 
-  test('解析题库列表', () {
+  test('解析题库列表与题型统计', () {
     final options = optionParser.parse('''
 {"success": true, "data": [
-  {"ExamTypeId": "3c3e249a-0000-0000-0000-000000000001", "ExamTypeName": "刑法修正案十一", "QuestionCount": 20, "StateName": "正常"}
+  {"ExamTypeId": "3c3e249a-0000-0000-0000-000000000001", "ExamTypeName": "刑法修正案十一", "QuestionCount": 20, "StateName": "正常", "OneQuestionCount": 9, "MoreQuestionCount": 4, "CheckQuestionCount": 7}
 ]}''');
 
     expect(options.single.id, '3c3e249a-0000-0000-0000-000000000001');
     expect(options.single.name, '刑法修正案十一');
     expect(options.single.questionCount, 20);
     expect(options.single.stateName, '正常');
+    expect(options.single.singleCount, 9);
+    expect(options.single.multipleCount, 4);
+    expect(options.single.judgeCount, 7);
   });
 
   test('success=false 透传服务端文案', () {

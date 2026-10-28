@@ -38,6 +38,9 @@ class BankOptionParser {
     name: _asText(json['ExamTypeName']),
     questionCount: _asInt(json['QuestionCount']),
     stateName: _asText(json['StateName']),
+    singleCount: _asInt(json['OneQuestionCount']),
+    multipleCount: _asInt(json['MoreQuestionCount']),
+    judgeCount: _asInt(json['CheckQuestionCount']),
   );
 }
 

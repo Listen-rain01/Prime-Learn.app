@@ -15,6 +15,9 @@ const _preset = BankPreset(
   bankId: 'bank-2',
   bankName: '目标题库',
   questionCount: 20,
+  singleCount: 9,
+  multipleCount: 4,
+  judgeCount: 7,
 );
 
 void main() {
@@ -79,5 +82,11 @@ void main() {
             as BankPreset;
     expect(saved.paperCount, 1);
     expect(saved.questionCount, _preset.questionCount);
+    expect(saved.singleCount, _preset.singleCount);
+    expect(saved.multipleCount, _preset.multipleCount);
+    expect(saved.judgeCount, _preset.judgeCount);
+    expect(saved.paperName, '试卷 A');
+    expect(saved.paperTotalScore, 100);
+    expect(saved.paperPassingGrade, 80);
   });
 }

@@ -380,6 +380,9 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           bankId: bank.id,
           bankName: bank.name,
           questionCount: bank.questionCount,
+          singleCount: bank.singleCount,
+          multipleCount: bank.multipleCount,
+          judgeCount: bank.judgeCount,
         ),
       );
       ref.invalidate(bankPresetProvider);
@@ -726,6 +729,14 @@ class _BankDetailsCard extends ConsumerWidget {
               styleName,
               if (year.isNotEmpty) '$year 年',
             ].where((part) => part.isNotEmpty).join(' / '),
+            style: textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '总题数 ${bank.questionCount} · 单选 ${bank.singleCount}'
+            ' · 多选 ${bank.multipleCount} · 判断 ${bank.judgeCount}',
             style: textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),

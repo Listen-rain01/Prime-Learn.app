@@ -25,12 +25,20 @@ class SaveBankPreset {
       if (papers.isEmpty) {
         throw const UseCaseFailure('该题库没有可开考试卷，无法用于考试');
       }
+      // 只有一份试卷时把试卷信息一并存快照，便于卡片展示；多份时不猜默认。
+      final singlePaper = papers.length == 1 ? papers.first : null;
       await _presetRepository.save(
         BankPreset(
           bankId: preset.bankId,
           bankName: preset.bankName,
           questionCount: preset.questionCount,
           paperCount: papers.length,
+          singleCount: preset.singleCount,
+          multipleCount: preset.multipleCount,
+          judgeCount: preset.judgeCount,
+          paperName: singlePaper?.name,
+          paperTotalScore: singlePaper?.totalScore,
+          paperPassingGrade: singlePaper?.passingGrade,
         ),
       );
     } on UseCaseFailure {

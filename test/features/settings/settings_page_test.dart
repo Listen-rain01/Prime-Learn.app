@@ -89,8 +89,10 @@ void main() {
     expect(find.text('13812345678'), findsNothing);
     expect(find.text('家庭地址'), findsOneWidget);
     expect(find.text('题库预设'), findsOneWidget);
+    expect(find.text('当前题库'), findsOneWidget);
+    expect(find.text('目标题库'), findsOneWidget);
     expect(find.text('点击选择目标题库'), findsOneWidget);
-    expect(find.text('未设置'), findsOneWidget);
+    expect(find.text('未设置'), findsNWidgets(2));
     expect(find.text('设置'), findsNothing);
     expect(find.text('退出登录'), findsOneWidget);
   });

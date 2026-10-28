@@ -52,6 +52,9 @@ class BankOption {
     required this.name,
     required this.questionCount,
     required this.stateName,
+    this.singleCount = 0,
+    this.multipleCount = 0,
+    this.judgeCount = 0,
   });
 
   /// 题库 ID（`ExamTypeId`）。
@@ -60,11 +63,20 @@ class BankOption {
   /// 题库名称。
   final String name;
 
-  /// 题目数量。
+  /// 题目总数。
   final int questionCount;
 
   /// 状态，如「正常」。
   final String stateName;
+
+  /// 单选题数（`OneQuestionCount`）。
+  final int singleCount;
+
+  /// 多选题数（`MoreQuestionCount`）。
+  final int multipleCount;
+
+  /// 判断题数（`CheckQuestionCount`）。
+  final int judgeCount;
 }
 
 /// 预设置的题库。
@@ -75,6 +87,12 @@ class BankPreset {
     required this.bankName,
     this.questionCount,
     this.paperCount,
+    this.singleCount,
+    this.multipleCount,
+    this.judgeCount,
+    this.paperName,
+    this.paperTotalScore,
+    this.paperPassingGrade,
   });
 
   /// 题库 ID。
@@ -88,4 +106,18 @@ class BankPreset {
 
   /// 保存时的可考试卷数快照（旧预设可能为 null）。
   final int? paperCount;
+
+  /// 单选题数快照。
+  final int? singleCount;
+
+  /// 多选题数快照。
+  final int? multipleCount;
+
+  /// 判断题数快照。
+  final int? judgeCount;
+
+  /// 仅有一份试卷时保存试卷名/总分/及格分，便于卡片展示。
+  final String? paperName;
+  final double? paperTotalScore;
+  final double? paperPassingGrade;
 }

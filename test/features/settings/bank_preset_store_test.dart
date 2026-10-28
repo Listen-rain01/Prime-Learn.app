@@ -17,6 +17,12 @@ void main() {
         bankName: '刑法修正案十一',
         questionCount: 20,
         paperCount: 1,
+        singleCount: 9,
+        multipleCount: 4,
+        judgeCount: 7,
+        paperName: '日常练习',
+        paperTotalScore: 100,
+        paperPassingGrade: 80,
       ),
     );
 
@@ -25,6 +31,12 @@ void main() {
     expect(preset?.bankName, '刑法修正案十一');
     expect(preset?.questionCount, 20);
     expect(preset?.paperCount, 1);
+    expect(preset?.singleCount, 9);
+    expect(preset?.multipleCount, 4);
+    expect(preset?.judgeCount, 7);
+    expect(preset?.paperName, '日常练习');
+    expect(preset?.paperTotalScore, 100);
+    expect(preset?.paperPassingGrade, 80);
 
     await store.clear();
     expect(store.read(), isNull);

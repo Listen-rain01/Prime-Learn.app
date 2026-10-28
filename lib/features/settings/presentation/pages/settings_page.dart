@@ -153,7 +153,8 @@ class _PresetEntryCard extends StatelessWidget {
     final value = preset;
     final aligned =
         value != null && currentBankId != null && value.bankId == currentBankId;
-    final meta = _metaOf(value);
+    final typeMeta = _typeMeta(value);
+    final paperMeta = _paperMeta(value);
 
     final (statusLabel, statusBackground, statusForeground) = switch (value) {
       null => ('未设置', scheme.surfaceContainerHigh, scheme.onSurfaceVariant),
@@ -174,107 +175,87 @@ class _PresetEntryCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 12, 14),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: scheme.primaryContainer,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.library_books_outlined,
-                    size: 20,
-                    color: scheme.onPrimaryContainer,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            '题库预设',
-                            style: textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: scheme.onSurface,
-                            ),
-                          ),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusBackground,
-                              borderRadius: BorderRadius.circular(999),
-                            ),
-                            child: Text(
-                              statusLabel,
-                              style: textTheme.labelSmall?.copyWith(
-                                color: statusForeground,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ],
+                Row(
+                  children: [
+                    Text(
+                      '题库预设',
+                      style: textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: scheme.onSurface,
                       ),
-                      const SizedBox(height: 8),
-                      if (value == null)
-                        Text(
-                          '点击选择目标题库',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        )
-                      else if (aligned)
-                        _BankText(
-                          name: value.bankName,
-                          meta: meta,
-                          highlight: true,
-                        )
-                      else
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: _BankText(
-                                label: '当前',
-                                name: currentBankName.isEmpty
-                                    ? '未知'
-                                    : currentBankName,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 14),
-                              child: Icon(
-                                Icons.arrow_forward,
-                                size: 16,
-                                color: scheme.primary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 2,
-                              child: _BankText(
-                                label: '目标',
-                                name: value.bankName,
-                                meta: meta,
-                                highlight: true,
-                              ),
-                            ),
-                          ],
+                    ),
+                    const Spacer(),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: statusBackground,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: Text(
+                        statusLabel,
+                        style: textTheme.labelSmall?.copyWith(
+                          color: statusForeground,
+                          fontWeight: FontWeight.w600,
                         ),
-                    ],
-                  ),
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(Icons.chevron_right, color: scheme.outlineVariant),
+                  ],
                 ),
-                const SizedBox(width: 4),
-                Icon(Icons.chevron_right, color: scheme.outlineVariant),
+                const SizedBox(height: 10),
+                _LabeledValue(
+                  label: '当前题库',
+                  value: currentBankName.isEmpty ? '未知' : currentBankName,
+                ),
+                const SizedBox(height: 6),
+                _LabeledValue(
+                  label: '目标题库',
+                  value: value?.bankName ?? '未设置',
+                  highlight: value != null,
+                ),
+                if (value != null && typeMeta != null) ...[
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 76),
+                    child: Text(
+                      typeMeta,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+                if (value != null && paperMeta != null) ...[
+                  const SizedBox(height: 2),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 76),
+                    child: Text(
+                      paperMeta,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
+                if (value == null) ...[
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 76),
+                    child: Text(
+                      '点击选择目标题库',
+                      style: textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -283,64 +264,77 @@ class _PresetEntryCard extends StatelessWidget {
     );
   }
 
-  String? _metaOf(BankPreset? value) {
+  String? _typeMeta(BankPreset? value) {
     if (value == null) return null;
     final parts = <String>[
-      if (value.questionCount != null) '${value.questionCount} 题',
-      if (value.paperCount != null) '${value.paperCount} 份试卷',
+      if (value.questionCount != null) '总题数 ${value.questionCount}',
+      if (value.singleCount != null) '单选 ${value.singleCount}',
+      if (value.multipleCount != null) '多选 ${value.multipleCount}',
+      if (value.judgeCount != null) '判断 ${value.judgeCount}',
     ];
     return parts.isEmpty ? null : parts.join(' · ');
   }
+
+  String? _paperMeta(BankPreset? value) {
+    if (value == null || value.paperCount == null) return null;
+    final parts = <String>['可考试卷 ${value.paperCount} 份'];
+    final name = value.paperName;
+    if (name != null && name.isNotEmpty) {
+      final total = value.paperTotalScore;
+      final pass = value.paperPassingGrade;
+      final score = total != null && pass != null
+          ? '（${_score(total)} 分 / 及格 ${_score(pass)}）'
+          : '';
+      parts.add('$name$score');
+    }
+    return parts.join(' · ');
+  }
+
+  String _score(double value) => value == value.roundToDouble()
+      ? value.round().toString()
+      : value.toStringAsFixed(1);
 }
 
-/// 卡片里的题库名称（可选标签、元信息）。
-class _BankText extends StatelessWidget {
-  const _BankText({
-    required this.name,
-    this.label,
-    this.meta,
+/// 卡片里的「标签 + 值」行。
+class _LabeledValue extends StatelessWidget {
+  const _LabeledValue({
+    required this.label,
+    required this.value,
     this.highlight = false,
   });
 
-  final String name;
-  final String? label;
-  final String? meta;
+  final String label;
+  final String value;
   final bool highlight;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-
-    return Column(
+    return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (label != null)
-          Text(
-            label!,
-            style: textTheme.labelSmall?.copyWith(
+        SizedBox(
+          width: 64,
+          child: Text(
+            label,
+            style: textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,
             ),
           ),
-        Text(
-          name,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: textTheme.bodyMedium?.copyWith(
-            color: scheme.onSurface,
-            fontWeight: highlight ? FontWeight.w600 : FontWeight.w400,
-          ),
         ),
-        if (meta != null)
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              meta!,
-              style: textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            value,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurface,
+              fontWeight: highlight ? FontWeight.w600 : FontWeight.w400,
             ),
           ),
+        ),
       ],
     );
   }
