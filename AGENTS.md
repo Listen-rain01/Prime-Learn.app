@@ -105,7 +105,7 @@ mocktail
 ```text
 lib/
 ├── app/          # 装配：MaterialApp、路由、主题
-├── core/         # 基础设施：网络、协议、会话、日志
+├── core/         # 基础设施：网络、协议、会话、证据、日志
 ├── features/     # 业务功能，一个功能一个目录
 └── main.dart
 ```
@@ -118,6 +118,7 @@ lib/
 | `core/protocol` | 平台协议编解码 | `EsdtCodec`、`SettleCrypto`、`PipeResponse` |
 | `core/session` | 登录态、会话失效、账号记忆 | `SessionStore`、`AccountMemory` |
 | `core/errors` | 跨层错误分类 | `UseCaseFailure` |
+| `core/evidence` | 写入许可证：按证据级别拦截真实写操作（§8.8.1） | `WriteGateway`、`WriteLevel`、`WriteEvidence`、`WriteBlocked` |
 | `core/logging` | 执行记录、诊断日志 | `RunLogStore` |
 | `core/utils` | 纯工具 | `Redactor`、`IdCardValidator`、时间格式化 |
 | `core/widgets` | 跨 feature 的通用视觉基元（不含业务语义） | `InlineNotice`、`TonalBlock`、`StatusLabel` |
@@ -689,7 +690,7 @@ GET  /ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne   { pid, zsid: Esdt }
 
 - PR 中的“取证计划”只能支持开发许可，**不能授予运行许可**；
 - 运行时必须检查证据级别，`observed`/`assumed`/`revalidating` 一律阻断写操作；
-- 检查必须放在**统一写网关**（Repository 写方法/`WriteGateway`），而不是只在 UI 或 AgentEngine 启动时查一次；
+- 检查必须放在**统一写网关**（Repository 写方法/`WriteGateway`，实现见 `lib/core/evidence/`），而不是只在 UI 或 AgentEngine 启动时查一次；
 - 每次写请求前重新解析证据状态（接口 + 行为 + 上下文 + 当前级别），拒绝时抛 `WriteBlocked`，**不得发出 HTTP**；
 - 证据状态与 `revalidating` 必须持久化；应用重启后仍然阻断，直到独立评审完成；
 - 只有独立评审完成升级后，才允许打开功能开关。
