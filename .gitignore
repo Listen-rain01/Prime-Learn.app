@@ -49,3 +49,6 @@ app.*.map.json
 
 # 本地发布产物
 /dist/
+
+# 本地代理探针产物
+/.workbuddy/

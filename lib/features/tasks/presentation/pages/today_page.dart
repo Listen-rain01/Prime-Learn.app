@@ -12,6 +12,7 @@ import 'package:primelearn/features/reading/reading_providers.dart';
 import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 import 'package:primelearn/features/tasks/domain/entities/task_board.dart';
 import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
+import 'package:primelearn/features/tasks/presentation/widgets/auto_run_sheet.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_points_header.dart';
 import 'package:primelearn/features/tasks/presentation/widgets/daily_task_row.dart';
 
@@ -43,6 +44,15 @@ class TodayPage extends ConsumerWidget {
                 userName: session?.userName ?? '未登录',
                 bankName: session?.bankName ?? '未设置',
                 points: board.value?.currentPoints,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: () => showAutoRunSheet(context),
+                icon: const Icon(Icons.bolt),
+                label: const Text('一键完成今日任务'),
               ),
             ),
             const SizedBox(height: 16),
