@@ -51,6 +51,7 @@ class ExamPageParser {
       questions: questions,
       examTypeName: _asText(vData['ExamTypeName']),
       totalCount: _asInt(vData['AllCount']),
+      publicKeyXml: _asText(vData['my']),
     );
   }
 

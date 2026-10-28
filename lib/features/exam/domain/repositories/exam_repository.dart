@@ -31,4 +31,11 @@ abstract interface class ExamRepository {
 
   /// 模拟考试结算。
   Future<ExamResult> settleMock(String ksmxid);
+
+  /// 手机考试结算（加密参数）。
+  Future<ExamResult> settleMobile({
+    required String ksmxid,
+    required String mxid2,
+    required String mxid3,
+  });
 }

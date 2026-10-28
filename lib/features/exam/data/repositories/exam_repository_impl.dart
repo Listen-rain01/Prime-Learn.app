@@ -75,8 +75,19 @@ class ExamRepositoryImpl implements ExamRepository {
   }
 
   @override
-  Future<ExamResult> settleMock(String ksmxid) async {
-    final body = await _api.settleMock(ksmxid);
+  Future<ExamResult> settleMock(String ksmxid) async =>
+      _parseSettle(await _api.settleMock(ksmxid));
+
+  @override
+  Future<ExamResult> settleMobile({
+    required String ksmxid,
+    required String mxid2,
+    required String mxid3,
+  }) async => _parseSettle(
+    await _api.settleMobile(ksmxid: ksmxid, mxid2: mxid2, mxid3: mxid3),
+  );
+
+  ExamResult _parseSettle(String body) {
     if (body.trim().isEmpty) {
       throw const ApiException(kind: ApiErrorKind.protocol, message: '结算返回空响应');
     }

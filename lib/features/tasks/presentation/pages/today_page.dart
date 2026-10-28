@@ -6,7 +6,8 @@ import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/checkin/presentation/widgets/check_in_card.dart';
-import 'package:primelearn/features/exam/presentation/widgets/mock_exam_sheet.dart';
+import 'package:primelearn/features/exam/application/run_exam.dart';
+import 'package:primelearn/features/exam/presentation/widgets/exam_sheet.dart';
 import 'package:primelearn/features/reading/reading_providers.dart';
 import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 import 'package:primelearn/features/tasks/domain/entities/task_board.dart';
@@ -66,7 +67,9 @@ class TodayPage extends ConsumerWidget {
                       !task.isCompleted) {
                     _openReadingSheet(context, ref);
                   } else if (task.criterion == Criterion.mockExam) {
-                    showMockExamSheet(context);
+                    showExamSheet(context, kind: ExamKind.mock);
+                  } else if (task.criterion == Criterion.mobileExam) {
+                    showExamSheet(context, kind: ExamKind.mobile);
                   }
                 },
               ),
@@ -361,7 +364,8 @@ class _TasksData extends StatelessWidget {
               onTap:
                   task.criterion == Criterion.studyKnowledge &&
                           !task.isCompleted ||
-                      task.criterion == Criterion.mockExam
+                      task.criterion == Criterion.mockExam ||
+                      task.criterion == Criterion.mobileExam
                   ? () => onTaskTap(task)
                   : null,
             ),

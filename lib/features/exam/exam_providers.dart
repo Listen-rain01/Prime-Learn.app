@@ -2,7 +2,7 @@ import 'package:primelearn/core/errors/no_retry.dart';
 import 'package:primelearn/core/evidence/write_gateway.dart';
 import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/session/session_store.dart';
-import 'package:primelearn/features/exam/application/run_mock_exam.dart';
+import 'package:primelearn/features/exam/application/run_exam.dart';
 import 'package:primelearn/features/exam/data/repositories/exam_repository_impl.dart';
 import 'package:primelearn/features/exam/data/services/exam_api.dart';
 import 'package:primelearn/features/exam/domain/entities/exam_paper.dart';
@@ -35,9 +35,7 @@ Future<List<ExamPaper>> examPapers(Ref ref, String bankId) async {
 Future<int> bankPaperCount(Ref ref, String bankId) async =>
     (await ref.watch(examPapersProvider(bankId).future)).length;
 
-/// 模拟考试执行用例。
+/// 考试执行用例（模拟/手机）。
 @Riverpod(keepAlive: true, retry: noProviderRetry)
-RunMockExam runMockExam(Ref ref) => RunMockExam(
-  ref.watch(examRepositoryProvider),
-  ref.watch(writeGatewayProvider),
-);
+RunExam runExam(Ref ref) =>
+    RunExam(ref.watch(examRepositoryProvider), ref.watch(writeGatewayProvider));

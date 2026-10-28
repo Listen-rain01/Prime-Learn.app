@@ -262,48 +262,48 @@ final class BankPaperCountFamily extends $Family
   String toString() => r'bankPaperCountProvider';
 }
 
-/// 模拟考试执行用例。
+/// 考试执行用例（模拟/手机）。
 
-@ProviderFor(runMockExam)
-final runMockExamProvider = RunMockExamProvider._();
+@ProviderFor(runExam)
+final runExamProvider = RunExamProvider._();
 
-/// 模拟考试执行用例。
+/// 考试执行用例（模拟/手机）。
 
-final class RunMockExamProvider
-    extends $FunctionalProvider<RunMockExam, RunMockExam, RunMockExam>
-    with $Provider<RunMockExam> {
-  /// 模拟考试执行用例。
-  RunMockExamProvider._()
+final class RunExamProvider
+    extends $FunctionalProvider<RunExam, RunExam, RunExam>
+    with $Provider<RunExam> {
+  /// 考试执行用例（模拟/手机）。
+  RunExamProvider._()
     : super(
         from: null,
         argument: null,
         retry: noProviderRetry,
-        name: r'runMockExamProvider',
+        name: r'runExamProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$runMockExamHash();
+  String debugGetCreateSourceHash() => _$runExamHash();
 
   @$internal
   @override
-  $ProviderElement<RunMockExam> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<RunExam> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  RunMockExam create(Ref ref) {
-    return runMockExam(ref);
+  RunExam create(Ref ref) {
+    return runExam(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(RunMockExam value) {
+  Override overrideWithValue(RunExam value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<RunMockExam>(value),
+      providerOverride: $SyncValueProvider<RunExam>(value),
     );
   }
 }
 
-String _$runMockExamHash() => r'dec50ae9a398314845a31d23871f1ad64dd9470c';
+String _$runExamHash() => r'2a1d596fff32c0a1b252eeca9b1925b0c5795b03';

@@ -38,6 +38,7 @@ class ExamPageData {
     required this.questions,
     required this.examTypeName,
     this.totalCount = 0,
+    this.publicKeyXml = '',
   });
 
   /// 题目列表。
@@ -48,6 +49,9 @@ class ExamPageData {
 
   /// 题目总数（vData.AllCount）。
   final int totalCount;
+
+  /// 手机考试结算使用的 RSA 公钥（vData.my）。
+  final String publicKeyXml;
 }
 
 /// 考试结算结果。

@@ -18,6 +18,8 @@ class WriteEvidence {
   ///   仍不可运行。
   /// - 题库切换：文档有真实环境记录，但本客户端尚未实测，保持 `observed`
   ///   → 运行时会被写网关拦截，待真实切换验证后再升级。
+  /// - 手机考试（type=2 / style=0）：账号持有人授权真实验证；结算使用
+  ///   `CEndTimeOne` 的 AES-128-ECB + RSA PKCS#1 v1.5 加密。
   factory WriteEvidence.defaults() => const WriteEvidence({
     '/ArchiveManger/D_PersonAccumulate/CheckInOne': WriteLevel.verified,
     '/ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne': WriteLevel.verified,
@@ -25,6 +27,7 @@ class WriteEvidence {
     '/P_ExamDetail/SetOnlineTestOne': WriteLevel.verified,
     '/Home/DoWriteAnswerAll': WriteLevel.verified,
     '/Home/CEndTimeMobil': WriteLevel.verified,
+    '/Home/CEndTimeOne': WriteLevel.verified,
     '/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne': WriteLevel.observed,
   });
 

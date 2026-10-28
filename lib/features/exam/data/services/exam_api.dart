@@ -71,4 +71,15 @@ class ExamApi {
     settleMockEndpoint,
     {'ksmxid': ksmxid, 'mxid2': '', 'mxid3': ''},
   );
+
+  /// 手机考试结算（需加密参数）。
+  Future<String> settleMobile({
+    required String ksmxid,
+    required String mxid2,
+    required String mxid3,
+  }) => _client.postForm(settleMobileEndpoint, {
+    'ksmxid': ksmxid,
+    'mxid2': mxid2,
+    'mxid3': mxid3,
+  });
 }

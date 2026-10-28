@@ -11,7 +11,7 @@
 | `/Home/CreateTempExamOne` | 模拟考试 type=1 创建 | verified | 2026-10-28 | 账号持有人授权 + 实测 | 文档 2026-10-27 两场 100 分；2026-10-28 客户端真实跑通（创建→进入→取题→提交→结算，100 分合格）；仅放行 type=1 | 未单独落盘 | 平台版本变更 / type 口径变更 |
 | `/P_ExamDetail/SetOnlineTestOne` | 进入模拟考试 style=1 | verified | 2026-10-28 | 账号持有人授权 + 实测 | 2026-10-28 客户端真实跑通模拟考试全链路 | 未单独落盘 | 平台版本变更 |
 | `/Home/DoWriteAnswerAll` | 模拟考试提交答案 | verified | 2026-10-28 | 账号持有人授权 + 实测 | 2026-10-28 客户端真实提交成功；响应为非标准 JSON（键未加引号） | 未单独落盘 | 平台版本变更 / 拼接规则变更 |
-| `/Home/CEndTimeOne` | 加密结算 | observed | 2026-10-27 | 待指定 | 真实环境实测（100 分） | `docs/api/samples/settle-encrypted/` | 平台版本变更 / 结算异常 |
+| `/Home/CEndTimeOne` | 手机考试加密结算（AES-128-ECB + RSA PKCS#1 v1.5） | verified | 2026-10-28 | 账号持有人授权 + 实测 | 文档 2026-10-27 手机考试真实结算 100 分；2026-10-28 账号持有人授权真机跑通手机考试全链路（含加密参数） | 未单独落盘 | 平台版本变更 / 加密口径变更 |
 | `/Home/CEndTimeMobil` | 模拟考试结算（空加密） | verified | 2026-10-28 | 账号持有人授权 + 实测 | 文档 2026-10-27 两场真实结算；2026-10-28 客户端真实结算返回「100 分合格」 | `docs/api/samples/settle-mobil/` | 平台版本变更 |
 | `/ArchiveManger/D_PersonAccumulate/CheckInOne` | 签到（写） | verified | 2026-10-28 | 账号持有人授权 + 实现者实测 | 2026-10-27 记录成功路径（0→2/3、重复调用「已签到」不重复计分）；2026-10-28 实测未满足前置条件返回 `success=false`「练习50题后才能签到!」；同日平台规则变更：练习不累计、手机/模拟考试按题数累计（账号持有人告知） | `docs/api/samples/checkin/` | 平台版本变更 / 前置规则变更 |
 | `/ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne` | 知识学习完成 | verified | 2026-10-28 | 账号持有人授权 + 实现者实测 | 2026-10-27 真实环境完成阅读 0→1；2026-10-28 账号持有人授权真实调用复核，按 §8.8 升级；平台按日封顶、重复调用幂等 | `docs/api/samples/study-knowledge/` | 平台版本变更 / 计分规则变更 |

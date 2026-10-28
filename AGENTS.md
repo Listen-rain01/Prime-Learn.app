@@ -624,7 +624,7 @@ GET  GetMyExamListOne             查询记录（恢复/对账）
 - 类型/样式写错会把积分记到错误任务，必须有单测；
 - 答案拼接：每条取 0–14 字段，`[4]=[13]`，记录间 `|`；
 - **结算加密是实现细节，不在主规范展开**：见 `docs/api/手机考试接口文档.md` §5.7；
-- 加密方案当前证据级别为 `observed`（见 `docs/api/evidence-register.md`），按 §8.8 不得据此宣称 `verified`；正式实现前需完成独立验证，或在 PR 写明取证计划；
+- 加密方案当前证据级别为 `verified`（2026-10-28 真机跑通手机考试 100 分，见 `docs/api/evidence-register.md`）；结算实现见 `docs/api/手机考试接口文档.md` §5.7；
 - 恢复/对账使用 `GetMyExamListOne` 查询记录状态，并带正确过滤：手机考试 `type=2`、模拟考试 `type=3`。
 
 

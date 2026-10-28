@@ -4,16 +4,17 @@ import 'package:primelearn/app/router.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
-import 'package:primelearn/features/exam/application/run_mock_exam.dart';
+import 'package:primelearn/features/exam/application/run_exam.dart';
 import 'package:primelearn/features/exam/domain/entities/exam_page.dart';
 import 'package:primelearn/features/exam/domain/entities/exam_paper.dart';
 import 'package:primelearn/features/exam/exam_providers.dart';
 import 'package:primelearn/features/settings/bank_providers.dart';
 import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
 
-/// 打开模拟考试执行弹层。
-Future<void> showMockExamSheet(
+/// 打开考试执行弹层（模拟/手机共用）。
+Future<void> showExamSheet(
   BuildContext context, {
+  required ExamKind kind,
   VoidCallback? onOpenPreset,
 }) => showModalBottomSheet<void>(
   context: context,
@@ -22,21 +23,22 @@ Future<void> showMockExamSheet(
   showDragHandle: true,
   builder: (_) => FractionallySizedBox(
     heightFactor: 0.88,
-    child: _MockExamSheet(onOpenPreset: onOpenPreset),
+    child: _ExamSheet(kind: kind, onOpenPreset: onOpenPreset),
   ),
 );
 
-class _MockExamSheet extends ConsumerStatefulWidget {
-  const _MockExamSheet({this.onOpenPreset});
+class _ExamSheet extends ConsumerStatefulWidget {
+  const _ExamSheet({required this.kind, this.onOpenPreset});
 
+  final ExamKind kind;
   final VoidCallback? onOpenPreset;
 
   @override
-  ConsumerState<_MockExamSheet> createState() => _MockExamSheetState();
+  ConsumerState<_ExamSheet> createState() => _ExamSheetState();
 }
 
-class _MockExamSheetState extends ConsumerState<_MockExamSheet> {
-  MockExamStep? _step;
+class _ExamSheetState extends ConsumerState<_ExamSheet> {
+  ExamStep? _step;
   ExamResult? _result;
   String? _message;
   bool _messageIsError = false;
@@ -61,7 +63,10 @@ class _MockExamSheetState extends ConsumerState<_MockExamSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('模拟考试', style: textTheme.titleMedium),
+            Text(
+              widget.kind == ExamKind.mock ? '模拟考试' : '手机考试',
+              style: textTheme.titleMedium,
+            ),
             const SizedBox(height: 12),
             if (preset.isLoading)
               const LinearProgressIndicator()
@@ -118,7 +123,13 @@ class _MockExamSheetState extends ConsumerState<_MockExamSheet> {
                   child: FilledButton.icon(
                     onPressed: _running ? null : _start,
                     icon: const Icon(Icons.play_arrow),
-                    label: Text(_running ? '正在执行...' : '开始模拟考试'),
+                    label: Text(
+                      _running
+                          ? '正在执行...'
+                          : widget.kind == ExamKind.mock
+                          ? '开始模拟考试'
+                          : '开始手机考试',
+                    ),
                   ),
                 ),
             ],
@@ -158,8 +169,9 @@ class _MockExamSheetState extends ConsumerState<_MockExamSheet> {
     });
     try {
       final result = await ref
-          .read(runMockExamProvider)
+          .read(runExamProvider)
           .execute(
+            kind: widget.kind,
             userId: session.userId,
             paper: ExamPaper(
               id: preset.paperId!,
@@ -230,14 +242,14 @@ class _EmptyPreset extends StatelessWidget {
 class _Steps extends StatelessWidget {
   const _Steps({required this.current});
 
-  final MockExamStep current;
+  final ExamStep current;
 
   static const _labels = {
-    MockExamStep.create: '创建考试',
-    MockExamStep.enter: '进入考试',
-    MockExamStep.fetch: '获取试题',
-    MockExamStep.submit: '提交答案',
-    MockExamStep.settle: '结算成绩',
+    ExamStep.create: '创建考试',
+    ExamStep.enter: '进入考试',
+    ExamStep.fetch: '获取试题',
+    ExamStep.submit: '提交答案',
+    ExamStep.settle: '结算成绩',
   };
 
   @override

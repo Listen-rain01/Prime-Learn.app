@@ -4,3 +4,4 @@ const String enterExamEndpoint = '/P_ExamDetail/SetOnlineTestOne';
 const String onlineTestEndpoint = '/P_ExamDetail/OnlineTestOne';
 const String submitAnswersEndpoint = '/Home/DoWriteAnswerAll';
 const String settleMockEndpoint = '/Home/CEndTimeMobil';
+const String settleMobileEndpoint = '/Home/CEndTimeOne';

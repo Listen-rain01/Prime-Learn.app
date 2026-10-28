@@ -1,12 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
 import 'package:primelearn/features/exam/data/parsers/exam_page_parser.dart';
 import 'package:primelearn/features/exam/domain/exam_answer_builder.dart';
 
-String _vDataHtml(List<List<String>> records) {
+String _vDataHtml(List<List<String>> records, {String publicKey = ''}) {
   final array = records.map((fields) => fields.join(',')).join('|');
-  return 'var vData = {"AllCount":"${records.length}",'
-      '"ExamTypeName":"模拟题库","AllQuestionArray":"$array"};';
+  return 'var vData = ${jsonEncode({'AllCount': '${records.length}', 'ExamTypeName': '模拟题库', 'AllQuestionArray': array, if (publicKey.isNotEmpty) 'my': publicKey})};';
 }
 
 List<String> _record(String id, {String correct = 'A', String type = '1'}) {
@@ -38,6 +39,19 @@ void main() {
     expect(question.correctAnswer, 'A');
     expect(question.stem, '第 q1 题题干');
     expect(question.options, ['A.选项一', 'B.选项二']);
+  });
+
+  test('解析手机考试的 RSA 公钥', () {
+    final page = parser.parse(
+      _vDataHtml(
+        [_record('q1')],
+        publicKey:
+            '<RSAKeyValue><Modulus>AQAB</Modulus>'
+            '<Exponent>AQAB</Exponent></RSAKeyValue>',
+      ),
+    );
+
+    expect(page.publicKeyXml, contains('<Modulus>'));
   });
 
   test('尾部空字段被省略时仍可解析', () {
