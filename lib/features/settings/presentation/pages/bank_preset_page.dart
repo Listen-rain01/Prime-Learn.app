@@ -418,10 +418,8 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       );
       ref.invalidate(bankPresetProvider);
       if (!mounted) return;
-      setState(() {
-        _message = '已保存预设：${bank.name} · ${selectedPaper.name}';
-        _messageIsError = false;
-      });
+      // 保存成功直接回到「我的」，卡片会随预设刷新，不留在原地看提示。
+      Navigator.of(context).pop(true);
     } on UseCaseFailure catch (error) {
       if (!mounted) return;
       setState(() {
