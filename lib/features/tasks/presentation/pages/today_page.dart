@@ -6,6 +6,7 @@ import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/checkin/presentation/widgets/check_in_card.dart';
+import 'package:primelearn/features/exam/presentation/widgets/mock_exam_sheet.dart';
 import 'package:primelearn/features/reading/reading_providers.dart';
 import 'package:primelearn/features/tasks/domain/entities/daily_task.dart';
 import 'package:primelearn/features/tasks/domain/entities/task_board.dart';
@@ -65,7 +66,7 @@ class TodayPage extends ConsumerWidget {
                       !task.isCompleted) {
                     _openReadingSheet(context, ref);
                   } else if (task.criterion == Criterion.mockExam) {
-                    const MockExamRoute().push<void>(context);
+                    showMockExamSheet(context);
                   }
                 },
               ),

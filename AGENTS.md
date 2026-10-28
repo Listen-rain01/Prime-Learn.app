@@ -517,7 +517,6 @@ class AgentEngine extends _$AgentEngine {
 /settings       我的（Tab 3）：账号、当前题库、题库预设、退出登录
 /settings/bank-preset 题库预设（「我的」分支内 push）
 /settings/reading-preset 阅读预设（「我的」分支内 push）
-/mock-exam      模拟考试（全屏，写操作）
 /run            执行中（push，暂未实现）
 /result         结果（push，暂未实现）
 ```

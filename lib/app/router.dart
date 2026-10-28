@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:primelearn/app/app_shell.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
-import 'package:primelearn/features/exam/presentation/pages/mock_exam_page.dart';
 import 'package:primelearn/features/records/presentation/pages/records_page.dart';
 import 'package:primelearn/features/reading/presentation/pages/reading_preset_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/bank_preset_page.dart';
@@ -21,17 +20,6 @@ class LoginRoute extends GoRouteData with $LoginRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) => const LoginPage();
-}
-
-/// 模拟考试路由（全屏，写操作）。
-@TypedGoRoute<MockExamRoute>(path: '/mock-exam')
-class MockExamRoute extends GoRouteData with $MockExamRoute {
-  /// 创建模拟考试路由。
-  const MockExamRoute();
-
-  @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const MockExamPage();
 }
 
 /// 三个 Tab 的 shell：今日 / 记录 / 我的。

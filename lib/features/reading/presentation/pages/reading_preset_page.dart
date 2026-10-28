@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
-import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/features/reading/domain/entities/reading_catalog.dart';
 import 'package:primelearn/features/reading/reading_providers.dart';
@@ -25,7 +24,6 @@ class _ReadingPresetPageState extends ConsumerState<ReadingPresetPage> {
   String? _message;
   bool _messageIsError = false;
   bool _saving = false;
-  bool _completing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +37,7 @@ class _ReadingPresetPageState extends ConsumerState<ReadingPresetPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
         children: [
-          _SummaryCard(
-            preset: preset,
-            completing: _completing,
-            onComplete: _complete,
-          ),
+          _SummaryCard(preset: preset),
           const SizedBox(height: 20),
           Text(
             '选择文章',
@@ -278,52 +272,13 @@ class _ReadingPresetPageState extends ConsumerState<ReadingPresetPage> {
       if (mounted) setState(() => _saving = false);
     }
   }
-
-  Future<void> _complete() async {
-    final preset = ref.read(readingPresetProvider).value;
-    final session = ref.read(sessionStoreProvider);
-    if (preset == null || session == null) {
-      setState(() {
-        _message = '还没有保存阅读预设';
-        _messageIsError = true;
-      });
-      return;
-    }
-    setState(() => _completing = true);
-    try {
-      final completed = await ref
-          .read(completeReadingProvider)
-          .execute(userId: session.userId, preset: preset);
-      if (!mounted) return;
-      setState(() {
-        _message = completed
-            ? '已完成阅读：${preset.title}（积分延迟到账）'
-            : '今日知识学习已完成，无需重复阅读';
-        _messageIsError = false;
-      });
-    } on UseCaseFailure catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _message = error.message;
-        _messageIsError = true;
-      });
-    } finally {
-      if (mounted) setState(() => _completing = false);
-    }
-  }
 }
 
-/// 顶部：当前预设 + 完成阅读按钮。
+/// 顶部：当前阅读预设。
 class _SummaryCard extends StatelessWidget {
-  const _SummaryCard({
-    required this.preset,
-    required this.completing,
-    required this.onComplete,
-  });
+  const _SummaryCard({required this.preset});
 
   final AsyncValue<ReadingPreset?> preset;
-  final bool completing;
-  final VoidCallback onComplete;
 
   @override
   Widget build(BuildContext context) {
@@ -392,15 +347,6 @@ class _SummaryCard extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.tonalIcon(
-                onPressed: value == null || completing ? null : onComplete,
-                icon: const Icon(Icons.menu_book_outlined, size: 18),
-                label: Text(completing ? '正在完成...' : '完成今日阅读'),
-              ),
-            ),
           ],
         ),
       ),
