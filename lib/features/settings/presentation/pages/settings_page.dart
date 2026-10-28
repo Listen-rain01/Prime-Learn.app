@@ -11,8 +11,27 @@ import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
 import 'package:primelearn/features/settings/bank_providers.dart';
+import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
 import 'package:primelearn/features/settings/profile_providers.dart';
+
+/// 头部工号文案；平台实测 pnum 可能等于身份证号，同值时按身份证脱敏。
+String _employeeNoText(PersonProfile? profile) {
+  if (profile == null) return '工号 --';
+  final no = profile.employeeNo.trim();
+  if (no.isEmpty) return '工号 未填写';
+  final display = no == profile.idCard ? Redactor.idCard(no) : no;
+  return '工号 $display';
+}
+
+/// 题库预设卡片副标题。
+String _presetSubtitle(BankPreset? preset, String? currentBankId) {
+  if (preset == null) return '未设置，点击选择目标题库';
+  if (currentBankId != null && preset.bankId == currentBankId) {
+    return '${preset.bankName} · 与当前题库一致';
+  }
+  return '${preset.bankName} · 执行前会切换';
+}
 
 /// 我的 Tab：账号、个人信息、题库入口、退出登录。
 class SettingsPage extends ConsumerWidget {
@@ -52,13 +71,25 @@ class SettingsPage extends ConsumerWidget {
                           ),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          '当前题库：${session?.bankName ?? '未设置'}',
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.bodySmall?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.badge_outlined,
+                              size: 14,
+                              color: scheme.onSurfaceVariant,
+                            ),
+                            const SizedBox(width: 5),
+                            Expanded(
+                              child: Text(
+                                _employeeNoText(profile.value),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -77,27 +108,64 @@ class SettingsPage extends ConsumerWidget {
             const SizedBox(height: 16),
             TonalBlock(
               padding: EdgeInsets.zero,
-              // ListTile 的水波纹需要就近 Material；TonalBlock 自带背景色会遮挡，
-              // 因此在这里补一层透明 Material。
+              // 整卡可点：图标 + 标题/状态 + 箭头，不额外放按钮。
               child: Material(
                 type: MaterialType.transparency,
-                child: ListTile(
-                  leading: Icon(
-                    Icons.library_books_outlined,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  title: const Text('题库预设'),
-                  subtitle: Text(
-                    preset.value?.bankName ?? '未设置',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: OutlinedButton(
-                    onPressed: () =>
-                        const BankPresetRoute().push<void>(context),
-                    child: const Text('设置'),
-                  ),
+                child: InkWell(
                   onTap: () => const BankPresetRoute().push<void>(context),
+                  borderRadius: BorderRadius.circular(20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: scheme.primaryContainer,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.library_books_outlined,
+                            size: 20,
+                            color: scheme.onPrimaryContainer,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '题库预设',
+                                style: textTheme.titleSmall?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: scheme.onSurface,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                _presetSubtitle(
+                                  preset.value,
+                                  session?.examTypeId,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: textTheme.bodySmall?.copyWith(
+                                  color: scheme.onSurfaceVariant,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Icon(Icons.chevron_right, color: scheme.outlineVariant),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -205,16 +273,23 @@ class _ProfileSection extends StatelessWidget {
                 ),
               );
             }
-            // 平台实测：部分账号的工号（pnum）就是身份证号，此时必须按身份证脱敏。
-            final employeeNo = value.employeeNo == value.idCard
-                ? Redactor.idCard(value.employeeNo)
-                : value.employeeNo;
-            final rows = <(String, String)>[
-              ('工号', employeeNo),
-              ('身份证号', Redactor.idCard(value.idCard)),
-              ('工作单位', value.department),
-              ('联系方式', Redactor.phone(value.phone)),
-              ('家庭地址', value.address),
+            final rows = <({String label, String value, IconData icon})>[
+              (
+                label: '身份证号',
+                value: Redactor.idCard(value.idCard),
+                icon: Icons.badge_outlined,
+              ),
+              (
+                label: '工作单位',
+                value: value.department,
+                icon: Icons.business_outlined,
+              ),
+              (
+                label: '联系方式',
+                value: Redactor.phone(value.phone),
+                icon: Icons.phone_outlined,
+              ),
+              (label: '家庭地址', value: value.address, icon: Icons.home_outlined),
             ];
             return Column(
               children: [
@@ -225,7 +300,11 @@ class _ProfileSection extends StatelessWidget {
                       thickness: 0.5,
                       color: scheme.outlineVariant,
                     ),
-                  _InfoRow(label: rows[index].$1, value: rows[index].$2),
+                  _InfoRow(
+                    label: rows[index].label,
+                    value: rows[index].value,
+                    icon: rows[index].icon,
+                  ),
                 ],
               ],
             );
@@ -237,10 +316,15 @@ class _ProfileSection extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
 
   final String label;
   final String value;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {
@@ -253,22 +337,28 @@ class _InfoRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 80,
-            child: Text(
-              label,
-              style: textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
-            ),
-          ),
+          Icon(icon, size: 18, color: scheme.onSurfaceVariant),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              display,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.bodySmall?.copyWith(
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  display,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ],
             ),
           ),
         ],

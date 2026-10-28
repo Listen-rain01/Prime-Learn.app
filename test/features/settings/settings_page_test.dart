@@ -75,10 +75,10 @@ void main() {
     await _pumpSettings(tester, _profile);
 
     expect(find.text('张小赞'), findsOneWidget);
-    expect(find.text('当前题库：题库A'), findsOneWidget);
+    expect(find.text('工号 E1001'), findsOneWidget);
+    expect(find.text('当前题库：题库A'), findsNothing);
     expect(find.text('个人信息'), findsOneWidget);
-    expect(find.text('工号'), findsOneWidget);
-    expect(find.text('E1001'), findsOneWidget);
+    expect(find.text('工号'), findsNothing);
     expect(find.text('身份证号'), findsOneWidget);
     expect(find.text('610525******1234'), findsOneWidget);
     expect(find.text('610525199001011234'), findsNothing);
@@ -89,8 +89,8 @@ void main() {
     expect(find.text('13812345678'), findsNothing);
     expect(find.text('家庭地址'), findsOneWidget);
     expect(find.text('题库预设'), findsOneWidget);
-    expect(find.text('未设置'), findsOneWidget);
-    expect(find.widgetWithText(OutlinedButton, '设置'), findsOneWidget);
+    expect(find.text('未设置，点击选择目标题库'), findsWidgets);
+    expect(find.text('设置'), findsNothing);
     expect(find.text('退出登录'), findsOneWidget);
   });
 
@@ -107,7 +107,9 @@ void main() {
       ),
     );
 
-    expect(find.text('610525******1234'), findsNWidgets(2));
+    // 头部工号与个人信息里的身份证号都必须是脱敏值。
+    expect(find.text('工号 610525******1234'), findsOneWidget);
+    expect(find.text('610525******1234'), findsOneWidget);
     expect(find.text('610525199001011234'), findsNothing);
   });
 
