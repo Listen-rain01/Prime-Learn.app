@@ -64,6 +64,8 @@ class TodayPage extends ConsumerWidget {
                   if (task.criterion == Criterion.studyKnowledge &&
                       !task.isCompleted) {
                     _openReadingSheet(context, ref);
+                  } else if (task.criterion == Criterion.mockExam) {
+                    const MockExamRoute().push<void>(context);
                   }
                 },
               ),
@@ -357,7 +359,8 @@ class _TasksData extends StatelessWidget {
               task: task,
               onTap:
                   task.criterion == Criterion.studyKnowledge &&
-                      !task.isCompleted
+                          !task.isCompleted ||
+                      task.criterion == Criterion.mockExam
                   ? () => onTaskTap(task)
                   : null,
             ),

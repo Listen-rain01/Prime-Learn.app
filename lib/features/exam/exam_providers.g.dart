@@ -261,3 +261,49 @@ final class BankPaperCountFamily extends $Family
   @override
   String toString() => r'bankPaperCountProvider';
 }
+
+/// 模拟考试执行用例。
+
+@ProviderFor(runMockExam)
+final runMockExamProvider = RunMockExamProvider._();
+
+/// 模拟考试执行用例。
+
+final class RunMockExamProvider
+    extends $FunctionalProvider<RunMockExam, RunMockExam, RunMockExam>
+    with $Provider<RunMockExam> {
+  /// 模拟考试执行用例。
+  RunMockExamProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: noProviderRetry,
+        name: r'runMockExamProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$runMockExamHash();
+
+  @$internal
+  @override
+  $ProviderElement<RunMockExam> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  RunMockExam create(Ref ref) {
+    return runMockExam(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RunMockExam value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RunMockExam>(value),
+    );
+  }
+}
+
+String _$runMockExamHash() => r'dec50ae9a398314845a31d23871f1ad64dd9470c';

@@ -107,7 +107,8 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] `features/reading`：阅读预设（分类→子分类→文章，保存一篇文章）+ 一键完成今日阅读（`StudyKnowledgeOne`，按日封顶、幂等），真实调用验证通过
 - [x] 签到（`CheckInOne`，写网关 + 平台前置条件提示）
 - [x] 排名与学习统计（`GetMarkRankingList` / `GetStudyTimeRankingListOne` / `GetPersonExamAchievementListOne`）
-- [ ] 手机考试 / 模拟考试流程（写操作需先完成协议取证 + 写网关）
+- [x] 模拟考试（`type=1` / `style=1` / `CEndTimeMobil`）：按预设题库+试卷创建 → 进入 → 取题 → 提交 → 结算，真实跑通 100 分
+- [ ] 手机考试流程（`type=2` / `style=0` / `CEndTimeOne` AES/RSA 结算，加密证据未验证）
 - [ ] 执行记录与审计日志
 
 ## 免责声明
