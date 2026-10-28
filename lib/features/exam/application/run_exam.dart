@@ -82,17 +82,25 @@ class RunExam {
       );
 
       onStep?.call(ExamStep.settle);
+      final ExamResult settled;
       if (kind == ExamKind.mock) {
-        return await _repository.settleMock(ksmxid);
+        settled = await _repository.settleMock(ksmxid);
+      } else {
+        final payload = const SettleCrypto().encrypt(
+          ksmxid: ksmxid,
+          publicKeyXml: page.publicKeyXml,
+        );
+        settled = await _repository.settleMobile(
+          ksmxid: ksmxid,
+          mxid2: payload.mxid2,
+          mxid3: payload.mxid3,
+        );
       }
-      final payload = const SettleCrypto().encrypt(
-        ksmxid: ksmxid,
-        publicKeyXml: page.publicKeyXml,
-      );
-      return await _repository.settleMobile(
-        ksmxid: ksmxid,
-        mxid2: payload.mxid2,
-        mxid3: payload.mxid3,
+      return ExamResult(
+        score: settled.score,
+        passed: settled.passed,
+        message: settled.message,
+        questionCount: page.questions.length,
       );
     } on WriteBlocked catch (error) {
       throw UseCaseFailure(error.message);

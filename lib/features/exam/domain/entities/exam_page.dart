@@ -61,6 +61,7 @@ class ExamResult {
     required this.score,
     required this.passed,
     required this.message,
+    this.questionCount = 0,
   });
 
   /// 分数。
@@ -71,4 +72,7 @@ class ExamResult {
 
   /// 平台返回的原始文案。
   final String message;
+
+  /// 本场题目数。
+  final int questionCount;
 }

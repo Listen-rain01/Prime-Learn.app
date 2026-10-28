@@ -202,6 +202,7 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
         _result = result;
         _message = '考试完成';
       });
+      await _learnPaperCount(preset, result.questionCount);
     } on UseCaseFailure catch (error) {
       if (!mounted) return;
       setState(() {
@@ -254,6 +255,24 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
       }
     } finally {
       if (mounted) setState(() => _aligning = false);
+    }
+  }
+
+  /// 首次跑完后把试卷题数写回预设（平台没有按试卷查询题数的接口）。
+  Future<void> _learnPaperCount(BankPreset preset, int count) async {
+    if (count <= 0) return;
+    try {
+      final repository = await ref.read(bankPresetRepositoryProvider.future);
+      final current = repository.read();
+      if (current == null ||
+          current.paperId != preset.paperId ||
+          current.paperQuestionCount == count) {
+        return;
+      }
+      await repository.save(current.copyWith(paperQuestionCount: count));
+      ref.invalidate(bankPresetProvider);
+    } on Object {
+      // 计数仅用于展示，失败不影响考试结果。
     }
   }
 
@@ -401,6 +420,15 @@ class _ResultTile extends StatelessWidget {
                         : scheme.onErrorContainer,
                   ),
                 ),
+                if (result.questionCount > 0)
+                  Text(
+                    '本场 ${result.questionCount} 题',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: result.passed
+                          ? scheme.onPrimaryContainer
+                          : scheme.onErrorContainer,
+                    ),
+                  ),
               ],
             ),
           ),

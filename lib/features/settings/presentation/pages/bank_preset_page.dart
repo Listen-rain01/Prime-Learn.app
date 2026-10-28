@@ -768,7 +768,7 @@ class _BankDetailsCard extends ConsumerWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '总题数 ${bank.questionCount} · 单选 ${bank.singleCount}'
+            '题库 ${bank.questionCount} 题 · 单选 ${bank.singleCount}'
             ' · 多选 ${bank.multipleCount} · 判断 ${bank.judgeCount}',
             style: textTheme.bodySmall?.copyWith(
               color: scheme.onSurfaceVariant,

@@ -15,6 +15,8 @@ class BankPresetStore {
   static const String _judgeKey = 'bank_preset_judge_count';
   static const String _paperNameKey = 'bank_preset_paper_name';
   static const String _paperIdKey = 'bank_preset_paper_id';
+  static const String _paperQuestionCountKey =
+      'bank_preset_paper_question_count';
   static const String _paperTotalKey = 'bank_preset_paper_total';
   static const String _paperPassKey = 'bank_preset_paper_pass';
 
@@ -35,6 +37,7 @@ class BankPresetStore {
       judgeCount: _prefs.getInt(_judgeKey),
       paperName: _prefs.getString(_paperNameKey),
       paperId: _prefs.getString(_paperIdKey),
+      paperQuestionCount: _prefs.getInt(_paperQuestionCountKey),
       paperTotalScore: _prefs.getDouble(_paperTotalKey),
       paperPassingGrade: _prefs.getDouble(_paperPassKey),
     );
@@ -51,6 +54,7 @@ class BankPresetStore {
     await _writeOptionalInt(_judgeKey, preset.judgeCount);
     await _writeOptionalString(_paperNameKey, preset.paperName);
     await _writeOptionalString(_paperIdKey, preset.paperId);
+    await _writeOptionalInt(_paperQuestionCountKey, preset.paperQuestionCount);
     await _writeOptionalDouble(_paperTotalKey, preset.paperTotalScore);
     await _writeOptionalDouble(_paperPassKey, preset.paperPassingGrade);
   }
@@ -67,6 +71,7 @@ class BankPresetStore {
       _judgeKey,
       _paperNameKey,
       _paperIdKey,
+      _paperQuestionCountKey,
       _paperTotalKey,
       _paperPassKey,
     ]) {

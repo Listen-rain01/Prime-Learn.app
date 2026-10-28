@@ -120,13 +120,17 @@ void main() {
         paperName: '2025安全规程模拟卷',
         paperTotalScore: 100,
         paperPassingGrade: 80,
+        paperQuestionCount: 100,
       ),
     );
 
     expect(find.text('题库A'), findsOneWidget);
     expect(find.text('2025陕西煤业煤矿安全规程'), findsOneWidget);
-    expect(find.text('2025安全规程模拟卷（100 分 / 及格 80） · 共 2 份'), findsOneWidget);
-    expect(find.text('总题数 3985 · 单选 1554 · 多选 793 · 判断 1638'), findsOneWidget);
+    expect(
+      find.text('2025安全规程模拟卷（100 分 / 及格 80） · 100 题 · 共 2 份'),
+      findsOneWidget,
+    );
+    expect(find.text('题库 3985 题 · 单选 1554 · 多选 793 · 判断 1638'), findsOneWidget);
     expect(find.text('待切换'), findsOneWidget);
   });
 

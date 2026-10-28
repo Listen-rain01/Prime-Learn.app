@@ -94,6 +94,7 @@ class BankPreset {
     this.paperTotalScore,
     this.paperPassingGrade,
     this.paperId,
+    this.paperQuestionCount,
   });
 
   /// 题库 ID。
@@ -124,4 +125,36 @@ class BankPreset {
 
   /// 预设置的试卷 ID（考试创建时必须传给平台）。
   final String? paperId;
+
+  /// 实际开考后学到的试卷题数（平台未提供按试卷查询题数的接口）。
+  final int? paperQuestionCount;
+
+  /// 复制并覆盖部分字段。
+  BankPreset copyWith({
+    String? bankId,
+    String? bankName,
+    int? questionCount,
+    int? paperCount,
+    int? singleCount,
+    int? multipleCount,
+    int? judgeCount,
+    String? paperId,
+    String? paperName,
+    double? paperTotalScore,
+    double? paperPassingGrade,
+    int? paperQuestionCount,
+  }) => BankPreset(
+    bankId: bankId ?? this.bankId,
+    bankName: bankName ?? this.bankName,
+    questionCount: questionCount ?? this.questionCount,
+    paperCount: paperCount ?? this.paperCount,
+    singleCount: singleCount ?? this.singleCount,
+    multipleCount: multipleCount ?? this.multipleCount,
+    judgeCount: judgeCount ?? this.judgeCount,
+    paperId: paperId ?? this.paperId,
+    paperName: paperName ?? this.paperName,
+    paperTotalScore: paperTotalScore ?? this.paperTotalScore,
+    paperPassingGrade: paperPassingGrade ?? this.paperPassingGrade,
+    paperQuestionCount: paperQuestionCount ?? this.paperQuestionCount,
+  );
 }

@@ -270,7 +270,7 @@ class _PresetEntryCard extends StatelessWidget {
   String? _typeMeta(BankPreset? value) {
     if (value == null) return null;
     final parts = <String>[
-      if (value.questionCount != null) '总题数 ${value.questionCount}',
+      if (value.questionCount != null) '题库 ${value.questionCount} 题',
       if (value.singleCount != null) '单选 ${value.singleCount}',
       if (value.multipleCount != null) '多选 ${value.multipleCount}',
       if (value.judgeCount != null) '判断 ${value.judgeCount}',
@@ -291,7 +291,10 @@ class _PresetEntryCard extends StatelessWidget {
     final count = value.paperCount != null && value.paperCount! > 1
         ? ' · 共 ${value.paperCount} 份'
         : '';
-    return '$name$score$count';
+    final questionCount = value.paperQuestionCount != null
+        ? ' · ${value.paperQuestionCount} 题'
+        : '';
+    return '$name$score$questionCount$count';
   }
 
   String _score(double value) => value == value.roundToDouble()
