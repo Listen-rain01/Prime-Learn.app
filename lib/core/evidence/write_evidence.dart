@@ -10,10 +10,13 @@ class WriteEvidence {
   /// 默认登记：
   /// - 签到：2026-10-28 经账号持有人授权，已完成真实环境签到实测，
   ///   按 §8.8 升级为 `verified`。
+  /// - 完成阅读：2026-10-27 真实环境完成阅读 0→1，2026-10-28 账号持有人
+  ///   授权真实调用复核，按 §8.8 升级为 `verified`。
   /// - 题库切换：文档有真实环境记录，但本客户端尚未实测，保持 `observed`
   ///   → 运行时会被写网关拦截，待真实切换验证后再升级。
   factory WriteEvidence.defaults() => const WriteEvidence({
     '/ArchiveManger/D_PersonAccumulate/CheckInOne': WriteLevel.verified,
+    '/ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne': WriteLevel.verified,
     '/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne': WriteLevel.observed,
   });
 

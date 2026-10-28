@@ -11,7 +11,7 @@
 | `/Home/CEndTimeOne` | 加密结算 | observed | 2026-10-27 | 待指定 | 真实环境实测（100 分） | `docs/api/samples/settle-encrypted/` | 平台版本变更 / 结算异常 |
 | `/Home/CEndTimeMobil` | 模拟考试结算（空加密） | observed | 2026-10-26 | 待指定 | 真实环境实测 | `docs/api/samples/settle-mobil/` | 平台版本变更 |
 | `/ArchiveManger/D_PersonAccumulate/CheckInOne` | 签到（写） | verified | 2026-10-28 | 账号持有人授权 + 实现者实测 | 2026-10-27 记录成功路径（0→2/3、重复调用「已签到」不重复计分）；2026-10-28 实测未满足前置条件返回 `success=false`「练习50题后才能签到!」；同日平台规则变更：练习不累计、手机/模拟考试按题数累计（账号持有人告知） | `docs/api/samples/checkin/` | 平台版本变更 / 前置规则变更 |
-| `/ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne` | 知识学习完成 | observed | 2026-10-26 | 待指定 | 真实环境实测 | `docs/api/samples/study-knowledge/` | 平台版本变更 |
+| `/ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne` | 知识学习完成 | verified | 2026-10-28 | 账号持有人授权 + 实现者实测 | 2026-10-27 真实环境完成阅读 0→1；2026-10-28 账号持有人授权真实调用复核，按 §8.8 升级；平台按日封顶、重复调用幂等 | `docs/api/samples/study-knowledge/` | 平台版本变更 / 计分规则变更 |
 | `/ExamManger/P_ExamDetail/GetMyExamListOne` | type=2 → 手机自测；type=3 → 手机模拟；type=0 → 理论考试 | observed | 2026-10-27 | 待指定 | 真实环境实测 | `docs/api/samples/my-exam-list/` | 平台版本变更 |
 | `/AccumulateManger/S_Accumulate/GetPersonTodayAccumulateOne` | 今日任务 / 积分查询（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（登录→取 7 条任务，样本已脱敏） | `docs/api/samples/today-accumulate/` | 平台版本变更 / 任务上限调整 |
 | `/ArchiveManger/D_PersonAccumulate/GetMyAccumulateListOne` | 积分明细（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（记录页展示，未落盘样本） | `docs/api/samples/points-ledger/` | 平台版本变更 |

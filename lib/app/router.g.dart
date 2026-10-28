@@ -67,6 +67,11 @@ RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
               hasOverriddenOnExit: false,
               factory: $BankPresetRoute._fromState,
             ),
+            GoRouteData.$route(
+              path: 'reading-preset',
+              hasOverriddenOnExit: false,
+              factory: $ReadingPresetRoute._fromState,
+            ),
           ],
         ),
       ],
@@ -145,6 +150,27 @@ mixin $BankPresetRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/settings/bank-preset');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ReadingPresetRoute on GoRouteData {
+  static ReadingPresetRoute _fromState(GoRouterState state) =>
+      const ReadingPresetRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/reading-preset');
 
   @override
   void go(BuildContext context) => context.go(location);

@@ -103,10 +103,11 @@ Esdt 向量的生成方式与来源记录在 `test/vectors/esdt/meta.json`：
 - [x] `features/tasks`：今日任务/积分（`GetPersonTodayAccumulateOne`，真实环境验证通过）、今日页（按接口自然顺序展示任务、今日得分/上限、加载/错误/空态）、会话失效清理
 - [x] 3 Tab shell（今日 / 记录 / 我的，`StatefulShellRoute.indexedStack`）
 - [x] `features/records`：考试记录（手机/模拟/理论，`GetMyExamListOne`）+ 积分明细（`GetMyAccumulateListOne`）+ 排行（成绩榜/学习时长榜，单位/集团）与个人成绩趋势，真实环境验证通过
-- [x] `features/settings`：账号与当前题库、个人信息（`MyBaseInfo` 的 vData：工号/身份证/单位/联系方式/地址，身份证与手机号脱敏展示）与头像（`GetPersonPhoto`，独立加载、失败回退姓名首字）、题库预设（单位→分类→年份→题库，保存前校验可考试卷）、退出登录
-- [ ] 排名与学习统计（`GetMarkRankingList` 等）
+- [x] `features/settings`：账号与当前题库、个人信息（`MyBaseInfo` 的 vData：工号/身份证/单位/联系方式/地址，身份证与手机号脱敏展示）与头像（`GetPersonPhoto`，独立加载、失败回退姓名首字）、题库预设（单位→分类→年份→题库→试卷，保存题数/题型/试卷快照）、退出登录
+- [x] `features/reading`：阅读预设（分类→子分类→文章，保存一篇文章）+ 一键完成今日阅读（`StudyKnowledgeOne`，按日封顶、幂等），真实调用验证通过
+- [x] 签到（`CheckInOne`，写网关 + 平台前置条件提示）
+- [x] 排名与学习统计（`GetMarkRankingList` / `GetStudyTimeRankingListOne` / `GetPersonExamAchievementListOne`）
 - [ ] 手机考试 / 模拟考试流程（写操作需先完成协议取证 + 写网关）
-- [ ] 签到 / 阅读学习（同上）
 - [ ] 执行记录与审计日志
 
 ## 免责声明

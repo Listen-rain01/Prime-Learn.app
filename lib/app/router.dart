@@ -4,6 +4,7 @@ import 'package:primelearn/app/app_shell.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
 import 'package:primelearn/features/records/presentation/pages/records_page.dart';
+import 'package:primelearn/features/reading/presentation/pages/reading_preset_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/bank_preset_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
 import 'package:primelearn/features/tasks/presentation/pages/today_page.dart';
@@ -38,6 +39,7 @@ class LoginRoute extends GoRouteData with $LoginRoute {
           path: '/settings',
           routes: <TypedRoute<RouteData>>[
             TypedGoRoute<BankPresetRoute>(path: 'bank-preset'),
+            TypedGoRoute<ReadingPresetRoute>(path: 'reading-preset'),
           ],
         ),
       ],
@@ -111,6 +113,16 @@ class BankPresetRoute extends GoRouteData with $BankPresetRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const BankPresetPage();
+}
+
+/// 阅读预设（「我的」分支内 push）。
+class ReadingPresetRoute extends GoRouteData with $ReadingPresetRoute {
+  /// 创建阅读预设路由。
+  const ReadingPresetRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ReadingPresetPage();
 }
 
 /// 全局路由。

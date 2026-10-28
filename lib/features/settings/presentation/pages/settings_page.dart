@@ -10,6 +10,8 @@ import 'package:primelearn/core/utils/redactor.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/auth/presentation/providers/login_notifier.dart';
+import 'package:primelearn/features/reading/domain/entities/reading_catalog.dart';
+import 'package:primelearn/features/reading/reading_providers.dart';
 import 'package:primelearn/features/settings/bank_providers.dart';
 import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
@@ -102,6 +104,11 @@ class SettingsPage extends ConsumerWidget {
               currentBankId: session?.examTypeId,
               currentBankName: session?.bankName ?? '',
               onTap: () => const BankPresetRoute().push<void>(context),
+            ),
+            const SizedBox(height: 16),
+            _ReadingEntryCard(
+              preset: ref.watch(readingPresetProvider),
+              onTap: () => const ReadingPresetRoute().push<void>(context),
             ),
             const SizedBox(height: 16),
             TonalBlock(
@@ -333,6 +340,105 @@ class _LabeledValue extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 阅读预设入口：整卡可点，显示当前文章。
+class _ReadingEntryCard extends StatelessWidget {
+  const _ReadingEntryCard({required this.preset, required this.onTap});
+
+  final AsyncValue<ReadingPreset?> preset;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final value = preset.value;
+    final hasPreset = value != null;
+
+    return TonalBlock(
+      padding: EdgeInsets.zero,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: scheme.secondaryContainer,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.auto_stories_outlined,
+                    size: 20,
+                    color: scheme.onSecondaryContainer,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            '阅读预设',
+                            style: textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: scheme.onSurface,
+                            ),
+                          ),
+                          const Spacer(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: hasPreset
+                                  ? scheme.primaryContainer
+                                  : scheme.surfaceContainerHigh,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              hasPreset ? '已设置' : '未设置',
+                              style: textTheme.labelSmall?.copyWith(
+                                color: hasPreset
+                                    ? scheme.onPrimaryContainer
+                                    : scheme.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        value?.title ?? '点击选择文章',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right, color: scheme.outlineVariant),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

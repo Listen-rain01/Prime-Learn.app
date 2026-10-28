@@ -516,6 +516,7 @@ class AgentEngine extends _$AgentEngine {
 /records        记录（Tab 2）：考试记录、积分明细、排行/成绩趋势（只读）
 /settings       我的（Tab 3）：账号、当前题库、题库预设、退出登录
 /settings/bank-preset 题库预设（「我的」分支内 push）
+/settings/reading-preset 阅读预设（「我的」分支内 push）
 /run            执行中（push，暂未实现）
 /result         结果（push，暂未实现）
 ```
