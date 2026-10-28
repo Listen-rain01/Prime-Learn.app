@@ -17,6 +17,15 @@ class DailyTaskRow extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final secondary = scheme.onSurfaceVariant;
+    // 签到 3 分包含连续签到累计，当天最多 +1；currentScore > 0 即今日已签到。
+    final checkedInToday =
+        task.criterion == Criterion.checkIn && task.currentScore > 0;
+    final doneForToday = task.isCompleted || checkedInToday;
+    final statusLabel = task.isCompleted
+        ? '已完成'
+        : checkedInToday
+        ? '今日已签到'
+        : '未完成';
 
     return Material(
       type: MaterialType.transparency,
@@ -57,6 +66,15 @@ class DailyTaskRow extends StatelessWidget {
                         style: textTheme.bodySmall?.copyWith(color: secondary),
                       ),
                     ],
+                    if (checkedInToday && !task.isCompleted) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '连续签到累计 ${task.currentScore}/${task.maxScore}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: textTheme.bodySmall?.copyWith(color: secondary),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -73,9 +91,9 @@ class DailyTaskRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    task.isCompleted ? '已完成' : '未完成',
+                    statusLabel,
                     style: textTheme.labelMedium?.copyWith(
-                      color: task.isCompleted ? scheme.outline : scheme.primary,
+                      color: doneForToday ? scheme.outline : scheme.primary,
                     ),
                   ),
                   if (onTap != null) ...[

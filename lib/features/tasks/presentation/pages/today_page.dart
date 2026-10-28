@@ -65,7 +65,7 @@ class TodayPage extends ConsumerWidget {
                   if (task.criterion == Criterion.checkIn) {
                     showCheckInSheet(
                       context,
-                      alreadyCheckedIn: task.isCompleted,
+                      alreadyCheckedIn: task.currentScore > 0,
                       onSuccess: () => ref.invalidate(dailyBoardProvider),
                     );
                   } else if (task.criterion == Criterion.studyKnowledge) {
@@ -328,6 +328,14 @@ class _TasksData extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    // 签到当天最多 +1（3 分含连续签到），currentScore > 0 即今日已完成。
+    final completedCount = board.tasks
+        .where(
+          (task) =>
+              task.isCompleted ||
+              (task.criterion == Criterion.checkIn && task.currentScore > 0),
+        )
+        .length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -343,7 +351,7 @@ class _TasksData extends StatelessWidget {
             ),
             const Spacer(),
             Text(
-              '${board.completedCount}/${board.tasks.length} 已完成',
+              '$completedCount/${board.tasks.length} 已完成',
               style: textTheme.labelMedium?.copyWith(
                 color: scheme.onSurfaceVariant,
               ),
