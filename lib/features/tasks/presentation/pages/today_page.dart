@@ -5,7 +5,7 @@ import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
-import 'package:primelearn/features/checkin/presentation/widgets/check_in_card.dart';
+import 'package:primelearn/features/checkin/presentation/widgets/check_in_sheet.dart';
 import 'package:primelearn/features/exam/application/run_exam.dart';
 import 'package:primelearn/features/exam/presentation/widgets/exam_sheet.dart';
 import 'package:primelearn/features/reading/reading_providers.dart';
@@ -24,12 +24,6 @@ class TodayPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(sessionStoreProvider);
     final board = ref.watch(dailyBoardProvider);
-    final checkedIn =
-        board.value?.tasks.any(
-          (task) =>
-              task.criterion == Criterion.checkIn && task.currentScore > 0,
-        ) ??
-        false;
 
     // 会话失效（平台返回登录页/401）时清理会话，App 层监听后跳回登录页。
     ref.listen<AsyncValue<TaskBoard>>(dailyBoardProvider, (_, next) {
@@ -52,19 +46,19 @@ class TodayPage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            CheckInCard(
-              alreadyCheckedIn: checkedIn,
-              onSuccess: () => ref.invalidate(dailyBoardProvider),
-            ),
-            const SizedBox(height: 16),
             TonalBlock(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: _TasksSection(
                 board: board,
                 onRetry: () => ref.invalidate(dailyBoardProvider),
                 onTaskTap: (task) {
-                  if (task.criterion == Criterion.studyKnowledge &&
-                      !task.isCompleted) {
+                  if (task.criterion == Criterion.checkIn) {
+                    showCheckInSheet(
+                      context,
+                      alreadyCheckedIn: task.isCompleted,
+                      onSuccess: () => ref.invalidate(dailyBoardProvider),
+                    );
+                  } else if (task.criterion == Criterion.studyKnowledge) {
                     _openReadingSheet(context, ref);
                   } else if (task.criterion == Criterion.mockExam) {
                     showExamSheet(context, kind: ExamKind.mock);
@@ -361,13 +355,13 @@ class _TasksData extends StatelessWidget {
           for (final task in board.tasks)
             DailyTaskRow(
               task: task,
-              onTap:
-                  task.criterion == Criterion.studyKnowledge &&
-                          !task.isCompleted ||
-                      task.criterion == Criterion.mockExam ||
-                      task.criterion == Criterion.mobileExam
-                  ? () => onTaskTap(task)
-                  : null,
+              onTap: switch (task.criterion) {
+                Criterion.checkIn ||
+                Criterion.studyKnowledge ||
+                Criterion.mockExam ||
+                Criterion.mobileExam => () => onTaskTap(task),
+                _ => null,
+              },
             ),
       ],
     );
