@@ -25,7 +25,7 @@
 | `/ExamManger/P_ExamTypeStyle/GetAllTypeEx` | 题库大类（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：返回 14 条分类 | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_ExamTypeStyle/GetAllChildTypeEx` | 题库子分类/年份（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：返回 2022 年层级（Level=3） | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_ExamType/GetExamTypeListExOne` | 题库列表（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：单位=1、2022 年返回「刑法修正案十一」20 题；`Year`/`Style` 明文，其余 Esdt | 未落盘样本 | 平台版本变更 |
-| `/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne` | 保存/切换题库（写） | observed | 2026-10-28 | 待独立复核 | 文档有真实环境记录，本客户端尚未实测；写网关按 `observed` 拦截 | 未落盘样本 | 完成真实切换验证后升级 |
+| `/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne` | 保存/切换题库（写） | verified | 2026-10-29 | 账号持有人授权 + 实测 | 2026-10-27 文档记录切换成功并以 FirstIndexOne 校验；2026-10-29 账号持有人要求执行前自动切库，真机验证通过 | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_Paper/SelectCanRunListOne` | 可考试卷（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测：当前题库 1 份试卷（总分 100 / 及格 80）；预设「刑法修正案十一」0 份，无法用于考试 | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_ExamDetail/GetMarkRankingList` | 成绩排名（单位/集团榜，只读） | observed | 2026-10-28 | 待独立复核 | 前端页面 POST `/PersonWap/ScoreList` 代码核对：标题「考试成绩排行榜」、渲染 `考试成绩 Mark`；`type=1/0` 为范围、`id=0/1` 为单位/集团；此前固定 `id=0` 导致的 4152 异常值已定位为参数错误 | 未落盘样本 | 平台版本变更 |
 | `/ArchiveManger/D_PersonStudyLog/GetStudyTimeRankingListOne` | 学习时长排名（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测 + 前端代码核对：`Mark` 为 null，时长在 `AllCount`（秒），页面渲染 `formatSeconds(AllCount)`；区间为本周 | 未落盘样本 | 平台版本变更 |

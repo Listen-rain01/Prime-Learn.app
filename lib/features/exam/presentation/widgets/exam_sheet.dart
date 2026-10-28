@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/app/router.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
+import 'package:primelearn/features/auth/auth_providers.dart';
 import 'package:primelearn/features/exam/application/run_exam.dart';
 import 'package:primelearn/features/exam/domain/entities/exam_page.dart';
 import 'package:primelearn/features/exam/domain/entities/exam_paper.dart';
 import 'package:primelearn/features/exam/exam_providers.dart';
 import 'package:primelearn/features/settings/bank_providers.dart';
+import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
 
 /// 打开考试执行弹层（模拟/手机共用）。
@@ -43,6 +46,7 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
   String? _message;
   bool _messageIsError = false;
   bool _running = false;
+  bool _aligning = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,11 +55,9 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
     final preset = ref.watch(bankPresetProvider);
     final session = ref.watch(sessionStoreProvider);
     final value = preset.value;
-    final ready =
-        value != null &&
-        value.paperId != null &&
-        session != null &&
-        value.bankId == session.examTypeId;
+    final ready = value != null && value.paperId != null && session != null;
+    final needsSwitch =
+        value != null && session != null && value.bankId != session.examTypeId;
 
     return SafeArea(
       child: SingleChildScrollView(
@@ -113,18 +115,26 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
               ),
               const SizedBox(height: 12),
               if (!ready)
-                InlineNotice(
-                  message: '当前题库与预设不一致，请先在平台切换到预设题库',
+                const InlineNotice(
+                  message: '还没有可用的题库/试卷预设',
                   tone: InlineNoticeTone.error,
                 )
-              else
+              else ...[
+                if (needsSwitch)
+                  const InlineNotice(
+                    message: '当前题库与预设不一致，开始时会自动切换到预设题库',
+                    tone: InlineNoticeTone.info,
+                  ),
+                if (needsSwitch) const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   child: FilledButton.icon(
                     onPressed: _running ? null : _start,
                     icon: const Icon(Icons.play_arrow),
                     label: Text(
-                      _running
+                      _aligning
+                          ? '正在切换题库...'
+                          : _running
                           ? '正在执行...'
                           : widget.kind == ExamKind.mock
                           ? '开始模拟考试'
@@ -132,6 +142,7 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
                     ),
                   ),
                 ),
+              ],
             ],
             if (_step != null) ...[
               const SizedBox(height: 14),
@@ -168,11 +179,13 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
       _messageIsError = false;
     });
     try {
+      await _alignBank(session, preset);
+      final current = ref.read(sessionStoreProvider) ?? session;
       final result = await ref
           .read(runExamProvider)
           .execute(
             kind: widget.kind,
-            userId: session.userId,
+            userId: current.userId,
             paper: ExamPaper(
               id: preset.paperId!,
               name: preset.paperName ?? '',
@@ -197,6 +210,50 @@ class _ExamSheetState extends ConsumerState<_ExamSheet> {
       });
     } finally {
       if (mounted) setState(() => _running = false);
+    }
+  }
+
+  /// 执行前对齐题库：不一致时调用切库接口并刷新会话。
+  Future<void> _alignBank(Session session, BankPreset preset) async {
+    if (session.examTypeId == preset.bankId) return;
+    setState(() {
+      _aligning = true;
+      _message = '题库不一致，正在切换到预设题库...';
+      _messageIsError = false;
+    });
+    try {
+      await ref
+          .read(ensureBankPresetProvider)
+          .execute(
+            userId: session.userId,
+            currentBankId: session.examTypeId ?? '',
+            preset: preset,
+          );
+      final context = await ref
+          .read(authRepositoryProvider)
+          .fetchBankContext(session.userId);
+      final latest = ref.read(sessionStoreProvider);
+      if (latest != null) {
+        ref
+            .read(sessionStoreProvider.notifier)
+            .save(
+              latest.copyWith(
+                bankName: context.bankName,
+                examTypeId: context.examTypeId,
+              ),
+            );
+      }
+      if (context.examTypeId != preset.bankId) {
+        throw const UseCaseFailure('题库切换后校验不一致，请重试');
+      }
+      if (mounted) {
+        setState(() {
+          _message = '已切换到预设题库：${preset.bankName}';
+          _messageIsError = false;
+        });
+      }
+    } finally {
+      if (mounted) setState(() => _aligning = false);
     }
   }
 
