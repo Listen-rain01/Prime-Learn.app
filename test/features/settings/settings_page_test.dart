@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/settings/bank_providers.dart';
+import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
 import 'package:primelearn/features/settings/domain/repositories/profile_repository.dart';
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
@@ -44,6 +45,7 @@ Future<void> _pumpSettings(
   WidgetTester tester,
   PersonProfile profile, {
   Uint8List? avatar,
+  BankPreset? preset,
 }) async {
   final container = ProviderContainer(
     overrides: [
@@ -53,7 +55,7 @@ Future<void> _pumpSettings(
       // 头像单独取；测试里不触网。
       profileAvatarProvider.overrideWith((ref) async => avatar),
       // 预设读本地存储；测试里不触插件。
-      bankPresetProvider.overrideWith((ref) async => null),
+      bankPresetProvider.overrideWith((ref) async => preset),
     ],
   );
   addTearDown(container.dispose);
@@ -95,6 +97,47 @@ void main() {
     expect(find.text('未设置'), findsNWidgets(2));
     expect(find.text('设置'), findsNothing);
     expect(find.text('退出登录'), findsOneWidget);
+  });
+
+  testWidgets('预设卡片展示当前题库、目标试卷与题型', (tester) async {
+    await _pumpSettings(
+      tester,
+      _profile,
+      preset: const BankPreset(
+        bankId: 'bank-b',
+        bankName: '2025陕西煤业煤矿安全规程',
+        questionCount: 3985,
+        singleCount: 1554,
+        multipleCount: 793,
+        judgeCount: 1638,
+        paperCount: 2,
+        paperId: 'p2',
+        paperName: '2025安全规程模拟卷',
+        paperTotalScore: 100,
+        paperPassingGrade: 80,
+      ),
+    );
+
+    expect(find.text('题库A'), findsOneWidget);
+    expect(find.text('2025陕西煤业煤矿安全规程'), findsOneWidget);
+    expect(find.text('2025安全规程模拟卷（100 分 / 及格 80） · 共 2 份'), findsOneWidget);
+    expect(find.text('总题数 3985 · 单选 1554 · 多选 793 · 判断 1638'), findsOneWidget);
+    expect(find.text('待切换'), findsOneWidget);
+  });
+
+  testWidgets('旧预设没有试卷 ID 时提示补选', (tester) async {
+    await _pumpSettings(
+      tester,
+      _profile,
+      preset: const BankPreset(
+        bankId: 'bank-b',
+        bankName: '旧题库',
+        questionCount: 20,
+        paperName: '旧试卷',
+      ),
+    );
+
+    expect(find.text('未选择，点击补选'), findsOneWidget);
   });
 
   testWidgets('工号等于身份证号时也按身份证脱敏', (tester) async {

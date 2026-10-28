@@ -23,6 +23,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
   BankStyle? _style;
   BankStyle? _child;
   BankOption? _bank;
+  ExamPaper? _paper;
   String? _message;
   bool _messageIsError = false;
   bool _saving = false;
@@ -66,7 +67,11 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
     final papers = _bank == null
         ? null
         : ref.watch(examPapersProvider(_bank!.id));
-    final canSave = papers?.value?.isNotEmpty ?? false;
+    final paperList = papers?.value ?? const <ExamPaper>[];
+    // 只有一份时自动选中；多份必须由用户明确选择。
+    final selectedPaper =
+        _paper ?? (paperList.length == 1 ? paperList.first : null);
+    final canSave = selectedPaper != null;
     final stage = _stage();
     final breadcrumb = [
       if (_unit != null) _unit!.name,
@@ -145,6 +150,8 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
               styleName: _style?.name ?? '',
               year: _child?.year ?? '',
               papers: papers,
+              selectedPaperId: selectedPaper?.id,
+              onSelectPaper: (paper) => setState(() => _paper = paper),
             ),
           ],
           const SizedBox(height: 20),
@@ -167,7 +174,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              _saveHint(papers),
+              _saveHint(papers, selectedPaper),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: canSave
                     ? Theme.of(context).colorScheme.onSurfaceVariant
@@ -199,14 +206,26 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
   bool _hasItems<T>(AsyncValue<List<T>>? value) =>
       value?.value?.isNotEmpty ?? false;
 
-  String _saveHint(AsyncValue<List<ExamPaper>>? papers) {
+  String _saveHint(
+    AsyncValue<List<ExamPaper>>? papers,
+    ExamPaper? selectedPaper,
+  ) {
     if (_bank == null) return '请先依次选择单位、分类、年份和题库';
     if (papers == null || papers.isLoading) return '正在检查该题库的可考试卷…';
     if (papers.hasError) return '试卷检查失败，请重新选择题库';
     final list = papers.value ?? const [];
     if (list.isEmpty) return '该题库没有可考试卷，不能用于模拟/手机考试';
-    return '可考试卷 ${list.length} 份 · 保存后考试前会自动对齐';
+    if (selectedPaper == null) {
+      return '该题库有 ${list.length} 份试卷，请选择要使用的一份';
+    }
+    return '将使用：${selectedPaper.name}'
+        '（${_score(selectedPaper.totalScore)} 分 / 及格 '
+        '${_score(selectedPaper.passingGrade)}）';
   }
+
+  String _score(double value) => value == value.roundToDouble()
+      ? value.round().toString()
+      : value.toStringAsFixed(1);
 
   Future<void> _pickUnit(List<BankUnit> units) async {
     final choice = await showModalBottomSheet<BankUnit>(
@@ -348,6 +367,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
     if (choice == null) return;
     setState(() {
       _bank = choice;
+      _paper = null;
       _message = null;
     });
     // 选完题库后自动滚到详情，避免用户以为没有反应。
@@ -363,6 +383,16 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
 
   Future<void> _save() async {
     final bank = _bank!;
+    final papersNow = ref.read(examPapersProvider(bank.id)).value ?? const [];
+    final selectedPaper =
+        _paper ?? (papersNow.length == 1 ? papersNow.first : null);
+    if (selectedPaper == null) {
+      setState(() {
+        _message = '请选择要使用的试卷';
+        _messageIsError = true;
+      });
+      return;
+    }
     final session = ref.read(sessionStoreProvider);
     if (session == null) {
       setState(() {
@@ -383,12 +413,13 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           singleCount: bank.singleCount,
           multipleCount: bank.multipleCount,
           judgeCount: bank.judgeCount,
+          paperId: selectedPaper.id,
         ),
       );
       ref.invalidate(bankPresetProvider);
       if (!mounted) return;
       setState(() {
-        _message = '已保存预设：${bank.name}';
+        _message = '已保存预设：${bank.name} · ${selectedPaper.name}';
         _messageIsError = false;
       });
     } on UseCaseFailure catch (error) {
@@ -674,7 +705,7 @@ class _StepBar extends StatelessWidget {
   }
 }
 
-/// 题库详情：题目数、状态、所属、可考试卷。
+/// 题库详情：题目数、状态、所属、可考试卷（需选一份）。
 class _BankDetailsCard extends ConsumerWidget {
   const _BankDetailsCard({
     required this.bank,
@@ -682,6 +713,8 @@ class _BankDetailsCard extends ConsumerWidget {
     required this.styleName,
     required this.year,
     required this.papers,
+    required this.selectedPaperId,
+    required this.onSelectPaper,
   });
 
   final BankOption bank;
@@ -689,6 +722,8 @@ class _BankDetailsCard extends ConsumerWidget {
   final String styleName;
   final String year;
   final AsyncValue<List<ExamPaper>>? papers;
+  final String? selectedPaperId;
+  final ValueChanged<ExamPaper> onSelectPaper;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -743,7 +778,7 @@ class _BankDetailsCard extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '可考试卷',
+            '试卷',
             style: textTheme.labelMedium?.copyWith(
               fontWeight: FontWeight.w600,
               color: scheme.onSurface,
@@ -768,36 +803,58 @@ class _BankDetailsCard extends ConsumerWidget {
                       style: textTheme.bodySmall?.copyWith(color: scheme.error),
                     )
                   : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        for (final paper in list)
+                        if (list.length > 1)
                           Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.description_outlined,
-                                  size: 18,
-                                  color: scheme.onSurfaceVariant,
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    paper.name,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: textTheme.bodyMedium?.copyWith(
-                                      color: scheme.onSurface,
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Text(
+                              '共 ${list.length} 份，请选择一份',
+                              style: textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        for (final paper in list)
+                          InkWell(
+                            onTap: () => onSelectPaper(paper),
+                            borderRadius: BorderRadius.circular(8),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    paper.id == selectedPaperId
+                                        ? Icons.radio_button_checked
+                                        : Icons.radio_button_unchecked,
+                                    size: 18,
+                                    color: paper.id == selectedPaperId
+                                        ? scheme.primary
+                                        : scheme.onSurfaceVariant,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      paper.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: textTheme.bodyMedium?.copyWith(
+                                        color: scheme.onSurface,
+                                        fontWeight: paper.id == selectedPaperId
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  '${_score(paper.totalScore)} 分 · 及格 ${_score(paper.passingGrade)}',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: scheme.onSurfaceVariant,
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${_score(paper.totalScore)} 分 · 及格 ${_score(paper.passingGrade)}',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: scheme.onSurfaceVariant,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                       ],
@@ -830,7 +887,7 @@ class _NotesCard extends StatelessWidget {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _note('预设只保存目标题库，不保存试卷；每次考试前再从可考试卷中选择。'),
+        _note('预设保存目标题库和一份试卷；执行考试时直接使用这份试卷。'),
         const SizedBox(height: 6),
         _note('执行考试或一键任务前会校验当前题库，不一致时切换（需授权）。'),
         const SizedBox(height: 6),

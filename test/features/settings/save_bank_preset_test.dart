@@ -18,6 +18,7 @@ const _preset = BankPreset(
   singleCount: 9,
   multipleCount: 4,
   judgeCount: 7,
+  paperId: 'p1',
 );
 
 void main() {
@@ -59,6 +60,38 @@ void main() {
     verifyNever(() => presetRepository.save(any()));
   });
 
+  test('所选试卷不属于该题库时拒绝保存', () async {
+    when(
+      () => examRepository.fetchPapers(
+        userId: any(named: 'userId'),
+        bankId: any(named: 'bankId'),
+      ),
+    ).thenAnswer(
+      (_) async => const [
+        ExamPaper(id: 'p1', name: '试卷 A', totalScore: 100, passingGrade: 80),
+      ],
+    );
+
+    await expectLater(
+      SaveBankPreset(examRepository, presetRepository).execute(
+        userId: 'u1',
+        preset: const BankPreset(
+          bankId: 'bank-2',
+          bankName: '目标题库',
+          paperId: 'missing',
+        ),
+      ),
+      throwsA(
+        isA<UseCaseFailure>().having(
+          (e) => e.message,
+          'message',
+          '所选试卷不存在，请重新选择',
+        ),
+      ),
+    );
+    verifyNever(() => presetRepository.save(any()));
+  });
+
   test('有试卷时保存预设', () async {
     when(
       () => examRepository.fetchPapers(
@@ -85,6 +118,7 @@ void main() {
     expect(saved.singleCount, _preset.singleCount);
     expect(saved.multipleCount, _preset.multipleCount);
     expect(saved.judgeCount, _preset.judgeCount);
+    expect(saved.paperId, 'p1');
     expect(saved.paperName, '试卷 A');
     expect(saved.paperTotalScore, 100);
     expect(saved.paperPassingGrade, 80);

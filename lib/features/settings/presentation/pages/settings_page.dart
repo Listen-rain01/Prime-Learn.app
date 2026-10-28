@@ -154,7 +154,7 @@ class _PresetEntryCard extends StatelessWidget {
     final aligned =
         value != null && currentBankId != null && value.bankId == currentBankId;
     final typeMeta = _typeMeta(value);
-    final paperMeta = _paperMeta(value);
+    final paperText = _paperText(value);
 
     final (statusLabel, statusBackground, statusForeground) = switch (value) {
       null => ('未设置', scheme.surfaceContainerHigh, scheme.onSurfaceVariant),
@@ -220,24 +220,20 @@ class _PresetEntryCard extends StatelessWidget {
                   value: value?.bankName ?? '未设置',
                   highlight: value != null,
                 ),
+                if (value != null) ...[
+                  const SizedBox(height: 6),
+                  _LabeledValue(
+                    label: '目标试卷',
+                    value: paperText,
+                    highlight: value.paperId != null,
+                  ),
+                ],
                 if (value != null && typeMeta != null) ...[
                   const SizedBox(height: 4),
                   Padding(
                     padding: const EdgeInsets.only(left: 76),
                     child: Text(
                       typeMeta,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ),
-                ],
-                if (value != null && paperMeta != null) ...[
-                  const SizedBox(height: 2),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 76),
-                    child: Text(
-                      paperMeta,
                       style: textTheme.bodySmall?.copyWith(
                         color: scheme.onSurfaceVariant,
                       ),
@@ -275,19 +271,20 @@ class _PresetEntryCard extends StatelessWidget {
     return parts.isEmpty ? null : parts.join(' · ');
   }
 
-  String? _paperMeta(BankPreset? value) {
-    if (value == null || value.paperCount == null) return null;
-    final parts = <String>['可考试卷 ${value.paperCount} 份'];
-    final name = value.paperName;
-    if (name != null && name.isNotEmpty) {
-      final total = value.paperTotalScore;
-      final pass = value.paperPassingGrade;
-      final score = total != null && pass != null
-          ? '（${_score(total)} 分 / 及格 ${_score(pass)}）'
-          : '';
-      parts.add('$name$score');
-    }
-    return parts.join(' · ');
+  /// 目标试卷文案；没有绑定试卷 ID 的旧预设提示重新选择。
+  String _paperText(BankPreset? value) {
+    if (value == null) return '';
+    if (value.paperId == null) return '未选择，点击补选';
+    final name = value.paperName ?? '';
+    final total = value.paperTotalScore;
+    final pass = value.paperPassingGrade;
+    final score = total != null && pass != null
+        ? '（${_score(total)} 分 / 及格 ${_score(pass)}）'
+        : '';
+    final count = value.paperCount != null && value.paperCount! > 1
+        ? ' · 共 ${value.paperCount} 份'
+        : '';
+    return '$name$score$count';
   }
 
   String _score(double value) => value == value.roundToDouble()

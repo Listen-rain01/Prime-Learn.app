@@ -93,6 +93,7 @@ class BankPreset {
     this.paperName,
     this.paperTotalScore,
     this.paperPassingGrade,
+    this.paperId,
   });
 
   /// 题库 ID。
@@ -120,4 +121,7 @@ class BankPreset {
   final String? paperName;
   final double? paperTotalScore;
   final double? paperPassingGrade;
+
+  /// 预设置的试卷 ID（考试创建时必须传给平台）。
+  final String? paperId;
 }

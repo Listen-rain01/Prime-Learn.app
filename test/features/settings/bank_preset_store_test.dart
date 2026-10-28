@@ -23,6 +23,7 @@ void main() {
         paperName: '日常练习',
         paperTotalScore: 100,
         paperPassingGrade: 80,
+        paperId: 'paper-1',
       ),
     );
 
@@ -37,6 +38,7 @@ void main() {
     expect(preset?.paperName, '日常练习');
     expect(preset?.paperTotalScore, 100);
     expect(preset?.paperPassingGrade, 80);
+    expect(preset?.paperId, 'paper-1');
 
     await store.clear();
     expect(store.read(), isNull);
