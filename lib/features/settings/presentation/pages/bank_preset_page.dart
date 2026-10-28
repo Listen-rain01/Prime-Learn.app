@@ -376,7 +376,11 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       final useCase = await ref.read(saveBankPresetProvider.future);
       await useCase.execute(
         userId: session.userId,
-        preset: BankPreset(bankId: bank.id, bankName: bank.name),
+        preset: BankPreset(
+          bankId: bank.id,
+          bankName: bank.name,
+          questionCount: bank.questionCount,
+        ),
       );
       ref.invalidate(bankPresetProvider);
       if (!mounted) return;

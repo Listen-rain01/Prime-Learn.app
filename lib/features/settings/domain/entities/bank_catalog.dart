@@ -70,11 +70,22 @@ class BankOption {
 /// 预设置的题库。
 class BankPreset {
   /// 创建预设。
-  const BankPreset({required this.bankId, required this.bankName});
+  const BankPreset({
+    required this.bankId,
+    required this.bankName,
+    this.questionCount,
+    this.paperCount,
+  });
 
   /// 题库 ID。
   final String bankId;
 
   /// 题库名称。
   final String bankName;
+
+  /// 保存时的题数快照（旧预设可能为 null）。
+  final int? questionCount;
+
+  /// 保存时的可考试卷数快照（旧预设可能为 null）。
+  final int? paperCount;
 }

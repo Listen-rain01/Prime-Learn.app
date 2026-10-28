@@ -25,7 +25,14 @@ class SaveBankPreset {
       if (papers.isEmpty) {
         throw const UseCaseFailure('该题库没有可开考试卷，无法用于考试');
       }
-      await _presetRepository.save(preset);
+      await _presetRepository.save(
+        BankPreset(
+          bankId: preset.bankId,
+          bankName: preset.bankName,
+          questionCount: preset.questionCount,
+          paperCount: papers.length,
+        ),
+      );
     } on UseCaseFailure {
       rethrow;
     } on ApiException catch (error) {

@@ -11,7 +11,11 @@ class _MockExamRepository extends Mock implements ExamRepository {}
 
 class _MockBankPresetRepository extends Mock implements BankPresetRepository {}
 
-const _preset = BankPreset(bankId: 'bank-2', bankName: '目标题库');
+const _preset = BankPreset(
+  bankId: 'bank-2',
+  bankName: '目标题库',
+  questionCount: 20,
+);
 
 void main() {
   late _MockExamRepository examRepository;
@@ -70,6 +74,10 @@ void main() {
       presetRepository,
     ).execute(userId: 'u1', preset: _preset);
 
-    verify(() => presetRepository.save(_preset)).called(1);
+    final saved =
+        verify(() => presetRepository.save(captureAny())).captured.single
+            as BankPreset;
+    expect(saved.paperCount, 1);
+    expect(saved.questionCount, _preset.questionCount);
   });
 }
