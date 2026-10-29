@@ -1,14 +1,14 @@
-import 'package:primelearn/core/errors/use_case_failure.dart';
+﻿import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
-import 'package:primelearn/features/records/domain/repositories/records_repository.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/repositories/stats_repository.dart';
 
 /// 加载榜单（成绩榜 / 学习时长榜）。
 class LoadRanking {
   /// 创建用例。
   LoadRanking(this._repository);
 
-  final RecordsRepository _repository;
+  final StatsRepository _repository;
 
   /// 执行。
   Future<RankingBoard> execute({
@@ -27,6 +27,12 @@ class LoadRanking {
           end: end,
         ),
         RankingKind.studyTime => await _repository.fetchStudyTimeRanking(
+          userId: userId,
+          scope: scope,
+          begin: begin,
+          end: end,
+        ),
+        RankingKind.integral => await _repository.fetchIntegralRanking(
           userId: userId,
           scope: scope,
           begin: begin,

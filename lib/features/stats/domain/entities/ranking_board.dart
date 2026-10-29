@@ -4,7 +4,10 @@ enum RankingKind {
   mark('成绩榜'),
 
   /// 学习时长榜（`GetStudyTimeRankingListOne`）。
-  studyTime('学习时长榜');
+  studyTime('学习时长榜'),
+
+  /// 个人积分榜（`GetAccumulateRankingListOne`）。
+  integral('积分榜');
 
   const RankingKind(this.label);
 

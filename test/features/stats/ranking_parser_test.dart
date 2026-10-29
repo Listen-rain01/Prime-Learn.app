@@ -1,6 +1,6 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/data/parsers/ranking_parser.dart';
+import 'package:primelearn/features/stats/data/parsers/ranking_parser.dart';
 
 void main() {
   const parser = RankingParser();
@@ -37,6 +37,29 @@ void main() {
     expect(board.myMark, 1793);
     expect(board.entries.single.mark, 0);
     expect(board.entries.single.allCount, 154710);
+  });
+
+  test('积分榜：Mark 恒为 null、积分在 AllCount，message 为「姓名|排名|积分」', () {
+    // 样本来自真实环境（docs/api/samples/accumulate-ranking/response.json）。
+    final board = parser.parse('''
+{
+  "success": true,
+  "message": "聂伟|54|1055",
+  "data": [
+    {"Cur": 1, "PersonName": "曹朋涛", "DepartmentFullName": "澄合矿业/西卓煤矿/机电队", "Mark": null, "AllCount": 1295, "Ranking": 1},
+    {"Cur": 2, "PersonName": "王照平", "DepartmentFullName": "澄合矿业/西卓煤矿/准备队", "Mark": null, "AllCount": 1295, "Ranking": 2}
+  ]
+}''');
+
+    expect(board.myName, '聂伟');
+    expect(board.myRank, 54);
+    expect(board.myMark, 1055);
+    expect(board.entries, hasLength(2));
+    expect(board.entries.first.personName, '曹朋涛');
+    expect(board.entries.first.department, '澄合矿业/西卓煤矿/机电队');
+    expect(board.entries.first.mark, 0, reason: 'Mark 为 null 时应解析为 0');
+    expect(board.entries.first.allCount, 1295, reason: '积分在 AllCount');
+    expect(board.entries.first.rank, 1);
   });
 
   test('缺少 message 时我的排名为 null', () {

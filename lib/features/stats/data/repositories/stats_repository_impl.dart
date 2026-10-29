@@ -1,22 +1,22 @@
-import 'package:primelearn/features/records/data/models/exam_record_dto.dart';
-import 'package:primelearn/features/records/data/models/point_entry_dto.dart';
-import 'package:primelearn/features/records/data/models/ranking_dto.dart';
-import 'package:primelearn/features/records/data/models/score_trend_dto.dart';
-import 'package:primelearn/features/records/data/parsers/ranking_parser.dart';
-import 'package:primelearn/features/records/data/parsers/score_trend_parser.dart';
-import 'package:primelearn/features/records/data/services/records_api.dart';
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
-import 'package:primelearn/features/records/domain/entities/point_entry.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
-import 'package:primelearn/features/records/domain/entities/score_trend_point.dart';
-import 'package:primelearn/features/records/domain/repositories/records_repository.dart';
+﻿import 'package:primelearn/features/stats/data/models/exam_record_dto.dart';
+import 'package:primelearn/features/stats/data/models/point_entry_dto.dart';
+import 'package:primelearn/features/stats/data/models/ranking_dto.dart';
+import 'package:primelearn/features/stats/data/models/score_trend_dto.dart';
+import 'package:primelearn/features/stats/data/parsers/ranking_parser.dart';
+import 'package:primelearn/features/stats/data/parsers/score_trend_parser.dart';
+import 'package:primelearn/features/stats/data/services/stats_api.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/point_entry.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/entities/score_trend_point.dart';
+import 'package:primelearn/features/stats/domain/repositories/stats_repository.dart';
 
 /// 记录仓储实现：DTO → Entity。
-class RecordsRepositoryImpl implements RecordsRepository {
+class StatsRepositoryImpl implements StatsRepository {
   /// 创建仓储实现。
-  RecordsRepositoryImpl(this._api);
+  StatsRepositoryImpl(this._api);
 
-  final RecordsApi _api;
+  final StatsApi _api;
   static const ExamRecordsParser _examParser = ExamRecordsParser();
   static const PointsLedgerParser _pointParser = PointsLedgerParser();
   static const RankingParser _rankingParser = RankingParser();
@@ -61,6 +61,22 @@ class RecordsRepositoryImpl implements RecordsRepository {
     required String end,
   }) async {
     final body = await _api.fetchStudyTimeRanking(
+      userId,
+      scope: scope,
+      begin: begin,
+      end: end,
+    );
+    return _toBoard(_rankingParser.parse(body));
+  }
+
+  @override
+  Future<RankingBoard> fetchIntegralRanking({
+    required String userId,
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) async {
+    final body = await _api.fetchIntegralRanking(
       userId,
       scope: scope,
       begin: begin,

@@ -1,17 +1,17 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/core/session/session_store.dart';
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
-import 'package:primelearn/features/records/domain/entities/point_entry.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
-import 'package:primelearn/features/records/domain/entities/score_trend_point.dart';
-import 'package:primelearn/features/records/domain/repositories/records_repository.dart';
-import 'package:primelearn/features/records/presentation/pages/records_page.dart';
-import 'package:primelearn/features/records/records_providers.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/point_entry.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/entities/score_trend_point.dart';
+import 'package:primelearn/features/stats/domain/repositories/stats_repository.dart';
+import 'package:primelearn/features/stats/presentation/pages/stats_page.dart';
+import 'package:primelearn/features/stats/stats_providers.dart';
 
-class _FakeRecordsRepository implements RecordsRepository {
+class _FakeStatsRepository implements StatsRepository {
   @override
   Future<List<ExamRecord>> fetchExamRecords(
     String userId,
@@ -115,13 +115,41 @@ class _FakeRecordsRepository implements RecordsRepository {
       time: DateTime(2026, 10, 20, 9, 0),
     ),
   ];
+
+  @override
+  Future<RankingBoard> fetchIntegralRanking({
+    required String userId,
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) async => const RankingBoard(
+    myName: '聂伟',
+    myRank: 54,
+    myMark: 1055,
+    entries: [
+      RankingEntry(
+        rank: 1,
+        personName: '曹朋涛',
+        department: '澄合矿业/西卓煤矿/机电队',
+        mark: 0,
+        allCount: 1295,
+      ),
+      RankingEntry(
+        rank: 2,
+        personName: '王照平',
+        department: '澄合矿业/西卓煤矿/准备队',
+        mark: 0,
+        allCount: 1295,
+      ),
+    ],
+  );
 }
 
 void main() {
   Future<void> pumpRecords(WidgetTester tester) async {
     final container = ProviderContainer(
       overrides: [
-        recordsRepositoryProvider.overrideWithValue(_FakeRecordsRepository()),
+        statsRepositoryProvider.overrideWithValue(_FakeStatsRepository()),
       ],
     );
     addTearDown(container.dispose);
@@ -131,7 +159,7 @@ void main() {
     await tester.pumpWidget(
       UncontrolledProviderScope(
         container: container,
-        child: const MaterialApp(home: RecordsPage()),
+        child: const MaterialApp(home: StatsPage()),
       ),
     );
     await tester.pumpAndSettle();
@@ -191,7 +219,7 @@ void main() {
     expect(find.text('10-27'), findsOneWidget);
   });
 
-  testWidgets('切换学习时长榜后刷新榜单', (tester) async {
+  testWidgets('切换学习时长榜后刷新榜单，并可切本月', (tester) async {
     await pumpRecords(tester);
 
     await tester.tap(find.text('排行'));
@@ -201,8 +229,45 @@ void main() {
 
     expect(find.text('李四'), findsOneWidget);
     expect(find.text('学习时长 · 本周'), findsOneWidget);
+    expect(find.text('本周'), findsOneWidget);
+    expect(find.text('本月'), findsOneWidget);
     expect(find.text('我的排名：第 3 名 · 学习时长 2 小时'), findsOneWidget);
     expect(find.text('2 小时'), findsOneWidget);
     expect(find.text('田小平'), findsNothing);
+
+    // 切到本月后区间文案更新
+    await tester.tap(find.text('本月'));
+    await tester.pumpAndSettle();
+    expect(find.text('学习时长 · 本月'), findsOneWidget);
+    expect(find.text('学习时长 · 本周'), findsNothing);
+  });
+
+  testWidgets('切换积分榜后展示积分与周/月切换', (tester) async {
+    await pumpRecords(tester);
+
+    await tester.tap(find.text('排行'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('积分榜'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('积分 · 本周'), findsOneWidget);
+    expect(find.text('本周'), findsOneWidget);
+    expect(find.text('本月'), findsOneWidget);
+    expect(find.text('我的排名：第 54 名 · 积分 1055 分'), findsOneWidget);
+    expect(find.text('曹朋涛'), findsOneWidget);
+    expect(find.text('1295 分'), findsNWidgets(2));
+  });
+
+  testWidgets('积分榜切换到本月后区间文案更新', (tester) async {
+    await pumpRecords(tester);
+
+    await tester.tap(find.text('排行'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('积分榜'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('本月'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('积分 · 本月'), findsOneWidget);
   });
 }

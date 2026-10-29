@@ -1,0 +1,116 @@
+{
+  "success": true,
+  "data": [
+    {
+      "Cur": 1,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "曹朋涛",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/机电队",
+      "Mark": null,
+      "AllCount": 1295,
+      "Ranking": 1
+    },
+    {
+      "Cur": 2,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "王照平",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/准备队",
+      "Mark": null,
+      "AllCount": 1295,
+      "Ranking": 2
+    },
+    {
+      "Cur": 3,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "赵利",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/抽放队",
+      "Mark": null,
+      "AllCount": 1295,
+      "Ranking": 3
+    },
+    {
+      "Cur": 4,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "龚刚",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/通风区",
+      "Mark": null,
+      "AllCount": 1295,
+      "Ranking": 4
+    },
+    {
+      "Cur": 5,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "李涛",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/调度室",
+      "Mark": null,
+      "AllCount": 1285,
+      "Ranking": 5
+    },
+    {
+      "Cur": 6,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "高绪成",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/机电队",
+      "Mark": null,
+      "AllCount": 1284,
+      "Ranking": 6
+    },
+    {
+      "Cur": 7,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "曹朋浪",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/机电队",
+      "Mark": null,
+      "AllCount": 1284,
+      "Ranking": 7
+    },
+    {
+      "Cur": 8,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "吕思辉",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/机电队",
+      "Mark": null,
+      "AllCount": 1283,
+      "Ranking": 8
+    },
+    {
+      "Cur": 9,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "张晓强",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/机电队",
+      "Mark": null,
+      "AllCount": 1283,
+      "Ranking": 9
+    },
+    {
+      "Cur": 10,
+      "PersonId": "<guid>",
+      "PhotoUrl": "/qyksFiles/person/<guid>/<guid>.zp",
+      "PersonName": "曹强",
+      "DepartmentId": "<guid>",
+      "DepartmentFullName": "澄合矿业/西卓煤矿/机电队",
+      "Mark": null,
+      "AllCount": 1282,
+      "Ranking": 10
+    }
+  ],
+  "message": "聂伟|54|1055"
+}

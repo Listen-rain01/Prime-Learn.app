@@ -1,19 +1,19 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/utils/date_formatter.dart';
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
-import 'package:primelearn/features/records/presentation/widgets/exam_record_row.dart';
-import 'package:primelearn/features/records/presentation/widgets/point_entry_row.dart';
-import 'package:primelearn/features/records/presentation/widgets/ranking_entry_row.dart';
-import 'package:primelearn/features/records/presentation/widgets/record_format.dart';
-import 'package:primelearn/features/records/records_providers.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/presentation/widgets/exam_record_row.dart';
+import 'package:primelearn/features/stats/presentation/widgets/point_entry_row.dart';
+import 'package:primelearn/features/stats/presentation/widgets/ranking_entry_row.dart';
+import 'package:primelearn/features/stats/presentation/widgets/record_format.dart';
+import 'package:primelearn/features/stats/stats_providers.dart';
 
 /// 记录 Tab：考试记录 + 积分明细 + 排名/成绩趋势（均为只读）。
-class RecordsPage extends StatelessWidget {
+class StatsPage extends StatelessWidget {
   /// 创建记录页。
-  const RecordsPage({super.key});
+  const StatsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -162,16 +162,22 @@ class _RankingTab extends ConsumerStatefulWidget {
 class _RankingTabState extends ConsumerState<_RankingTab> {
   RankingKind _kind = RankingKind.mark;
   RankingScope _scope = RankingScope.unit;
+  // 学习时长榜 / 积分榜的时间维度：本周 / 本月（成绩榜固定本月）。
+  bool _week = true;
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    // 平台页面：成绩排行按本月统计，学习时长排行按本周统计。
+    // 平台页面：成绩榜固定本月；学习时长榜、积分榜可切本周/本月。
     final now = DateTime.now();
-    final range = _kind == RankingKind.mark
-        ? DateFormatter.monthRange(now)
-        : DateFormatter.weekRange(now);
+    final range = switch (_kind) {
+      RankingKind.mark => DateFormatter.monthRange(now),
+      RankingKind.studyTime =>
+        _week ? DateFormatter.weekRange(now) : DateFormatter.monthRange(now),
+      RankingKind.integral =>
+        _week ? DateFormatter.weekRange(now) : DateFormatter.monthRange(now),
+    };
     final query = (
       kind: _kind,
       scope: _scope,
@@ -208,23 +214,24 @@ class _RankingTabState extends ConsumerState<_RankingTab> {
           onSelectionChanged: (selection) =>
               setState(() => _scope = selection.first),
         ),
-        if (_kind == RankingKind.mark) ...[
+        if (_kind != RankingKind.mark) ...[
           const SizedBox(height: 8),
-          Text(
-            '考试成绩 · 本月',
-            style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
-          ),
-        ] else ...[
-          const SizedBox(height: 8),
-          Text(
-            '学习时长 · 本周',
-            style: textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+          SegmentedButton<bool>(
+            showSelectedIcon: false,
+            segments: const [
+              ButtonSegment<bool>(value: true, label: Text('本周')),
+              ButtonSegment<bool>(value: false, label: Text('本月')),
+            ],
+            selected: {_week},
+            onSelectionChanged: (selection) =>
+                setState(() => _week = selection.first),
           ),
         ],
+        const SizedBox(height: 8),
+        Text(
+          _rangeCaption(_kind, _week),
+          style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+        ),
         const SizedBox(height: 12),
         board.when(
           loading: () => const _Loading(message: '正在加载排名...'),
@@ -347,26 +354,36 @@ class _RankingTabState extends ConsumerState<_RankingTab> {
   }
 }
 
-/// 我的排名文案；成绩榜数值为考试成绩，学习时长榜为时长。
+/// 区间说明文案。
+String _rangeCaption(RankingKind kind, bool week) => switch (kind) {
+  RankingKind.mark => '考试成绩 · 本月',
+  RankingKind.studyTime => week ? '学习时长 · 本周' : '学习时长 · 本月',
+  RankingKind.integral => week ? '积分 · 本周' : '积分 · 本月',
+};
+
+/// 我的排名文案；成绩榜数值为考试成绩，学习时长榜为时长，积分榜为积分。
 String _myRankText(RankingKind kind, int? rank, double? value) {
   if (rank == null) return '我的排名：暂无';
   final label = switch (kind) {
     RankingKind.mark => '考试成绩',
     RankingKind.studyTime => '学习时长',
+    RankingKind.integral => '积分',
   };
   return '我的排名：第 $rank 名 · $label ${_myValueText(kind, value)}';
 }
 
-/// 我的排名数值：成绩榜为 `Mark`，学习时长榜按秒展示。
+/// 我的排名数值：成绩榜为 `Mark`，学习时长榜按秒展示，积分榜为 `AllCount`。
 String _myValueText(RankingKind kind, double? value) => switch (kind) {
   RankingKind.mark => value == null ? '暂无' : RecordFormat.score(value),
   RankingKind.studyTime => value == null ? '暂无' : RecordFormat.duration(value),
+  RankingKind.integral => value == null ? '暂无' : '${value.toInt()} 分',
 };
 
-/// 榜单行数值：成绩榜取 `Mark`，学习时长榜取 `AllCount`（秒）。
+/// 榜单行数值：成绩榜取 `Mark`，学习时长榜取 `AllCount`（秒），积分榜取 `AllCount`。
 String _entryValueText(RankingKind kind, RankingEntry entry) => switch (kind) {
   RankingKind.mark => RecordFormat.score(entry.mark),
   RankingKind.studyTime => RecordFormat.duration(entry.allCount),
+  RankingKind.integral => '${entry.allCount.toInt()} 分',
 };
 
 class _Loading extends StatelessWidget {

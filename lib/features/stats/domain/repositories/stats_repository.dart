@@ -1,10 +1,10 @@
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
-import 'package:primelearn/features/records/domain/entities/point_entry.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
-import 'package:primelearn/features/records/domain/entities/score_trend_point.dart';
+﻿import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/point_entry.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/entities/score_trend_point.dart';
 
 /// 记录（考试记录 + 积分明细 + 排名/趋势）数据接口。
-abstract interface class RecordsRepository {
+abstract interface class StatsRepository {
   /// 查询考试记录；[category] 决定 `type` 过滤。
   Future<List<ExamRecord>> fetchExamRecords(
     String userId,
@@ -24,6 +24,14 @@ abstract interface class RecordsRepository {
 
   /// 查询学习时长排名。
   Future<RankingBoard> fetchStudyTimeRanking({
+    required String userId,
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  });
+
+  /// 查询个人积分排名。
+  Future<RankingBoard> fetchIntegralRanking({
     required String userId,
     required RankingScope scope,
     required String begin,

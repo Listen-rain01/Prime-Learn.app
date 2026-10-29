@@ -1,12 +1,12 @@
-import 'package:primelearn/core/network/api_client.dart';
+﻿import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/protocol/esdt_codec.dart';
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
 
 /// 记录端点（考试记录 / 积分明细 / 排名 / 成绩趋势）。
-class RecordsApi {
+class StatsApi {
   /// 创建 API 封装。
-  RecordsApi(this._client);
+  StatsApi(this._client);
 
   final ApiClient _client;
   static const EsdtCodec _esdt = EsdtCodec();
@@ -64,6 +64,26 @@ class RecordsApi {
     'end': end,
   };
 
+  /// 个人积分排名的表单；`pid`/`begin`/`end` 均需 Esdt 编码，`type` 明文。
+  ///
+  /// 实测（2026-10-29，账号持有人授权）：`type=1` 单位榜 / `0` 集团榜；
+  /// 积分在 `AllCount`，`Mark` 恒为 null；周榜周一~周日，月榜月初~月末。
+  static Map<String, String> integralRankingForm(
+    String userId, {
+    required RankingScope scope,
+    required String begin,
+    required String end,
+    int page = 1,
+    int rows = 20,
+  }) => {
+    'pid': _esdt.encode(userId),
+    'type': '${scope.wireType}',
+    'page': '$page',
+    'rows': '$rows',
+    'begin': _esdt.encode(begin),
+    'end': _esdt.encode(end),
+  };
+
   /// 个人成绩趋势路径；`pid` 为明文，`type` 为考试类型（中文需编码）。
   static String scoreTrendPath(
     String userId, {
@@ -102,6 +122,17 @@ class RecordsApi {
   }) => _client.postForm(
     '/ArchiveManger/D_PersonStudyLog/GetStudyTimeRankingListOne',
     studyTimeRankingForm(userId, scope: scope, begin: begin, end: end),
+  );
+
+  /// 查询个人积分排名。
+  Future<String> fetchIntegralRanking(
+    String userId, {
+    required RankingScope scope,
+    required String begin,
+    required String end,
+  }) => _client.postForm(
+    '/ArchiveManger/D_PersonAccumulate/GetAccumulateRankingListOne',
+    integralRankingForm(userId, scope: scope, begin: begin, end: end),
   );
 
   /// 查询个人成绩趋势。

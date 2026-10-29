@@ -1,22 +1,22 @@
-import 'package:flutter_test/flutter_test.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/application/load_ranking.dart';
-import 'package:primelearn/features/records/application/load_score_trend.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
-import 'package:primelearn/features/records/domain/entities/score_trend_point.dart';
-import 'package:primelearn/features/records/domain/repositories/records_repository.dart';
+import 'package:primelearn/features/stats/application/load_ranking.dart';
+import 'package:primelearn/features/stats/application/load_score_trend.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/entities/score_trend_point.dart';
+import 'package:primelearn/features/stats/domain/repositories/stats_repository.dart';
 
-class _MockRecordsRepository extends Mock implements RecordsRepository {}
+class _MockStatsRepository extends Mock implements StatsRepository {}
 
 void main() {
-  late _MockRecordsRepository repository;
+  late _MockStatsRepository repository;
 
   setUpAll(() => registerFallbackValue(RankingScope.unit));
 
   setUp(() {
-    repository = _MockRecordsRepository();
+    repository = _MockStatsRepository();
   });
 
   test('成绩榜调用 fetchMarkRanking 并透传参数', () async {
@@ -85,6 +85,46 @@ void main() {
         end: '2026-10-31',
       ),
     ).called(1);
+  });
+
+  test('积分榜调用 fetchIntegralRanking 并透传参数', () async {
+    when(
+      () => repository.fetchIntegralRanking(
+        userId: any(named: 'userId'),
+        scope: any(named: 'scope'),
+        begin: any(named: 'begin'),
+        end: any(named: 'end'),
+      ),
+    ).thenAnswer(
+      (_) async => const RankingBoard(myName: '聂伟', myRank: 54, myMark: 1055),
+    );
+
+    final board = await LoadRanking(repository).execute(
+      userId: 'u1',
+      kind: RankingKind.integral,
+      scope: RankingScope.unit,
+      begin: '2026-10-01',
+      end: '2026-10-31',
+    );
+
+    expect(board.myRank, 54);
+    expect(board.myMark, 1055);
+    verify(
+      () => repository.fetchIntegralRanking(
+        userId: 'u1',
+        scope: RankingScope.unit,
+        begin: '2026-10-01',
+        end: '2026-10-31',
+      ),
+    ).called(1);
+    verifyNever(
+      () => repository.fetchMarkRanking(
+        userId: any(named: 'userId'),
+        scope: any(named: 'scope'),
+        begin: any(named: 'begin'),
+        end: any(named: 'end'),
+      ),
+    );
   });
 
   test('会话失效映射为 sessionExpired', () async {

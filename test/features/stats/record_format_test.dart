@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
-import 'package:primelearn/features/records/presentation/widgets/record_format.dart';
+﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:primelearn/features/stats/presentation/widgets/record_format.dart';
 
 void main() {
   test('分数：整数不带小数位', () {
@@ -12,16 +12,15 @@ void main() {
     expect(RecordFormat.duration(59), '59 秒');
   });
 
-  test('时长：小于 1 小时按分钟', () {
-    expect(RecordFormat.duration(60), '1 分钟');
-    expect(RecordFormat.duration(1793), '30 分钟');
-    expect(RecordFormat.duration(3599), '60 分钟');
-  });
-
-  test('时长：整小时不带小数，其余保留一位', () {
-    expect(RecordFormat.duration(3600), '1 小时');
+  test('时长：三段式「X小时Y分Z秒」，高位为 0 时省略', () {
+    // 平台样本：18270 秒 → 5小时4分30秒（18000=5时 + 270=4分30秒）
+    expect(RecordFormat.duration(18270), '5 小时4 分30 秒');
     expect(RecordFormat.duration(7200), '2 小时');
-    expect(RecordFormat.duration(154710), '43 小时');
-    expect(RecordFormat.duration(5400), '1.5 小时');
+    expect(RecordFormat.duration(5400), '1 小时30 分');
+    expect(RecordFormat.duration(90), '1 分30 秒');
+    expect(RecordFormat.duration(60), '1 分');
+    expect(RecordFormat.duration(61), '1 分1 秒');
+    expect(RecordFormat.duration(3600), '1 小时');
+    expect(RecordFormat.duration(3661), '1 小时1 分1 秒');
   });
 }

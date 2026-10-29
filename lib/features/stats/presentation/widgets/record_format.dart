@@ -5,13 +5,22 @@ abstract final class RecordFormat {
       ? value.round().toString()
       : value.toStringAsFixed(1);
 
-  /// 时长（秒）：小于 1 分钟按秒，小于 1 小时按分钟，其余按小时（保留一位）。
+  /// 时长（秒）：三段式「X小时Y分Z秒」，与平台网页一致。
+  ///
+  /// 平台页面把 `AllCount`（秒）渲染为 `时/分/秒`（如 18270 → 5小时4分30秒），
+  /// 客户端按同样口径展示，保证与网页数字一致；高位为 0 时省略。
   static String duration(double seconds) {
     final total = seconds.round();
-    if (total < 60) return '$total 秒';
-    if (total < 3600) return '${(total / 60).round()} 分钟';
-    final hours = total / 3600;
-    final text = hours.toStringAsFixed(1);
-    return '${text.endsWith('.0') ? text.substring(0, text.length - 2) : text} 小时';
+    final hours = total ~/ 3600;
+    final minutes = (total % 3600) ~/ 60;
+    final secs = total % 60;
+
+    final parts = <String>[
+      if (hours > 0) '$hours 小时',
+      if (minutes > 0) '$minutes 分',
+      if (secs > 0) '$secs 秒',
+    ];
+    if (parts.isEmpty) return '0 秒';
+    return parts.join('');
   }
 }
