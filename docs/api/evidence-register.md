@@ -31,6 +31,10 @@
 | `/ArchiveManger/D_PersonStudyLog/GetStudyTimeRankingListOne` | 学习时长排名（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测 + 前端代码核对：`Mark` 为 null，时长在 `AllCount`（秒），页面渲染 `formatSeconds(AllCount)`；区间为本周 | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_ExamDetail/GetPersonExamAchievementListOne` | 个人成绩趋势（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测（记录页排行，返回多期成绩与日期） | 未落盘样本 | 平台版本变更 |
 | `/ArchiveManger/D_PersonAccumulate/GetAccumulateRankingListOne` | 个人积分排行（单位/集团榜，只读） | verified | 2026-10-29 | 账号持有人授权 + 实测 | 账号持有人授权登录，真机调用返回 10 条榜单 + `message` 管道「姓名\|排名\|积分」。`Mark` 恒为 null，积分在 `AllCount`；`type=1` 单位 / `0` 集团；`begin`/`end` 走 Esdt，`type` 不走；周=周一~周日、月=月初~月末 | `docs/api/samples/accumulate-ranking/` | 平台版本变更 / 计分口径变更 |
+| `/P_ExamDetail/SetOnlineStuday` | 进入手机练习（写，练习与考试共用练习链路） | observed | 2026-10-29 | 待独立复核 | 账号持有人授权实测：`XXExam("MobileExercises")` 直达练习页（参数全 Esdt，`style='0'`）；详见《手机练习接口文档》 | 未落盘样本 | 平台版本变更 |
+| `/P_ExamDetail/OnlineStuday` | 练习页题目数据（HTML 内嵌 allShiTi，只读） | observed | 2026-10-29 | 待独立复核 | 账号持有人授权实测：整卷 3985 题预载、翻题无请求；单条 22 字段与考试 `AllQuestionArray` 同构，`f[13]` 正确答案（显示序）、`f[18]` 服务端答案编码、`f[15]`/`f[16]` 题干/选项（URL 编码） | 未落盘样本 | 平台版本变更 / 数据结构变更 |
+| `/ArchiveManger/D_PersonStuday/SetQuestionOne` | 练习单题提交（写） | observed | 2026-10-29 | 待独立复核 | 账号持有人授权实测两题（对/错各一）：答错提交显示字母 → `data:"0"`；按 `f[13]` 答对提交 `f[18]` → `data:"1"`。参数除 Esdt 外明文；`pparms` 含两任务规则与当前题号。v1 范围外，仅取证 | 未落盘样本 | 平台版本变更 / 计分规则变更 |
+| `/PersonWap/SyncPersonStat` | 退出练习同步统计（写） | observed | 2026-10-29 | 待独立复核 | 账号持有人授权实测：`CloseStuday()` 触发，`pid` Esdt，`success=true` | 未落盘样本 | 平台版本变更 |
 | 会话失效 | 识别登录页/错误文案/状态码 | assumed | — | — | 待补信号表 | — | 首次实现前必须验证 |
 
 ## 字段说明
@@ -58,4 +62,5 @@
 |---|---|---|
 | 2026-10-29 | 手机考试创建（`type=2`）由 `observed` 升级为 `verified`；`CreateTempExamOne` / `SetOnlineTestOne` / `DoWriteAnswerAll` 改为按行为登记 | 2026-10-28 真机跑通手机考试全链路（含加密结算 100 分）；此前登记为 `observed` 与同批实测结论不一致 |
 | 2026-10-29 | 明确「规则文案与接口字段不一致」时以字段为准 | `docs/api/samples/today-accumulate/`：手机考试 `MaxAccumulate=16`、`Accumulate=6`，模拟考试 `MaxAccumulate=8` |
+| 2026-10-29 | 新增手机练习链路 4 条登记（`SetOnlineStuday` / `OnlineStuday` 页 / `SetQuestionOne` / `SyncPersonStat`），均为 `observed`，配套《手机练习接口文档》v1.0 | 2026-10-29 账号持有人授权 Playwright 真实环境实测（对/错两题双向验证提交语义）；v1 范围外仅取证，升级 `verified` 待独立复核 |
 
