@@ -44,7 +44,7 @@ final class LoginNotifierProvider
   }
 }
 
-String _$loginNotifierHash() => r'631e2f9d005868787711431b8eeeb6fc5e68d94e';
+String _$loginNotifierHash() => r'd8a266068a8e916065a2d0d7cee3f536d530eac4';
 
 /// 登录页状态机：负责状态迁移，不碰网络细节。
 

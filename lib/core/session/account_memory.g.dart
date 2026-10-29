@@ -54,17 +54,68 @@ final class AccountMemoryProvider
 
 String _$accountMemoryHash() => r'94492cd516aaed16b20b9c67cf5780603de42505';
 
-/// 已记住的身份证号（登录页用于预填）。
+/// 已记住的账号列表（登录页账号切换用）。
+
+@ProviderFor(savedAccounts)
+final savedAccountsProvider = SavedAccountsProvider._();
+
+/// 已记住的账号列表（登录页账号切换用）。
+
+final class SavedAccountsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<SavedAccount>>,
+          List<SavedAccount>,
+          FutureOr<List<SavedAccount>>
+        >
+    with
+        $FutureModifier<List<SavedAccount>>,
+        $FutureProvider<List<SavedAccount>> {
+  /// 已记住的账号列表（登录页账号切换用）。
+  SavedAccountsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'savedAccountsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$savedAccountsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<SavedAccount>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<SavedAccount>> create(Ref ref) {
+    return savedAccounts(ref);
+  }
+}
+
+String _$savedAccountsHash() => r'1bb0d56d392735a32de2dbb991eb0e9e89c0c98a';
+
+/// 最近登录的账号（登录页预填）。
 
 @ProviderFor(rememberedAccount)
 final rememberedAccountProvider = RememberedAccountProvider._();
 
-/// 已记住的身份证号（登录页用于预填）。
+/// 最近登录的账号（登录页预填）。
 
 final class RememberedAccountProvider
-    extends $FunctionalProvider<AsyncValue<String?>, String?, FutureOr<String?>>
-    with $FutureModifier<String?>, $FutureProvider<String?> {
-  /// 已记住的身份证号（登录页用于预填）。
+    extends
+        $FunctionalProvider<
+          AsyncValue<SavedAccount?>,
+          SavedAccount?,
+          FutureOr<SavedAccount?>
+        >
+    with $FutureModifier<SavedAccount?>, $FutureProvider<SavedAccount?> {
+  /// 最近登录的账号（登录页预填）。
   RememberedAccountProvider._()
     : super(
         from: null,
@@ -81,13 +132,14 @@ final class RememberedAccountProvider
 
   @$internal
   @override
-  $FutureProviderElement<String?> $createElement($ProviderPointer pointer) =>
-      $FutureProviderElement(pointer);
+  $FutureProviderElement<SavedAccount?> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
 
   @override
-  FutureOr<String?> create(Ref ref) {
+  FutureOr<SavedAccount?> create(Ref ref) {
     return rememberedAccount(ref);
   }
 }
 
-String _$rememberedAccountHash() => r'6dad001b161addffcb01ec06f7aad321fea1a057';
+String _$rememberedAccountHash() => r'82227160a3a173339effe8c337066f33051ccd70';

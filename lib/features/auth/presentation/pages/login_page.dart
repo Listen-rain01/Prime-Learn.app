@@ -45,10 +45,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   }
 
   Future<void> _prefillRememberedAccount() async {
-    final saved = await ref.read(accountMemoryProvider).read();
-    if (!mounted || saved == null || saved.isEmpty) return;
+    final saved = await ref.read(accountMemoryProvider).readRecent();
+    if (!mounted || saved == null || saved.idCard.isEmpty) return;
     setState(() {
-      _idCardController.text = saved;
+      _idCardController.text = saved.idCard;
+      _passwordController.text = saved.password;
+      _rememberAccount = true;
+    });
+  }
+
+  /// 弹出账号选择列表：点选预填、可删除。
+  Future<void> _showAccountPicker() async {
+    final selected = await showModalBottomSheet<SavedAccount>(
+      context: context,
+      useRootNavigator: true,
+      showDragHandle: true,
+      builder: (_) => _AccountPickerSheet(),
+    );
+    if (selected == null || !mounted) return;
+    setState(() {
+      _idCardController.text = selected.idCard;
+      _passwordController.text = selected.password;
+      _idCardError = null;
+      _passwordError = null;
       _rememberAccount = true;
     });
   }
@@ -159,9 +178,19 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               maxLength: 18,
                               enabled: !submitting,
                               errorText: _idCardError,
-                              suffix: value.text.isEmpty
-                                  ? null
-                                  : IconButton(
+                              suffix: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    tooltip: '切换账号',
+                                    icon: const Icon(Icons.manage_accounts),
+                                    color: scheme.onSurfaceVariant,
+                                    onPressed: submitting
+                                        ? null
+                                        : () => _showAccountPicker(),
+                                  ),
+                                  if (value.text.isNotEmpty)
+                                    IconButton(
                                       tooltip: '清空身份证号',
                                       icon: const Icon(Icons.clear, size: 18),
                                       color: scheme.onSurfaceVariant,
@@ -170,6 +199,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                         setState(() => _idCardError = null);
                                       },
                                     ),
+                                ],
+                              ),
                               onChanged: (_) {
                                 if (_idCardError != null) {
                                   setState(() => _idCardError = null);
@@ -304,6 +335,85 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+/// 账号选择弹层：列出已记住的账号，点选预填，可删除。
+class _AccountPickerSheet extends ConsumerWidget {
+  const _AccountPickerSheet();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final accounts = ref.watch(savedAccountsProvider);
+
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('切换账号', style: textTheme.titleMedium),
+            const SizedBox(height: 8),
+            accounts.when(
+              loading: () => const LinearProgressIndicator(),
+              error: (_, _) => Text(
+                '读取账号失败',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              data: (list) => list.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        '暂无记住的账号',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    )
+                  : ListView(
+                      shrinkWrap: true,
+                      children: [
+                        for (final account in list)
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: const Icon(Icons.person_outline),
+                            title: Text(
+                              account.userName.isEmpty
+                                  ? account.idCard
+                                  : account.userName,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            subtitle: Text(
+                              account.idCard,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            trailing: IconButton(
+                              tooltip: '删除该账号',
+                              icon: const Icon(Icons.delete_outline, size: 20),
+                              color: scheme.onSurfaceVariant,
+                              onPressed: () async {
+                                await ref
+                                    .read(accountMemoryProvider)
+                                    .remove(account.idCard);
+                                ref.invalidate(savedAccountsProvider);
+                              },
+                            ),
+                            onTap: () => Navigator.of(context).pop(account),
+                          ),
+                      ],
+                    ),
+            ),
+          ],
         ),
       ),
     );

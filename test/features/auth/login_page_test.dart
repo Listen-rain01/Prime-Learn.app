@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/session/account_memory.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/session/session.dart';
 import 'package:primelearn/features/auth/auth_providers.dart';
@@ -23,6 +24,34 @@ class _FailingAuthRepository implements AuthRepository {
   @override
   Future<BankContext> fetchBankContext(String userId) async =>
       const BankContext();
+}
+
+/// 内存版账号记忆，供账号切换测试用。
+class _FakeAccountMemory extends AccountMemory {
+  _FakeAccountMemory(List<SavedAccount> accounts) : _accounts = [...accounts];
+
+  final List<SavedAccount> _accounts;
+
+  @override
+  Future<List<SavedAccount>> readAll() async => List.of(_accounts);
+
+  @override
+  Future<SavedAccount?> readRecent() async =>
+      _accounts.isEmpty ? null : _accounts.first;
+
+  @override
+  Future<void> save(SavedAccount account) async {
+    _accounts.removeWhere((e) => e.idCard == account.idCard);
+    _accounts.insert(0, account);
+  }
+
+  @override
+  Future<void> remove(String idCard) async {
+    _accounts.removeWhere((e) => e.idCard == idCard);
+  }
+
+  @override
+  Future<void> clear() async => _accounts.clear();
 }
 
 void main() {
@@ -156,5 +185,62 @@ void main() {
     await tester.pump();
 
     expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
+  });
+
+  testWidgets('有记住的账号时自动预填身份证和密码', (tester) async {
+    final memory = _FakeAccountMemory([
+      const SavedAccount(
+        idCard: '610525199001011238',
+        password: 'saved-password',
+        userName: '张小赞',
+      ),
+    ]);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [accountMemoryProvider.overrideWithValue(memory)],
+        child: const MaterialApp(home: LoginPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(fieldAt(tester, 0).controller?.text, '610525199001011238');
+    expect(fieldAt(tester, 1).controller?.text, 'saved-password');
+  });
+
+  testWidgets('点账号切换图标弹出列表并可切换预填', (tester) async {
+    final memory = _FakeAccountMemory([
+      const SavedAccount(
+        idCard: '610525199001011238',
+        password: 'p1',
+        userName: '张小赞',
+      ),
+      const SavedAccount(
+        idCard: '610525199001011115',
+        password: 'p2',
+        userName: '聂伟',
+      ),
+    ]);
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [accountMemoryProvider.overrideWithValue(memory)],
+        child: const MaterialApp(home: LoginPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // 点切换账号图标
+    await tester.tap(find.byTooltip('切换账号'));
+    await tester.pumpAndSettle();
+
+    // 列表显示两个账号
+    expect(find.text('张小赞'), findsOneWidget);
+    expect(find.text('聂伟'), findsOneWidget);
+
+    // 点聂伟，预填其身份证和密码
+    await tester.tap(find.text('聂伟'));
+    await tester.pumpAndSettle();
+
+    expect(fieldAt(tester, 0).controller?.text, '610525199001011115');
+    expect(fieldAt(tester, 1).controller?.text, 'p2');
   });
 }

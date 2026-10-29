@@ -35,13 +35,22 @@ class _FakeAuthRepository implements AuthRepository {
 }
 
 class _FakeAccountMemory extends AccountMemory {
-  String? saved;
+  SavedAccount? saved;
 
   @override
-  Future<String?> read() async => saved;
+  Future<List<SavedAccount>> readAll() async =>
+      saved == null ? const [] : [saved!];
 
   @override
-  Future<void> save(String idCard) async => saved = idCard;
+  Future<SavedAccount?> readRecent() async => saved;
+
+  @override
+  Future<void> save(SavedAccount account) async => saved = account;
+
+  @override
+  Future<void> remove(String idCard) async {
+    if (saved?.idCard == idCard) saved = null;
+  }
 
   @override
   Future<void> clear() async => saved = null;
@@ -84,7 +93,9 @@ void main() {
     expect(state, isA<LoginSucceeded>());
     expect((state as LoginSucceeded).session.bankName, '题库A');
     expect(container.read(sessionStoreProvider)?.userId, 'u1');
-    expect(memory.saved, '610525199001011238');
+    expect(memory.saved?.idCard, '610525199001011238');
+    expect(memory.saved?.password, 'p@ss');
+    expect(memory.saved?.userName, '张小赞');
     expect(repository.ensureCalls, 1);
   });
 

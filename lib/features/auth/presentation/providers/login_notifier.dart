@@ -28,9 +28,13 @@ class LoginNotifier extends _$LoginNotifier {
       ref.read(sessionStoreProvider.notifier).save(session);
       final memory = ref.read(accountMemoryProvider);
       if (remember) {
-        await memory.save(idCard.trim());
-      } else {
-        await memory.clear();
+        await memory.save(
+          SavedAccount(
+            idCard: idCard.trim(),
+            password: password,
+            userName: session.userName,
+          ),
+        );
       }
       state = LoginSucceeded(session);
     } on UseCaseFailure catch (failure) {
