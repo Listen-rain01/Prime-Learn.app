@@ -238,11 +238,19 @@ String _$bankPresetRepositoryHash() =>
     r'b9092facf47141da5648d127f23674e1f42b89a9';
 
 /// 当前预设；未设置时为 null。
+///
+/// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+/// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+/// 且这里只是读本地偏好，没有需要随页面释放的资源。
 
 @ProviderFor(bankPreset)
 final bankPresetProvider = BankPresetProvider._();
 
 /// 当前预设；未设置时为 null。
+///
+/// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+/// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+/// 且这里只是读本地偏好，没有需要随页面释放的资源。
 
 final class BankPresetProvider
     extends
@@ -253,13 +261,17 @@ final class BankPresetProvider
         >
     with $FutureModifier<BankPreset?>, $FutureProvider<BankPreset?> {
   /// 当前预设；未设置时为 null。
+  ///
+  /// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+  /// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+  /// 且这里只是读本地偏好，没有需要随页面释放的资源。
   BankPresetProvider._()
     : super(
         from: null,
         argument: null,
         retry: noProviderRetry,
         name: r'bankPresetProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -279,7 +291,7 @@ final class BankPresetProvider
   }
 }
 
-String _$bankPresetHash() => r'04d30e735543687a3b06af4d36207df89ddb4525';
+String _$bankPresetHash() => r'365d7e093c74c8f5711e12376ffe050e9cf021fa';
 
 /// 保存预设（先校验可考试卷）。
 

@@ -36,7 +36,7 @@ class _FakeProfileRepository implements ProfileRepository {
 const _profile = PersonProfile(
   employeeNo: 'E1001',
   name: '张小赞',
-  idCard: '610525199001011234',
+  idCard: '610525199001011238',
   department: '澄合矿业/西卓煤矿/设备维修队',
   phone: '13812345678',
   address: '陕西省澄城县某村一组',
@@ -84,8 +84,8 @@ void main() {
     expect(find.text('个人信息'), findsOneWidget);
     expect(find.text('工号'), findsNothing);
     expect(find.text('身份证号'), findsOneWidget);
-    expect(find.text('610525******1234'), findsOneWidget);
-    expect(find.text('610525199001011234'), findsNothing);
+    expect(find.text('610525******1238'), findsOneWidget);
+    expect(find.text('610525199001011238'), findsNothing);
     expect(find.text('工作单位'), findsOneWidget);
     expect(find.text('澄合矿业/西卓煤矿/设备维修队'), findsOneWidget);
     expect(find.text('联系方式'), findsOneWidget);
@@ -153,9 +153,9 @@ void main() {
     await _pumpSettings(
       tester,
       const PersonProfile(
-        employeeNo: '610525199001011234',
+        employeeNo: '610525199001011238',
         name: '张小赞',
-        idCard: '610525199001011234',
+        idCard: '610525199001011238',
         department: '某单位',
         phone: '13812345678',
         address: '某地址',
@@ -163,9 +163,9 @@ void main() {
     );
 
     // 头部工号与个人信息里的身份证号都必须是脱敏值。
-    expect(find.text('工号 610525******1234'), findsOneWidget);
-    expect(find.text('610525******1234'), findsOneWidget);
-    expect(find.text('610525199001011234'), findsNothing);
+    expect(find.text('工号 610525******1238'), findsOneWidget);
+    expect(find.text('610525******1238'), findsOneWidget);
+    expect(find.text('610525199001011238'), findsNothing);
   });
 
   testWidgets('有头像字节时显示图片', (tester) async {
@@ -174,7 +174,7 @@ void main() {
       const PersonProfile(
         employeeNo: 'E1001',
         name: '张小赞',
-        idCard: '610525199001011234',
+        idCard: '610525199001011238',
         department: '某单位',
         phone: '13812345678',
         address: '某地址',

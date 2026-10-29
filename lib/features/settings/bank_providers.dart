@@ -58,7 +58,11 @@ Future<BankPresetRepository> bankPresetRepository(Ref ref) async =>
     BankPresetRepositoryImpl(await ref.watch(bankPresetStoreProvider.future));
 
 /// 当前预设；未设置时为 null。
-@Riverpod(retry: noProviderRetry)
+///
+/// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+/// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+/// 且这里只是读本地偏好，没有需要随页面释放的资源。
+@Riverpod(keepAlive: true, retry: noProviderRetry)
 Future<BankPreset?> bankPreset(Ref ref) async {
   final repository = await ref.watch(bankPresetRepositoryProvider.future);
   return repository.read();

@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/protocol/v_data_extractor.dart';
 import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 
 /// 单位解析：从 `SelectExamType` 页面 HTML 的 `vData.Units` 提取。
@@ -39,43 +38,16 @@ class BankUnitParser {
   }
 
   String? _extractUnits(String html) {
-    final marker = html.indexOf('var vData');
-    if (marker < 0) return null;
-    final start = html.indexOf('{', marker);
-    if (start < 0) return null;
-
-    var depth = 0;
-    var inString = false;
-    var escaped = false;
-    for (var index = start; index < html.length; index++) {
-      final char = html[index];
-      if (inString) {
-        if (escaped) {
-          escaped = false;
-        } else if (char == r'\') {
-          escaped = true;
-        } else if (char == '"') {
-          inString = false;
-        }
-        continue;
-      }
-      if (char == '"') {
-        inString = true;
-      } else if (char == '{') {
-        depth += 1;
-      } else if (char == '}') {
-        depth -= 1;
-        if (depth == 0) {
-          final jsonText = html.substring(start, index + 1);
-          final decoded = jsonDecode(jsonText);
-          if (decoded is Map<String, dynamic>) {
-            final units = decoded['Units'];
-            return units is String ? units : null;
-          }
-          return null;
-        }
-      }
+    // vData 缺失或非法 JSON 统一转成 ApiException（数据层不得外抛 FormatException）。
+    final result = VDataExtractor.extract(html);
+    if (result.status == VDataStatus.malformed) {
+      throw const ApiException(
+        kind: ApiErrorKind.protocol,
+        message: '题库单位数据格式异常',
+      );
     }
-    return null;
+    if (result.status == VDataStatus.missing) return null;
+    final units = result.data?['Units'];
+    return units is String ? units : null;
   }
 }

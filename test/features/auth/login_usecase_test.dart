@@ -35,7 +35,7 @@ void main() {
     stubLoginSuccess();
 
     final session = await useCase.execute(
-      idCard: ' 610525199001011234 ',
+      idCard: ' 610525199001011238 ',
       password: 'p@ss',
     );
 
@@ -45,7 +45,7 @@ void main() {
     expect(session.examTypeId, 't1');
     verify(() => repository.ensureSessionCookie()).called(1);
     verify(
-      () => repository.login(idCard: '610525199001011234', password: 'p@ss'),
+      () => repository.login(idCard: '610525199001011238', password: 'p@ss'),
     ).called(1);
     verify(() => repository.fetchBankContext('u1')).called(1);
   });
@@ -72,7 +72,7 @@ void main() {
 
   test('密码为空：提示请输入登录密码', () async {
     await expectLater(
-      useCase.execute(idCard: '610525199001011234', password: ''),
+      useCase.execute(idCard: '610525199001011238', password: ''),
       throwsA(
         isA<UseCaseFailure>().having((e) => e.message, 'message', '请输入登录密码'),
       ),
@@ -106,7 +106,7 @@ void main() {
     );
 
     await expectLater(
-      useCase.execute(idCard: '610525199001011234', password: 'wrong'),
+      useCase.execute(idCard: '610525199001011238', password: 'wrong'),
       throwsA(
         isA<UseCaseFailure>()
             .having((e) => e.message, 'message', '密码错误')
@@ -140,7 +140,7 @@ void main() {
         .thenAnswer((_) async => const BankContext());
 
     final session = await useCase.execute(
-      idCard: '610525199001011234',
+      idCard: '610525199001011238',
       password: 'p',
     );
 
@@ -154,7 +154,7 @@ void main() {
     );
 
     await expectLater(
-      useCase.execute(idCard: '610525199001011234', password: 'p'),
+      useCase.execute(idCard: '610525199001011238', password: 'p'),
       throwsA(
         isA<UseCaseFailure>()
             .having((e) => e.canRetry, 'canRetry', isTrue)
@@ -182,7 +182,7 @@ void main() {
     );
 
     await expectLater(
-      useCase.execute(idCard: '610525199001011234', password: 'p'),
+      useCase.execute(idCard: '610525199001011238', password: 'p'),
       throwsA(
         isA<UseCaseFailure>().having(
           (e) => e.sessionExpired,

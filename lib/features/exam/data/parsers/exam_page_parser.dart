@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/protocol/v_data_extractor.dart';
 import 'package:primelearn/features/exam/domain/entities/exam_page.dart';
 
 /// 考试页 HTML 解析：提取 `var vData` 并展开题目。
@@ -56,43 +55,33 @@ class ExamPageParser {
   }
 
   Map<String, dynamic> _extractVData(String html) {
-    final marker = html.indexOf('var vData');
-    if (marker < 0) {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '考试页缺少 vData',
-      );
+    final result = VDataExtractor.extract(html);
+    switch (result.status) {
+      case VDataStatus.missing:
+        throw const ApiException(
+          kind: ApiErrorKind.protocol,
+          message: '考试页缺少 vData',
+        );
+      case VDataStatus.malformed:
+        throw const ApiException(
+          kind: ApiErrorKind.protocol,
+          message: '考试页 vData 解析失败',
+        );
+      case VDataStatus.ok:
+        return result.data!;
     }
-    final start = html.indexOf('{', marker);
-    final end = html.indexOf('};', start);
-    if (start < 0 || end < 0) {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '考试页 vData 格式异常',
-      );
-    }
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(html.substring(start, end + 1));
-    } on FormatException {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '考试页 vData 解析失败',
-      );
-    }
-    if (decoded is! Map<String, dynamic>) {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '考试页 vData 类型异常',
-      );
-    }
-    return decoded;
   }
 
+  /// 解码平台写入的 URL 编码文本。
+  ///
+  /// 平台对题干/选项做 URL 编码；遇到非法转义（裸 `%`、非 UTF-8 字节）
+  /// 时退回原文，不能因为一个字符让整场考试不可解析。
   String _decode(String value) {
     try {
       return Uri.decodeComponent(value).trim();
     } on ArgumentError {
+      return value.trim();
+    } on FormatException {
       return value.trim();
     }
   }

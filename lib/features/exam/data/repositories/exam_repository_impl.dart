@@ -98,8 +98,10 @@ class ExamRepositoryImpl implements ExamRepository {
       );
     }
     final parts = body.split('|');
-    final score = int.tryParse(parts.length > 1 ? parts[1].trim() : '');
-    if (score == null) {
+    // 平台实测返回整数，但 `100.0` 这类形态也必须能解析，否则整场成绩丢失。
+    final scoreText = parts.length > 1 ? parts[1].trim() : '';
+    final scoreValue = double.tryParse(scoreText);
+    if (scoreValue == null) {
       throw const ApiException(
         kind: ApiErrorKind.protocol,
         message: '无法解析结算分数',
@@ -107,9 +109,23 @@ class ExamRepositoryImpl implements ExamRepository {
     }
     final passText = parts.length > 2 ? parts[2].trim() : '';
     return ExamResult(
-      score: score,
-      passed: passText.contains('合格') && !passText.contains('不合格'),
+      score: scoreValue.round(),
+      passed: _isPassed(passText),
       message: parts.first.trim(),
     );
+  }
+
+  /// 判定是否合格。
+  ///
+  /// 不能用 `contains('合格') && !contains('不合格')`：平台会返回「未合格」，
+  /// 它同时含「合格」且不含「不合格」，会被误判成合格。
+  /// 因此先判否定形态（未合格 / 不合格 / 不及格），再判肯定形态。
+  bool _isPassed(String text) {
+    if (text.isEmpty) return false;
+    const negative = ['未合格', '不合格', '不及格', '未能合格'];
+    for (final word in negative) {
+      if (text.contains(word)) return false;
+    }
+    return text.contains('合格') || text.contains('及格');
   }
 }

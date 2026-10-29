@@ -63,7 +63,7 @@ void main() {
   testWidgets('身份证号合法但密码为空：密码字段报错', (tester) async {
     await pumpLoginPage(tester);
 
-    await tester.enterText(find.byType(TextField).first, '610525199001011234');
+    await tester.enterText(find.byType(TextField).first, '610525199001011238');
     await tester.pump();
     await tester.tap(find.text('登 录'));
     await tester.pumpAndSettle();
@@ -79,7 +79,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(fieldAt(tester, 0).decoration?.errorText, isNotNull);
 
-    await tester.enterText(find.byType(TextField).first, '610525199001011234');
+    await tester.enterText(find.byType(TextField).first, '610525199001011238');
     await tester.pump();
 
     expect(fieldAt(tester, 0).decoration?.errorText, isNull);
@@ -96,7 +96,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    await tester.enterText(find.byType(TextField).first, '610525199001011234');
+    await tester.enterText(find.byType(TextField).first, '610525199001011238');
     await tester.enterText(find.byType(TextField).at(1), 'wrong-password');
     await tester.pump();
     await tester.tap(find.text('登 录'));
@@ -122,7 +122,7 @@ void main() {
     await pumpLoginPage(tester);
 
     expect(find.byIcon(Icons.clear), findsNothing);
-    await tester.enterText(find.byType(TextField).first, '610525199001011234');
+    await tester.enterText(find.byType(TextField).first, '610525199001011238');
     await tester.pump();
 
     expect(find.byIcon(Icons.clear), findsOneWidget);

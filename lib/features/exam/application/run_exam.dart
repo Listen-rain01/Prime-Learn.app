@@ -50,9 +50,24 @@ class RunExam {
   }) async {
     try {
       // 所有写操作先统一过网关，避免走到一半才发现被拦截。
-      _gateway.ensureAllowed(createTempExamEndpoint, behavior: '创建考试');
-      _gateway.ensureAllowed(enterExamEndpoint, behavior: '进入考试');
-      _gateway.ensureAllowed(submitAnswersEndpoint, behavior: '提交考试答案');
+      // 创建/进入/提交三类端点同时承载模拟与手机两种行为，
+      // 必须带行为标识判级，否则一种验证过会连带放行另一种。
+      final behaviorId = kind == ExamKind.mock ? 'mock' : 'mobile';
+      _gateway.ensureAllowed(
+        createTempExamEndpoint,
+        behavior: '创建考试',
+        behaviorId: behaviorId,
+      );
+      _gateway.ensureAllowed(
+        enterExamEndpoint,
+        behavior: '进入考试',
+        behaviorId: behaviorId,
+      );
+      _gateway.ensureAllowed(
+        submitAnswersEndpoint,
+        behavior: '提交考试答案',
+        behaviorId: behaviorId,
+      );
       _gateway.ensureAllowed(kind.settleEndpoint, behavior: '结算考试');
 
       onStep?.call(ExamStep.create);

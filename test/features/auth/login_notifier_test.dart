@@ -72,7 +72,7 @@ void main() {
     final controller = container.read(loginProvider.notifier);
 
     final pending = controller.submit(
-      idCard: '610525199001011234',
+      idCard: '610525199001011238',
       password: 'p@ss',
       remember: true,
     );
@@ -84,7 +84,7 @@ void main() {
     expect(state, isA<LoginSucceeded>());
     expect((state as LoginSucceeded).session.bankName, '题库A');
     expect(container.read(sessionStoreProvider)?.userId, 'u1');
-    expect(memory.saved, '610525199001011234');
+    expect(memory.saved, '610525199001011238');
     expect(repository.ensureCalls, 1);
   });
 
@@ -105,7 +105,7 @@ void main() {
 
     await container
         .read(loginProvider.notifier)
-        .submit(idCard: '610525199001011234', password: 'wrong');
+        .submit(idCard: '610525199001011238', password: 'wrong');
 
     final state = container.read(loginProvider);
     expect(state, isA<LoginFailed>());
@@ -116,10 +116,10 @@ void main() {
   test('重复提交在提交中会被忽略', () async {
     final controller = container.read(loginProvider.notifier);
     final first = controller.submit(
-      idCard: '610525199001011234',
+      idCard: '610525199001011238',
       password: 'p',
     );
-    await controller.submit(idCard: '610525199001011234', password: 'p');
+    await controller.submit(idCard: '610525199001011238', password: 'p');
     await first;
 
     expect(container.read(loginProvider), isA<LoginSucceeded>());

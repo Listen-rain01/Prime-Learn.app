@@ -1,6 +1,5 @@
-import 'dart:convert';
-
 import 'package:primelearn/core/network/api_exception.dart';
+import 'package:primelearn/core/protocol/v_data_extractor.dart';
 import 'package:primelearn/features/settings/data/models/person_profile_dto.dart';
 
 /// 个人信息响应解析。
@@ -21,68 +20,27 @@ class PersonProfileParser {
       );
     }
 
-    final jsonText = _extractVData(html);
-    if (jsonText == null) {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '个人信息响应缺少数据',
-      );
+    final result = VDataExtractor.extract(html);
+    switch (result.status) {
+      case VDataStatus.missing:
+        throw const ApiException(
+          kind: ApiErrorKind.protocol,
+          message: '个人信息响应缺少数据',
+        );
+      case VDataStatus.malformed:
+        throw const ApiException(
+          kind: ApiErrorKind.protocol,
+          message: '个人信息数据格式异常',
+        );
+      case VDataStatus.ok:
+        break;
     }
-
-    final Object? decoded;
-    try {
-      decoded = jsonDecode(jsonText);
-    } on FormatException {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '个人信息数据格式异常',
-      );
-    }
-    if (decoded is! Map<String, dynamic>) {
-      throw const ApiException(
-        kind: ApiErrorKind.protocol,
-        message: '个人信息数据格式异常',
-      );
-    }
+    final decoded = result.data!;
 
     final dto = PersonProfileDto.fromVData(decoded);
     if (dto.name.isEmpty && dto.idCard.isEmpty) {
       throw const ApiException(kind: ApiErrorKind.protocol, message: '个人信息为空');
     }
     return dto;
-  }
-
-  /// 找到 `vData` 后第一个 `{`，按花括号配对截取 JSON（跳过字符串内的括号）。
-  String? _extractVData(String html) {
-    final marker = html.indexOf('vData');
-    if (marker < 0) return null;
-    final start = html.indexOf('{', marker);
-    if (start < 0) return null;
-
-    var depth = 0;
-    var inString = false;
-    var escaped = false;
-    for (var index = start; index < html.length; index++) {
-      final char = html[index];
-      if (inString) {
-        if (escaped) {
-          escaped = false;
-        } else if (char == r'\') {
-          escaped = true;
-        } else if (char == '"') {
-          inString = false;
-        }
-        continue;
-      }
-      if (char == '"') {
-        inString = true;
-      } else if (char == '{') {
-        depth += 1;
-      } else if (char == '}') {
-        depth -= 1;
-        if (depth == 0) return html.substring(start, index + 1);
-      }
-    }
-    return null;
   }
 }

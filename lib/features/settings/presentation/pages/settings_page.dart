@@ -16,6 +16,7 @@ import 'package:primelearn/features/settings/bank_providers.dart';
 import 'package:primelearn/features/settings/domain/entities/bank_catalog.dart';
 import 'package:primelearn/features/settings/domain/entities/person_profile.dart';
 import 'package:primelearn/features/settings/profile_providers.dart';
+import 'package:primelearn/features/tasks/presentation/providers/daily_board_notifier.dart';
 
 /// 头部工号文案；平台实测 pnum 可能等于身份证号，同值时按身份证脱敏。
 String _employeeNoText(PersonProfile? profile) {
@@ -121,6 +122,9 @@ class SettingsPage extends ConsumerWidget {
                     await ref.read(apiClientProvider).clearCookies();
                     ref.read(sessionStoreProvider.notifier).clear();
                     ref.read(loginProvider.notifier).reset();
+                    // 今日任务看板按会话重建；一键执行的进度由
+                    // DailyAutoRunner 自己监听会话变化后重置。
+                    ref.invalidate(dailyBoardProvider);
                     if (context.mounted) {
                       const LoginRoute().go(context);
                     }

@@ -247,10 +247,12 @@ class _ReadingPresetPageState extends ConsumerState<ReadingPresetPage> {
   }
 
   Future<void> _save() async {
-    final article = _article!;
-    final useCase = await ref.read(saveReadingPresetProvider.future);
+    final article = _article;
+    if (article == null || _saving) return;
+    // 先置位再 await：否则加载预设期间按钮仍可点，会重复保存。
     setState(() => _saving = true);
     try {
+      final useCase = await ref.read(saveReadingPresetProvider.future);
       await useCase.execute(
         ReadingPreset(
           articleId: article.id,
@@ -259,8 +261,8 @@ class _ReadingPresetPageState extends ConsumerState<ReadingPresetPage> {
           typeName: _typeName,
         ),
       );
-      ref.invalidate(readingPresetProvider);
       if (!mounted) return;
+      ref.invalidate(readingPresetProvider);
       Navigator.of(context).pop(true);
     } on UseCaseFailure catch (error) {
       if (!mounted) return;

@@ -248,11 +248,19 @@ String _$readingPresetRepositoryHash() =>
     r'cbe72af9e2227c247a881be1b0d4bbf2731a7f8b';
 
 /// 当前阅读预设。
+///
+/// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+/// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+/// 且这里只是读本地偏好，没有需要随页面释放的资源。
 
 @ProviderFor(readingPreset)
 final readingPresetProvider = ReadingPresetProvider._();
 
 /// 当前阅读预设。
+///
+/// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+/// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+/// 且这里只是读本地偏好，没有需要随页面释放的资源。
 
 final class ReadingPresetProvider
     extends
@@ -263,13 +271,17 @@ final class ReadingPresetProvider
         >
     with $FutureModifier<ReadingPreset?>, $FutureProvider<ReadingPreset?> {
   /// 当前阅读预设。
+  ///
+  /// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+  /// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+  /// 且这里只是读本地偏好，没有需要随页面释放的资源。
   ReadingPresetProvider._()
     : super(
         from: null,
         argument: null,
         retry: noProviderRetry,
         name: r'readingPresetProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -289,7 +301,7 @@ final class ReadingPresetProvider
   }
 }
 
-String _$readingPresetHash() => r'd4d5bcaf786622b36bb346425515dc89459591c8';
+String _$readingPresetHash() => r'cbd34ad3869e6c50f99e958d530a5c284f9d29fb';
 
 /// 保存阅读预设用例。
 

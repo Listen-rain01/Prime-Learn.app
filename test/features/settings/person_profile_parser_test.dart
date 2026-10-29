@@ -25,7 +25,7 @@ void main() {
   "DepartmentId": "00000000-0000-0000-0000-000000000002",
   "pnum": "E1001",
   "pname": "张小赞",
-  "idcard": "610525199001011234",
+  "idcard": "610525199001011238",
   "punit": "澄合矿业/西卓煤矿/设备维修队",
   "tel": "13812345678",
   "address": "陕西省澄城县某村一组",
@@ -35,7 +35,7 @@ void main() {
 
     expect(dto.employeeNo, 'E1001');
     expect(dto.name, '张小赞');
-    expect(dto.idCard, '610525199001011234');
+    expect(dto.idCard, '610525199001011238');
     expect(dto.department, '澄合矿业/西卓煤矿/设备维修队');
     expect(dto.phone, '13812345678');
     expect(dto.address, '陕西省澄城县某村一组');

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/core/widgets/inline_notice.dart';
 import 'package:primelearn/core/widgets/tonal_block.dart';
 import 'package:primelearn/features/checkin/check_in_providers.dart';
@@ -70,15 +71,7 @@ class CheckInCard extends ConsumerWidget {
             FilledButton.tonal(
               onPressed: alreadyCheckedIn || submitting
                   ? null
-                  : () async {
-                      await ref
-                          .read(checkInControllerProvider.notifier)
-                          .submit();
-                      final next = ref.read(checkInControllerProvider);
-                      if (next.hasValue && next.value != null) {
-                        onSuccess?.call();
-                      }
-                    },
+                  : () => _submit(context, ref),
               child: submitting
                   ? const SizedBox(
                       width: 16,
@@ -110,5 +103,24 @@ class CheckInCard extends ConsumerWidget {
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
       child: content,
     );
+  }
+
+  /// 提交签到。
+  ///
+  /// 弹层可能在等待期间被关闭，之后不能再碰 ref/回调（会抛已 dispose）；
+  /// 会话失效时统一清会话，由 App 层跳回登录页。
+  Future<void> _submit(BuildContext context, WidgetRef ref) async {
+    final notifier = ref.read(checkInControllerProvider.notifier);
+    await notifier.submit();
+    if (!context.mounted) return;
+    final next = ref.read(checkInControllerProvider);
+    final failure = next.error;
+    if (failure is UseCaseFailure && failure.sessionExpired) {
+      ref.read(sessionStoreProvider.notifier).clear();
+      return;
+    }
+    if (next.hasValue && next.value != null) {
+      onSuccess?.call();
+    }
   }
 }

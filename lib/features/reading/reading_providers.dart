@@ -43,7 +43,11 @@ Future<ReadingPresetRepository> readingPresetRepository(Ref ref) async =>
     );
 
 /// 当前阅读预设。
-@Riverpod(retry: noProviderRetry)
+///
+/// 常驻：`DailyAutoRunner` 是 keepAlive，读取常驻 provider 才符合
+/// riverpod_lint 的 `only_use_keep_alive_inside_keep_alive`；
+/// 且这里只是读本地偏好，没有需要随页面释放的资源。
+@Riverpod(keepAlive: true, retry: noProviderRetry)
 Future<ReadingPreset?> readingPreset(Ref ref) async =>
     (await ref.watch(readingPresetRepositoryProvider.future)).read();
 

@@ -71,7 +71,9 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
     // 只有一份时自动选中；多份必须由用户明确选择。
     final selectedPaper =
         _paper ?? (paperList.length == 1 ? paperList.first : null);
-    final canSave = selectedPaper != null;
+    // 必须同时有题库：换单位/分类/年份时只清 _bank 不清 _paper，
+    // 只看 selectedPaper 会让保存按钮在题库已失效时仍然可点（点了 _bank! 崩溃）。
+    final canSave = _bank != null && selectedPaper != null;
     final stage = _stage();
     final breadcrumb = [
       if (_unit != null) _unit!.name,
@@ -105,9 +107,11 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           _SelectorRow(
             label: '单位',
             value: _unit?.name,
-            placeholder: '选择单位',
+            placeholder: units.hasError ? '单位加载失败，点击重试' : '选择单位',
             loading: units.isLoading,
-            onTap: units.value == null || units.value!.isEmpty
+            onTap: units.hasError
+                ? () => ref.invalidate(bankUnitsProvider)
+                : units.value == null || units.value!.isEmpty
                 ? null
                 : () => _pickUnit(units.value!),
           ),
@@ -245,6 +249,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       _style = null;
       _child = null;
       _bank = null;
+      _paper = null;
       _message = null;
     });
     await _advanceToStyles(choice);
@@ -268,6 +273,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
       _style = choice;
       _child = null;
       _bank = null;
+      _paper = null;
       _message = null;
     });
     await _advanceToChildren(choice);
@@ -290,6 +296,7 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
     setState(() {
       _child = choice;
       _bank = null;
+      _paper = null;
       _message = null;
     });
     await _advanceToBanks(choice);
@@ -301,10 +308,15 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
     if (!mounted || _unit?.id != unit.id) return;
     try {
       final styles = await ref.read(bankStylesProvider(unit.id).future);
-      if (!mounted || styles.isEmpty) return;
+      if (!mounted) return;
+      if (styles.isEmpty) {
+        _notice('该单位下没有分类', isError: false);
+        return;
+      }
       await _pickStyle(styles);
-    } on Object {
-      // 加载失败时停在当前步，用户可手动点选择器重试。
+    } on Object catch (error) {
+      // 失败时停在当前步，同时给出可见提示（用户可点选择器重试）。
+      if (mounted) _notice(_reason(error, '分类加载失败'));
     }
   }
 
@@ -323,10 +335,14 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           departmentId: style.departmentId,
         )).future,
       );
-      if (!mounted || children.isEmpty) return;
+      if (!mounted) return;
+      if (children.isEmpty) {
+        _notice('该分类下没有年份', isError: false);
+        return;
+      }
       await _pickChild(children);
-    } on Object {
-      // 同上，失败保留手动重试入口。
+    } on Object catch (error) {
+      if (mounted) _notice(_reason(error, '年份加载失败'));
     }
   }
 
@@ -345,11 +361,27 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           year: child.year,
         )).future,
       );
-      if (!mounted || options.isEmpty) return;
+      if (!mounted) return;
+      if (options.isEmpty) {
+        _notice('该年份下没有题库', isError: false);
+        return;
+      }
       await _pickBank(options);
-    } on Object {
-      // 同上。
+    } on Object catch (error) {
+      if (mounted) _notice(_reason(error, '题库加载失败'));
     }
+  }
+
+  /// 把异常收敛成可展示文案（不吞掉根因）。
+  String _reason(Object error, String fallback) =>
+      error is UseCaseFailure ? error.message : fallback;
+
+  /// 更新页面提示。
+  void _notice(String message, {bool isError = true}) {
+    setState(() {
+      _message = message;
+      _messageIsError = isError;
+    });
   }
 
   Future<void> _pickBank(List<BankOption> options) async {
@@ -382,7 +414,15 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
   }
 
   Future<void> _save() async {
-    final bank = _bank!;
+    // 兜底：按钮已按 canSave 禁用，这里仍防 _bank 在异步间隙被清空。
+    final bank = _bank;
+    if (bank == null) {
+      setState(() {
+        _message = '请先依次选择单位、分类、年份和题库';
+        _messageIsError = true;
+      });
+      return;
+    }
     final papersNow = ref.read(examPapersProvider(bank.id)).value ?? const [];
     final selectedPaper =
         _paper ?? (papersNow.length == 1 ? papersNow.first : null);
@@ -416,8 +456,8 @@ class _BankPresetPageState extends ConsumerState<BankPresetPage> {
           paperId: selectedPaper.id,
         ),
       );
-      ref.invalidate(bankPresetProvider);
       if (!mounted) return;
+      ref.invalidate(bankPresetProvider);
       // 保存成功直接回到「我的」，卡片会随预设刷新，不留在原地看提示。
       Navigator.of(context).pop(true);
     } on UseCaseFailure catch (error) {

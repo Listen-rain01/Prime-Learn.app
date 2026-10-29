@@ -52,8 +52,27 @@ class ReadingRepositoryImpl implements ReadingRepository {
       return true;
     } on ApiException catch (error) {
       // 当日已达上限是幂等结果，不算失败。
-      if (error.message.contains('每日最多积分')) return false;
+      if (_meansDailyLimitReached(error.message)) return false;
       rethrow;
     }
+  }
+
+  /// 判断文案是否表达「今日已达上限」。
+  ///
+  /// 平台实际文案会变（实测出现过「已达到或超过每日最多积分!」「已达每日上限!」
+  /// 「今天已经完成知识学习」等），因此按关键词组合判定，而不是匹配整句；
+  /// 同时要求出现「上限/最多/已完成」这类语义，避免把真正的失败吞成成功。
+  bool _meansDailyLimitReached(String message) {
+    if (message.isEmpty) return false;
+    final reached =
+        message.contains('上限') ||
+        message.contains('最多') ||
+        message.contains('已完成') ||
+        message.contains('已经完成');
+    if (!reached) return false;
+    return message.contains('积分') ||
+        message.contains('每日') ||
+        message.contains('今日') ||
+        message.contains('知识学习');
   }
 }
