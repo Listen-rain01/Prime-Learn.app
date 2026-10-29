@@ -52,17 +52,33 @@ class SettleCrypto {
   Uint8List _aesEcb(Uint8List data, Uint8List key) => aesEcbEncrypt(data, key);
 
   Uint8List _rsaEncrypt(List<int> data, String modulusB64, String exponentB64) {
-    final publicKey = RSAPublicKey(
-      _bigIntFromBase64(modulusB64),
-      _bigIntFromBase64(exponentB64),
-    );
+    final modulus = _bigIntFromBase64(modulusB64, 'Modulus');
+    final exponent = _bigIntFromBase64(exponentB64, 'Exponent');
+    final publicKey = RSAPublicKey(modulus, exponent);
+    // PKCS#1 v1.5 需要 11 字节填充；明文超过模数-11 会抛底层 ArgumentError，
+    // 提前给出可定位的报错，避免被上层误报成「考试失败」。
+    final maxBytes = (modulus.bitLength + 7) ~/ 8 - 11;
+    if (data.length > maxBytes) {
+      throw FormatException('RSA 公钥过短：可用 $maxBytes 字节，需要 ${data.length} 字节');
+    }
     final cipher = PKCS1Encoding(RSAEngine());
     cipher.init(true, PublicKeyParameter<RSAPublicKey>(publicKey));
     return cipher.process(Uint8List.fromList(data));
   }
 
-  BigInt _bigIntFromBase64(String value) {
-    final bytes = base64Decode(value);
+  BigInt _bigIntFromBase64(String value, String field) {
+    // 平台公钥是 Base64；XML 换行、缩进或手工拼接常带空白，
+    // 标准 Base64 解码器不接受空白字符，这里先剔除。
+    final cleaned = value.replaceAll(RegExp(r'\s+'), '');
+    if (cleaned.isEmpty) {
+      throw FormatException('RSA 公钥 $field 为空');
+    }
+    final List<int> bytes;
+    try {
+      bytes = base64Decode(cleaned);
+    } on FormatException {
+      throw FormatException('RSA 公钥 $field 不是合法 Base64');
+    }
     var result = BigInt.zero;
     for (final byte in bytes) {
       result = (result << 8) | BigInt.from(byte);
@@ -70,9 +86,16 @@ class SettleCrypto {
     return result;
   }
 
+  /// 从 RSAKeyValue XML 中取标签内容。
+  ///
+  /// 兼容标签带属性（`<Modulus id="x">`）、大小写差异与值跨行的写法：
+  /// 真实的 XML 序列化器（如 .NET `ToXmlString`）会缩进换行。
   String _xmlValue(String xml, String tag) {
-    final match = RegExp('<$tag>(.*?)</$tag>').firstMatch(xml);
-    return match?.group(1)?.trim() ?? '';
+    final pattern = RegExp(
+      '<$tag(?:\\s[^>]*)?>([\\s\\S]*?)</$tag>',
+      caseSensitive: false,
+    );
+    return pattern.firstMatch(xml)?.group(1)?.trim() ?? '';
   }
 }
 

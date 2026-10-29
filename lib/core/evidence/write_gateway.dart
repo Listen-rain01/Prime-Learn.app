@@ -16,9 +16,17 @@ class WriteGateway {
 
   final WriteEvidence _evidence;
 
-  /// 检查 [endpoint] 是否允许执行 [behavior]；不允许时抛 [WriteBlocked]。
-  void ensureAllowed(String endpoint, {required String behavior}) {
-    final level = _evidence.levelOf(endpoint);
+  /// 检查 [endpoint] 是否允许执行 [behaviorId] 对应的行为。
+  ///
+  /// [behavior] 是给用户看的中文名，[behaviorId] 是证据登记里的行为标识
+  /// （如 `mobile` / `mock`）。同一端点承载多种写入时必须传 [behaviorId]，
+  /// 否则只能按端点级判定。
+  void ensureAllowed(
+    String endpoint, {
+    required String behavior,
+    String? behaviorId,
+  }) {
+    final level = _evidence.levelOf(endpoint, behavior: behaviorId);
     if (level != WriteLevel.verified) {
       throw WriteBlocked('$behavior尚未通过协议验证（当前：${level.label}），已阻止写入');
     }

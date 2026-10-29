@@ -3,7 +3,7 @@ import 'package:primelearn/core/utils/redactor.dart';
 
 void main() {
   test('身份证保留前 6 后 4', () {
-    expect(Redactor.idCard('610525199001011234'), '610525******1234');
+    expect(Redactor.idCard('610525199001011238'), '610525******1238');
   });
 
   test('短文本整体脱敏', () {
@@ -12,7 +12,7 @@ void main() {
   });
 
   test('首尾空格不影响脱敏结果', () {
-    expect(Redactor.idCard(' 610525199001011234 '), '610525******1234');
+    expect(Redactor.idCard(' 610525199001011238 '), '610525******1238');
   });
 
   test('密码等敏感值替换为占位符', () {
