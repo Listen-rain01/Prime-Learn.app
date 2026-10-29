@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/data/models/point_entry_dto.dart';
+import 'package:primelearn/features/stats/data/models/point_entry_dto.dart';
 
 void main() {
   const parser = PointsLedgerParser();

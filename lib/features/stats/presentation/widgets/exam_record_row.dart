@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:primelearn/core/utils/date_formatter.dart';
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
 
 /// 考试记录行。
 class ExamRecordRow extends StatelessWidget {

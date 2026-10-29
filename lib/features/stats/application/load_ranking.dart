@@ -1,4 +1,4 @@
-﻿import 'package:primelearn/core/errors/use_case_failure.dart';
+import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_exception.dart';
 import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
 import 'package:primelearn/features/stats/domain/repositories/stats_repository.dart';

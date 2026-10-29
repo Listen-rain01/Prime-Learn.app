@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/data/models/score_trend_dto.dart';
+import 'package:primelearn/features/stats/data/models/score_trend_dto.dart';
 
 /// 个人成绩趋势解析：外层为 `{total, rows}`，没有 `success` 字段。
 class ScoreTrendParser {

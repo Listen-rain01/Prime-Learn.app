@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'records_providers.dart';
+part of 'stats_providers.dart';
 
 // **************************************************************************
 // RiverpodGenerator
@@ -10,101 +10,96 @@ part of 'records_providers.dart';
 // ignore_for_file: type=lint, type=warning
 /// 记录 API 实例。
 
-@ProviderFor(recordsApi)
-final recordsApiProvider = RecordsApiProvider._();
+@ProviderFor(statsApi)
+final statsApiProvider = StatsApiProvider._();
 
 /// 记录 API 实例。
 
-final class RecordsApiProvider
-    extends $FunctionalProvider<RecordsApi, RecordsApi, RecordsApi>
-    with $Provider<RecordsApi> {
+final class StatsApiProvider
+    extends $FunctionalProvider<StatsApi, StatsApi, StatsApi>
+    with $Provider<StatsApi> {
   /// 记录 API 实例。
-  RecordsApiProvider._()
+  StatsApiProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'recordsApiProvider',
+        name: r'statsApiProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$recordsApiHash();
+  String debugGetCreateSourceHash() => _$statsApiHash();
 
   @$internal
   @override
-  $ProviderElement<RecordsApi> $createElement($ProviderPointer pointer) =>
+  $ProviderElement<StatsApi> $createElement($ProviderPointer pointer) =>
       $ProviderElement(pointer);
 
   @override
-  RecordsApi create(Ref ref) {
-    return recordsApi(ref);
+  StatsApi create(Ref ref) {
+    return statsApi(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(RecordsApi value) {
+  Override overrideWithValue(StatsApi value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<RecordsApi>(value),
+      providerOverride: $SyncValueProvider<StatsApi>(value),
     );
   }
 }
 
-String _$recordsApiHash() => r'6637c9c85c699fcd4b4a2d7c32c078b4039b1ffc';
+String _$statsApiHash() => r'db1ca67e645d88e0df385ea6c42a39615201d7fa';
 
 /// 记录仓储实例。
 
-@ProviderFor(recordsRepository)
-final recordsRepositoryProvider = RecordsRepositoryProvider._();
+@ProviderFor(statsRepository)
+final statsRepositoryProvider = StatsRepositoryProvider._();
 
 /// 记录仓储实例。
 
-final class RecordsRepositoryProvider
+final class StatsRepositoryProvider
     extends
-        $FunctionalProvider<
-          RecordsRepository,
-          RecordsRepository,
-          RecordsRepository
-        >
-    with $Provider<RecordsRepository> {
+        $FunctionalProvider<StatsRepository, StatsRepository, StatsRepository>
+    with $Provider<StatsRepository> {
   /// 记录仓储实例。
-  RecordsRepositoryProvider._()
+  StatsRepositoryProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
-        name: r'recordsRepositoryProvider',
+        name: r'statsRepositoryProvider',
         isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
 
   @override
-  String debugGetCreateSourceHash() => _$recordsRepositoryHash();
+  String debugGetCreateSourceHash() => _$statsRepositoryHash();
 
   @$internal
   @override
-  $ProviderElement<RecordsRepository> $createElement(
-    $ProviderPointer pointer,
-  ) => $ProviderElement(pointer);
+  $ProviderElement<StatsRepository> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
 
   @override
-  RecordsRepository create(Ref ref) {
-    return recordsRepository(ref);
+  StatsRepository create(Ref ref) {
+    return statsRepository(ref);
   }
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(RecordsRepository value) {
+  Override overrideWithValue(StatsRepository value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<RecordsRepository>(value),
+      providerOverride: $SyncValueProvider<StatsRepository>(value),
     );
   }
 }
 
-String _$recordsRepositoryHash() => r'8e876f1975f540c4196109a847d26ba27a6b7cd5';
+String _$statsRepositoryHash() => r'5d119f983efac4370d724039df545091ea7291af';
 
 /// 加载考试记录用例。
 
@@ -151,7 +146,7 @@ final class LoadExamRecordsProvider
   }
 }
 
-String _$loadExamRecordsHash() => r'acdf9b2a6dd71ea47df515761a79f800cdb21840';
+String _$loadExamRecordsHash() => r'a245add7ae57c762420270846fac0c386dc74bf3';
 
 /// 加载积分明细用例。
 
@@ -202,7 +197,7 @@ final class LoadPointsLedgerProvider
   }
 }
 
-String _$loadPointsLedgerHash() => r'a9582f630e17810296df2803c828ba133eb114c4';
+String _$loadPointsLedgerHash() => r'114b050256fe08b7a44944c78ba413957240979e';
 
 /// 加载榜单用例。
 
@@ -248,7 +243,7 @@ final class LoadRankingProvider
   }
 }
 
-String _$loadRankingHash() => r'a15a3823c11acfbb88ce5ba73cfaf3772cd7d12b';
+String _$loadRankingHash() => r'8abbcbeb5ea55a84a3acd14faf2bc3a3351c4db3';
 
 /// 加载成绩趋势用例。
 
@@ -294,7 +289,7 @@ final class LoadScoreTrendProvider
   }
 }
 
-String _$loadScoreTrendHash() => r'd521f571e797c8b7d21b920a19a2ad37ec9c3afe';
+String _$loadScoreTrendHash() => r'0f348a1a6fd774f931f986b472622a1f912c0220';
 
 /// 指定分类的考试记录。
 

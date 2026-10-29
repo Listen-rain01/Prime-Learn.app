@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:primelearn/features/records/domain/entities/ranking_board.dart';
+import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
 
 /// 榜单中的一行：排名、姓名/单位、数值（得分或时长）。
 class RankingEntryRow extends StatelessWidget {

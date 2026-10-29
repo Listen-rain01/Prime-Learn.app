@@ -1,4 +1,4 @@
-﻿import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
 import 'package:primelearn/features/stats/domain/entities/point_entry.dart';
 import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
 import 'package:primelearn/features/stats/domain/entities/score_trend_point.dart';

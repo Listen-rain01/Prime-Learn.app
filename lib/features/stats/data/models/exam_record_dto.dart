@@ -1,5 +1,5 @@
 import 'package:primelearn/core/protocol/json_envelope.dart';
-import 'package:primelearn/features/records/domain/entities/exam_record.dart';
+import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
 
 /// 考试记录 DTO（`GetMyExamListOne` 的单条 `data`）。
 class ExamRecordDto {

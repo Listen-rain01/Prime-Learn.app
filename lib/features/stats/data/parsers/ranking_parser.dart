@@ -1,5 +1,5 @@
 import 'package:primelearn/core/protocol/json_envelope.dart';
-import 'package:primelearn/features/records/data/models/ranking_dto.dart';
+import 'package:primelearn/features/stats/data/models/ranking_dto.dart';
 
 /// 排名响应解析（`GetMarkRankingList` / 学习时长排名）。
 class RankingParser {

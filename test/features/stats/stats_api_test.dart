@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/features/stats/data/services/stats_api.dart';
 import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';
 

@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/utils/date_formatter.dart';

@@ -1,4 +1,4 @@
-﻿import 'package:primelearn/core/network/api_client.dart';
+import 'package:primelearn/core/network/api_client.dart';
 import 'package:primelearn/core/protocol/esdt_codec.dart';
 import 'package:primelearn/features/stats/domain/entities/exam_record.dart';
 import 'package:primelearn/features/stats/domain/entities/ranking_board.dart';

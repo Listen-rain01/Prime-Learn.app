@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/features/stats/presentation/widgets/record_format.dart';
 
 void main() {

@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_exception.dart';

@@ -1,14 +1,14 @@
 import 'package:primelearn/core/errors/use_case_failure.dart';
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/domain/entities/point_entry.dart';
-import 'package:primelearn/features/records/domain/repositories/records_repository.dart';
+import 'package:primelearn/features/stats/domain/entities/point_entry.dart';
+import 'package:primelearn/features/stats/domain/repositories/stats_repository.dart';
 
 /// 加载积分明细：按入账时间倒序。
 class LoadPointsLedger {
   /// 创建用例。
   LoadPointsLedger(this._repository);
 
-  final RecordsRepository _repository;
+  final StatsRepository _repository;
 
   /// 查询积分明细。
   Future<List<PointEntry>> execute(String userId) async {

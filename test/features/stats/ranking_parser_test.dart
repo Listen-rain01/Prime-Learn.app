@@ -1,4 +1,4 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
 import 'package:primelearn/features/stats/data/parsers/ranking_parser.dart';
 

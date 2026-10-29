@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:primelearn/core/network/api_exception.dart';
-import 'package:primelearn/features/records/data/parsers/score_trend_parser.dart';
+import 'package:primelearn/features/stats/data/parsers/score_trend_parser.dart';
 
 void main() {
   const parser = ScoreTrendParser();

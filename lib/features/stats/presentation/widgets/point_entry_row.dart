@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:primelearn/core/utils/date_formatter.dart';
-import 'package:primelearn/features/records/domain/entities/point_entry.dart';
+import 'package:primelearn/features/stats/domain/entities/point_entry.dart';
 
 /// 积分明细行。
 class PointEntryRow extends StatelessWidget {
