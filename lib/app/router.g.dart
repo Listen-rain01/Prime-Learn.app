@@ -49,9 +49,9 @@ RouteBase get $appShellRouteData => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       routes: [
         GoRouteData.$route(
-          path: '/records',
+          path: '/stats',
           hasOverriddenOnExit: false,
-          factory: $RecordsRoute._fromState,
+          factory: $StatsRoute._fromState,
         ),
       ],
     ),
@@ -104,11 +104,11 @@ mixin $TodayRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $RecordsRoute on GoRouteData {
-  static RecordsRoute _fromState(GoRouterState state) => const RecordsRoute();
+mixin $StatsRoute on GoRouteData {
+  static StatsRoute _fromState(GoRouterState state) => const StatsRoute();
 
   @override
-  String get location => GoRouteData.$location('/records');
+  String get location => GoRouteData.$location('/stats');
 
   @override
   void go(BuildContext context) => context.go(location);

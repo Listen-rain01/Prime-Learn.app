@@ -284,7 +284,7 @@ class RunMobileExam {
 
 ### 3.7 命名与目录规则
 
-- feature 目录用业务名：`auth`、`tasks`、`records`、`checkin`、`exam`、`reading`、`stats`、`settings`、`agent`；
+- feature 目录用业务名：`auth`、`tasks`、`stats`、`checkin`、`exam`、`reading`、`settings`、`agent`；
 - 页面统一 `xxx_page.dart` / `XxxPage`，不要 `screens/`、`_screen.dart`；
 - 用例 `xxx_usecase.dart` / `XxxUseCase`；
 - Repository 接口 `xxx_repository.dart`，实现 `xxx_repository_impl.dart`；
@@ -513,8 +513,8 @@ class AgentEngine extends _$AgentEngine {
 
 ```text
 /login          登录（shell 之外）
-/               今日（Tab 1）：今日积分、每日任务（按接口顺序）、任务入口
-/records        记录（Tab 2）：考试记录、积分明细、排行/成绩趋势（只读）
+/               首页（Tab 1）：今日积分、每日任务（按接口顺序）、任务入口
+/stats          统计（Tab 2）：考试记录、积分明细、排行/成绩趋势（只读）
 /settings       我的（Tab 3）：账号、当前题库、题库预设、退出登录
 /settings/bank-preset 题库预设（「我的」分支内 push）
 /settings/reading-preset 阅读预设（「我的」分支内 push）
@@ -523,9 +523,9 @@ class AgentEngine extends _$AgentEngine {
 ```
 
 - 使用 `@TypedGoRoute` + `GoRouteData`，禁止字符串路由；shell 用 `@TypedStatefulShellRoute`；
-- Tab 顺序：今日 / 记录 / 我的；新增 Tab 需先改本节与 `lib/app/app_shell.dart`；
+- Tab 顺序：首页 / 统计 / 我的；新增 Tab 需先改本节与 `lib/app/app_shell.dart`；
 - 执行中离开需二次确认；
-- 深链只开放 `/` 与 `/records`；
+- 深链只开放 `/` 与 `/stats`；
 - 会话失效统一跳 `/login`，登录后回原页。
 
 ---
@@ -592,6 +592,30 @@ POST /PersonWap/FirstIndexOne             校验会话 + 当前题库
 - 会话失效：清本地态 → 登录页；
 - 登录失败直接展示错误，不自动重试。
 
+#### 8.1.1 身份证号校验（GB 11643）
+
+登录前的本地校验，实现在 `lib/core/utils/id_card_validator.dart`，登录页与用例共用。
+
+号码结构：`6 位地址码 + 8 位出生日期 + 3 位顺序码 + 1 位校验码`。
+
+必校项（四项缺一不可）：
+
+1. 长度与字符集：17 位数字 + 校验位（`0-9` 或 `X`/`x`，小写归一为大写）；
+2. **地址码省级前缀**必须是**大陆 31 个省级行政区**之一；`00`、`99` 这类手误，
+   以及港澳台（`71/81/82/83`）与境外（`91`）前缀一律拒绝——平台只接受大陆号码；
+3. 出生日期段必须是真实存在的日期：拒绝 13 月、2 月 30 日、非闰年 2 月 29 日，
+   早于 1900 年或晚于今天的也拒绝（1900-01-01 为允许的下边界）；
+4. 末位校验码 = 前 17 位加权求和后对 11 取模，按 `[1,0,X,9,8,7,6,5,4,3,2]` 映射。
+
+不校验项（有意为之，不得擅自加严）：
+
+- 完整 6 位行政区划码表（数千条且随区划调整变动，只校省级前缀）；
+- 顺序码的性别奇偶与 `000`（规范未禁止 `000`，且历史数据存在，
+  拒绝会有误伤真实账号的风险）。
+
+顺序码第 15–17 位奇数为男、偶数为女，仅用于**展示性别**，
+不参与合法性判定。
+
 ### 8.2 Esdt
 
 - 所有标注 Esdt 的参数必须走统一 `EsdtCodec`；
@@ -643,8 +667,15 @@ GET  /ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne   { pid, zsid: Esdt }
 
 - 今日任务：`GET /AccumulateManger/S_Accumulate/GetPersonTodayAccumulateOne?pid=Esdt`；
 - 以 `CurAccumulate / MaxAccumulate` 为准；
-- 规则文案可能滞后（如手机考试上限 8/16 不一致），以接口字段为准；
-- 结算成功 ≠ 积分到账：轮询 10–15s，最多 90s；
+- 规则文案可能滞后，以接口字段为准。实测（`docs/api/samples/today-accumulate/`，
+  2026-10-28）：手机考试 `MaxAccumulate=16`、`Accumulate=6`，模拟考试
+  `MaxAccumulate=8`；**“每日上限 8/16 不一致”指的是规则文案与字段不一致，
+  不是字段本身不可用**，实现必须按字段判断是否需要再跑一场；
+- 结算成功 ≠ 积分到账：每 10–15s 轮询一次，最多 90s（实现取 10s × 9 次）；
+- “本场是否到账”与“是否还要再考一场”必须分开判断：轮询窗口内
+  `CurAccumulate` 没上涨时，**停止而不是继续创建考试**（避免烧掉考试次数）；
+  窗口取值不得小于 90s，否则会把延迟入账误判成“未产生积分”；
+- 查询返回里找不到该任务时属于“状态未知”，不得当成“已完成”；
 - 禁止把“请求成功”直接展示为“积分 +N”。
 
 ### 8.6 重试与幂等
@@ -675,6 +706,9 @@ GET  /ArchiveManger/D_PersonAccumulate/StudyKnowledgeOne   { pid, zsid: Esdt }
 规则：
 
 1. **粒度**：`verified` 针对「具体接口 + 具体行为 + 具体前提」，不给整份文档打总标签；
+   **同一端点承载多种写入行为时必须按行为分别登记**（如 `CreateTempExamOne` 的
+   `type=1/2`、`SetOnlineTestOne` 的 `style=1/0`）。代码侧用 `端点#行为` 键实现，
+   行为不匹配按 `assumed` 处理，不回落到端点级；
 2. **登记**：`docs/api/evidence-register.md` 记录接口、行为、级别、验证日期、验证人、验证方式、样本路径、重验触发条件；
 3. **升级权限**：人（开发者/负责人）可直接升级，但必须由独立于实现者的评审确认并在 `evidence-register.md` 记录依据；Agent 只能**提议**，不得自行提升；
 4. **过期**：`observed` 超过 90 天未重验自动降为 `assumed`；`verified` 在平台版本变更或连续 2 次结算异常时触发重验；
@@ -1048,3 +1082,10 @@ docs/api/evidence-register.md（协议证据登记）
 | v2.0 | 2026-10-27 | 收口 403/签到/查询语义/写网关/超时竞态；新增可执行验收矩阵 |
 | v2.1 | 2026-10-27 | 浏览器实测修正：type=2 记录为手机自测、type=1 为手机模拟；查询须带 type=2/3 |
 | v2.2 | 2026-10-27 | 补回代码注释约束（§4.5：中文注释、public API 用 `///`、复杂逻辑说明“为什么”、生成文件与 analyzer 指令豁免）；原「代码评审六问」顺延为 §4.6 |
+| v2.3 | 2026-10-29 | 按实测修正 §8.5 积分口径（手机考试 `Max=16`/`Accumulate=6`、模拟 `Max=8`，需跑 2 场；“未到账即停止”而非继续创建）；§8.8 增加「同一端点按行为分别登记」；回写 evidence-register 手机考试 `observed→verified` 与行为级登记 |
+| v2.4 | 2026-10-29 | 新增 §8.1.1 身份证号校验（GB 11643）：补地址码省级前缀校验、明确四项必校与两项有意不校；积分轮询窗口定为 10s × 9 = 90s |
+| v2.5 | 2026-10-29 | 身份证地址码收敛为**大陆 31 个省级区划**：移除港澳台（71/81/82/83）与境外（91）前缀，与平台只接受大陆号码一致 |
+| v2.6 | 2026-10-29 | 按 `riverpod_lint` 修订三类问题：①`only_use_keep_alive_inside_keep_alive`——keepAlive provider 引用 autoDispose provider（`bankPreset`/`readingPreset` 改为 keepAlive）；②`avoid_public_notifier_properties`——删除 `DailyAutoRunner.running` getter，改由 `state` 推导；③同类问题：轮询配置从 notifier 可变字段改为 `creditPollIntervalProvider`/`creditPollCountProvider`，测试用 override 注入 |
+| v2.7 | 2026-10-29 | 全项目审计后按实测修复（每项均有复现）：①预设页换年份后保存按钮可点、`_bank!` 崩溃；②结算「未合格」被判合格、`100.0` 解析失败；③提交答案正则无词边界致 `success:false` 判成功；④一键执行异常冒泡、UI 无终态、状态跨账号残留；⑤vData 提取抽出 `VDataExtractor`（花括号配对，区分 missing/malformed）；⑥`JsonEnvelope` 补读 `error` 字段与字符串 `success`；⑦RSA 公钥 XML 容错（属性/大小写/跨行）+ Base64 空白清洗 + 长度预检；⑧阅读「已达上限」改关键词组合判定；⑨`ref.invalidate` 前补 `mounted` 守卫；⑩签到会话失效清理；⑪身份证补 GB 11643 校验位与大陆省级地址码 |
+| v2.8 | 2026-10-29 | 记录 Tab 新增「个人积分榜」：账号持有人授权真机实测 `POST /ArchiveManger/D_PersonAccumulate/GetAccumulateRankingListOne`（`pid`/`begin`/`end` 走 Esdt、`type` 明文 `1`单位/`0`集团；`Mark` 恒 null、积分在 `AllCount`、`message` 为「姓名\|排名\|积分」），等级 `verified` 并落盘样本。成绩榜/学习时长榜**保留**，与积分榜三选一并存；积分榜额外提供「本周/本月」切换 |
+| v2.9 | 2026-10-29 | 底部导航与模块重命名：Tab 1「今日」→「首页」、Tab 2「记录」→「统计」；feature 目录 `records`→`stats`、路由 `/records`→`/stats`、类名 `RecordsApi/Repository/Page/Route`→`Stats*`；业务级 `record`（`ExamRecord`/`fetchExamRecords` 等）保留不变；时长榜补「本周/本月」切换；时长格式化改为与平台一致的三段式「X小时Y分Z秒」 |

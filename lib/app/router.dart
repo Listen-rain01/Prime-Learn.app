@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:primelearn/app/app_shell.dart';
 import 'package:primelearn/core/session/session_store.dart';
 import 'package:primelearn/features/auth/presentation/pages/login_page.dart';
-import 'package:primelearn/features/records/presentation/pages/records_page.dart';
+import 'package:primelearn/features/stats/presentation/pages/stats_page.dart';
 import 'package:primelearn/features/reading/presentation/pages/reading_preset_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/bank_preset_page.dart';
 import 'package:primelearn/features/settings/presentation/pages/settings_page.dart';
@@ -28,10 +28,8 @@ class LoginRoute extends GoRouteData with $LoginRoute {
     TypedStatefulShellBranch<TodayBranchData>(
       routes: <TypedRoute<RouteData>>[TypedGoRoute<TodayRoute>(path: '/')],
     ),
-    TypedStatefulShellBranch<RecordsBranchData>(
-      routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<RecordsRoute>(path: '/records'),
-      ],
+    TypedStatefulShellBranch<StatsBranchData>(
+      routes: <TypedRoute<RouteData>>[TypedGoRoute<StatsRoute>(path: '/stats')],
     ),
     TypedStatefulShellBranch<SettingsBranchData>(
       routes: <TypedRoute<RouteData>>[
@@ -65,9 +63,9 @@ class TodayBranchData extends StatefulShellBranchData {
 }
 
 /// 记录分支。
-class RecordsBranchData extends StatefulShellBranchData {
+class StatsBranchData extends StatefulShellBranchData {
   /// 创建记录分支。
-  const RecordsBranchData();
+  const StatsBranchData();
 }
 
 /// 我的分支。
@@ -86,13 +84,12 @@ class TodayRoute extends GoRouteData with $TodayRoute {
 }
 
 /// 记录 Tab。
-class RecordsRoute extends GoRouteData with $RecordsRoute {
+class StatsRoute extends GoRouteData with $StatsRoute {
   /// 创建记录路由。
-  const RecordsRoute();
+  const StatsRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) =>
-      const RecordsPage();
+  Widget build(BuildContext context, GoRouterState state) => const StatsPage();
 }
 
 /// 我的 Tab。

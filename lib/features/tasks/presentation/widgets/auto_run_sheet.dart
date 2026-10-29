@@ -24,12 +24,17 @@ class _AutoRunSheetState extends ConsumerState<_AutoRunSheet> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final runner = ref.read(dailyAutoRunnerProvider.notifier);
-      final hasResult = ref
-          .read(dailyAutoRunnerProvider)
-          .any((step) => step.status != AutoTaskStatus.pending);
-      if (!runner.running && !hasResult) {
-        runner.run();
+      final steps = ref.read(dailyAutoRunnerProvider);
+      // 「是否在跑」从 state 推导：有任一步处于 running 即视为执行中。
+      // 不再读 notifier 的公开 getter（riverpod_lint: avoid_public_notifier_properties）。
+      final alreadyRunning = steps.any(
+        (step) => step.status == AutoTaskStatus.running,
+      );
+      final hasResult = steps.any(
+        (step) => step.status != AutoTaskStatus.pending,
+      );
+      if (!alreadyRunning && !hasResult) {
+        ref.read(dailyAutoRunnerProvider.notifier).run();
       }
     });
   }

@@ -17,6 +17,18 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'daily_auto_runner.g.dart';
 
+/// 积分轮询间隔（默认 10s）。
+///
+/// 独立成 provider 便于测试 override 成 `Duration.zero`，
+/// 避免 notifier 暴露可变字段（riverpod_lint 要求 notifier 只通过 state 暴露 API）。
+@Riverpod(keepAlive: true)
+Duration creditPollInterval(Ref ref) =>
+    DailyAutoRunner.defaultCreditPollInterval;
+
+/// 积分轮询次数（默认 9 次，配合 10s 间隔即 90s 窗口）。
+@Riverpod(keepAlive: true)
+int creditPollCount(Ref ref) => DailyAutoRunner.defaultCreditPollCount;
+
 /// 一键完成步骤状态。
 enum AutoTaskStatus { pending, running, done, failed }
 
@@ -55,17 +67,48 @@ class DailyAutoRunner extends _$DailyAutoRunner {
   bool _running = false;
 
   @override
-  List<AutoTaskProgress> build() => const [
-    AutoTaskProgress(title: '模拟考试'),
-    AutoTaskProgress(title: '手机考试'),
-    AutoTaskProgress(title: '签到'),
-    AutoTaskProgress(title: '知识学习'),
-  ];
+  List<AutoTaskProgress> build() {
+    // 会话变化（退出登录 / 换账号）时重置进度，
+    // 避免把上一个账号的分数与「已完成」带到新会话。
+    final session = ref.watch(sessionStoreProvider);
+    _resetForSession(session?.userId);
+    return const [
+      AutoTaskProgress(title: '模拟考试'),
+      AutoTaskProgress(title: '手机考试'),
+      AutoTaskProgress(title: '签到'),
+      AutoTaskProgress(title: '知识学习'),
+    ];
+  }
 
-  /// 是否正在执行。
-  bool get running => _running;
+  /// 当前进度所属的用户；换人时清空。
+  String? _ownerUserId;
+
+  void _resetForSession(String? userId) {
+    if (_ownerUserId == userId) return;
+    _ownerUserId = userId;
+    _running = false;
+  }
+
+  /// 默认积分轮询间隔（10s，符合 §8.5 的 10–15s 建议）。
+  static const Duration defaultCreditPollInterval = Duration(seconds: 10);
+
+  /// 默认积分轮询次数（9 次，配合 10s 间隔即 90s 窗口）。
+  static const int defaultCreditPollCount = 9;
+
+  /// 每次执行前从 provider 读取的轮询配置。
+  ///
+  /// 不再用 notifier 上的可变字段：notifier 的公开成员只允许是 `state`
+  /// （riverpod_lint `avoid_public_notifier_properties`）。
+  /// 测试通过 override 这两个 provider 把 90s 窗口缩短为 0。
+  ({Duration interval, int count}) get _creditPollConfig => (
+    interval: ref.read(creditPollIntervalProvider),
+    count: ref.read(creditPollCountProvider),
+  );
 
   /// 执行全部任务。
+  ///
+  /// 任何一步抛出的异常都必须收敛成明确终态，不能冒泡给调用方：
+  /// 调用点（auto_run_sheet）不 await，异常会让 UI 永久停在「正在执行」。
   Future<void> run() async {
     if (_running) return;
     final session = ref.read(sessionStoreProvider);
@@ -88,6 +131,24 @@ class DailyAutoRunner extends _$DailyAutoRunner {
       );
       await _runCheckIn(session.userId);
       await _runReading(session.userId);
+    } on Object catch (error) {
+      // 未能归入具体步骤的异常（多为看板查询失败）落到第一个未完成步骤上。
+      final index = state.indexWhere(
+        (step) => step.status == AutoTaskStatus.running,
+      );
+      final target = index >= 0
+          ? index
+          : state.indexWhere((step) => step.status == AutoTaskStatus.pending);
+      final reason = error is UseCaseFailure ? error.message : '执行中断，请稍后重试';
+      if (target >= 0) {
+        _update(target, AutoTaskStatus.failed, reason);
+      }
+      // 其余未开始步骤标记为未完成，避免界面永远显示「等待执行」。
+      for (var i = 0; i < state.length; i++) {
+        if (state[i].status == AutoTaskStatus.pending) {
+          _update(i, AutoTaskStatus.failed, '未执行（上一步中断）');
+        }
+      }
     } finally {
       ref.invalidate(dailyBoardProvider);
       _running = false;
@@ -173,7 +234,9 @@ class DailyAutoRunner extends _$DailyAutoRunner {
     }
 
     _update(index, AutoTaskStatus.running, '开始执行');
-    for (var attempt = 0; attempt < 5; attempt++) {
+    // 平台积分延迟入账（§8.5），一场考完立刻回查可能仍是旧分数。
+    // 因此额外给「积分未入账」留轮询预算，避免把已到账的场次当成没跑而重复创建。
+    for (var attempt = 0; attempt < _maxExamAttempts; attempt++) {
       if (task == null || task.isCompleted) {
         _update(index, AutoTaskStatus.done, '今日已完成');
         return;
@@ -182,7 +245,7 @@ class DailyAutoRunner extends _$DailyAutoRunner {
         final result = await ref
             .read(runExamProvider)
             .execute(kind: kind, userId: userId, paper: _toPaper(preset));
-        _update(index, AutoTaskStatus.running, '${result.score} 分，检查进度');
+        _update(index, AutoTaskStatus.running, '${result.score} 分，等待积分入账');
       } on UseCaseFailure catch (error) {
         // 失败后回查：平台可能已记录本次结果。
         board = await _fetchBoard(userId);
@@ -194,10 +257,65 @@ class DailyAutoRunner extends _$DailyAutoRunner {
         }
         return;
       }
-      board = await _fetchBoard(userId);
+
+      // 结算成功后先轮询积分，确认真实未到账再决定是否再考一场。
+      final confirmed = await _awaitExamCredit(userId, criterion, task);
+      board = confirmed.board;
       task = _find(board, criterion);
+      if (confirmed.gained && (task == null || task.isCompleted)) {
+        _update(index, AutoTaskStatus.done, '今日已完成');
+        return;
+      }
+      if (!confirmed.gained) {
+        // 本场完全没有产生积分：再考也不会增加，停止而不是空耗考试次数。
+        _update(index, AutoTaskStatus.failed, '本场未产生积分，已停止（请查看记录）');
+        return;
+      }
+      if (task == null) {
+        // 积分涨了但任务查不到：状态不明，停止而不是继续开考。
+        _update(index, AutoTaskStatus.failed, '积分已变化但任务状态未知，已停止');
+        return;
+      }
     }
     _update(index, AutoTaskStatus.failed, '多次执行仍未完成');
+  }
+
+  /// 单类考试最多尝试的场次。
+  ///
+  /// 手机考试日上限 16 分、单场 8 分（真实样本 `today-accumulate`），
+  /// 模拟考试 8 分、单场 4 分 → 各需 2 场；留 1 场余量应对失败重考。
+  static const int _maxExamAttempts = 3;
+
+  /// 结算后轮询今日任务，等待积分入账。
+  ///
+  /// 平台入账有延迟（§8.5：每 10–15s 一次，最多 90s）。这里只等「本场是否到账」；
+  /// 轮询窗口结束仍未到账时交由调用方停止，而不是继续开下一场。
+  /// 窗口本身不判失败：延迟更久的场次仍可能之后入账，结果会体现在下一次看板上。
+  Future<({TaskBoard board, bool gained})> _awaitExamCredit(
+    String userId,
+    Criterion criterion,
+    DailyTask before,
+  ) async {
+    final baseline = before.currentScore;
+    var board = await _fetchBoard(userId);
+    var task = _find(board, criterion);
+    // 只看「积分真的涨了」或「任务已满额」：任务查不到属于状态未知，
+    // 不能当成已到账（否则会把失败的写入报成完成）。
+    if (task != null && (task.currentScore > baseline || task.isCompleted)) {
+      return (board: board, gained: true);
+    }
+    final poll = _creditPollConfig;
+    for (var i = 0; i < poll.count; i++) {
+      await Future<void>.delayed(poll.interval);
+      board = await _fetchBoard(userId);
+      task = _find(board, criterion);
+      if (task != null && (task.currentScore > baseline || task.isCompleted)) {
+        return (board: board, gained: true);
+      }
+    }
+    // 轮询结束仍未到账：可能是延迟更久，也可能是本场没被计入。
+    // 返回 gained=false 交由调用方停止，避免继续烧考试次数。
+    return (board: board, gained: false);
   }
 
   ExamPaper _toPaper(BankPreset preset) => ExamPaper(

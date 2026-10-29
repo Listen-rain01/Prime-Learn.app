@@ -47,12 +47,29 @@ class TodayPage extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton.icon(
-                onPressed: () => showAutoRunSheet(context),
-                icon: const Icon(Icons.bolt),
-                label: const Text('一键完成今日任务'),
+            TonalBlock(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () => showAutoRunSheet(context),
+                      icon: const Icon(Icons.bolt),
+                      label: const Text('一键完成今日任务'),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    '自动按顺序完成：模拟考试 → 手机考试 → 签到 → 知识学习。'
+                    '已完成或已满额会自动跳过，也可点击下方任务单独完成。',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -223,8 +240,8 @@ class _ReadingTaskSheetState extends ConsumerState<_ReadingTaskSheet> {
       final completed = await ref
           .read(completeReadingProvider)
           .execute(userId: session.userId, preset: preset);
-      ref.invalidate(dailyBoardProvider);
       if (!mounted) return;
+      ref.invalidate(dailyBoardProvider);
       setState(() {
         _done = true;
         _message = completed

@@ -119,11 +119,10 @@ void main() {
     const allowed = {
       'auth',
       'tasks',
-      'records',
+      'stats',
       'checkin',
       'exam',
       'reading',
-      'stats',
       'settings',
       'agent',
     };

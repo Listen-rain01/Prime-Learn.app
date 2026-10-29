@@ -116,6 +116,11 @@ void main() {
     expect(find.text('当前题库：题库A'), findsOneWidget);
     expect(find.text('今日积分'), findsOneWidget);
     expect(find.text('7'), findsOneWidget);
+    expect(find.text('一键完成今日任务'), findsOneWidget);
+    expect(
+      find.textContaining('自动按顺序完成：模拟考试 → 手机考试 → 签到 → 知识学习'),
+      findsOneWidget,
+    );
     expect(find.text('每日任务'), findsOneWidget);
     expect(find.text('2/3 已完成'), findsOneWidget);
     expect(find.text('知识学习'), findsOneWidget);
