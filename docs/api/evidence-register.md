@@ -26,6 +26,7 @@
 | `/ExamManger/P_ExamTypeStyle/GetAllChildTypeEx` | 题库子分类/年份（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：返回 2022 年层级（Level=3） | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_ExamType/GetExamTypeListExOne` | 题库列表（只读） | observed | 2026-10-28 | 待独立复核 | 真实会话实测：单位=1、2022 年返回「刑法修正案十一」20 题；`Year`/`Style` 明文，其余 Esdt | 未落盘样本 | 平台版本变更 |
 | `/ArchiveManger/D_PersonManager/SaveExamTypeIdsOne` | 保存/切换题库（写） | verified | 2026-10-29 | 账号持有人授权 + 实测 | 2026-10-27 文档记录切换成功并以 FirstIndexOne 校验；2026-10-29 账号持有人要求执行前自动切库，真机验证通过 | 未落盘样本 | 平台版本变更 |
+| `/ArchiveManger/D_PersonManager/SaveExamPaperIdOne` | 选试卷学习（写，不改题库） | observed | 2026-10-30 | 账号持有人授权 + 实测 | 参数 `pid` / `PaperId` 均 Esdt；实测 `success=true`，`data` 返回当前题库 ID，调用前后 `FirstIndexOne.parts[6]` 一致（题库未切换）。**注意**：`/PersonWap/SelectPaper`（标题「模拟考试 选择试卷」）页面不调用此接口，其链路为 `SelectCanRunListOne → ExistsNoFinish → CreateTempExamOne → SetOnlineTestOne`；本接口的确切前端调用点尚未定位 | 未落盘样本 | 平台版本变更 / 调用点确认 |
 | `/ExamManger/P_Paper/SelectCanRunListOne` | 可考试卷（只读） | observed | 2026-10-28 | 待独立复核 | 真实环境实测：当前题库 1 份试卷（总分 100 / 及格 80）；预设「刑法修正案十一」0 份，无法用于考试。**不返回题数** | 未落盘样本 | 平台版本变更 |
 | `/ExamManger/P_PaperScore/GetChildList` | 试卷出题数配置（只读） | observed | 2026-10-30 | 账号持有人授权 + 实测 | 参数为 `sjid`（试卷 ID，明文）+ `findName`；**传 `PaperId` 会返回空对象**。响应为非标准 JSON（键未加引号）。`出题数` 按「题型 + 考查分类」逐条配置，本卷题数 = 各条 `出题数` 之和。实测 4 份试卷合计均为 100 题；同一 3985 题题库的两份试卷题型分配不同（50/10/40 vs 40/10/50），证明题数按试卷人工配置、与题库大小无关 | `docs/api/samples/paper-score-config/` | 平台版本变更 / 配置口径变更 |
 | `/ExamManger/P_ExamDetail/GetMarkRankingList` | 成绩排名（单位/集团榜，只读） | observed | 2026-10-28 | 待独立复核 | 前端页面 POST `/PersonWap/ScoreList` 代码核对：标题「考试成绩排行榜」、渲染 `考试成绩 Mark`；`type=1/0` 为范围、`id=0/1` 为单位/集团；此前固定 `id=0` 导致的 4152 异常值已定位为参数错误 | 未落盘样本 | 平台版本变更 |
@@ -65,4 +66,5 @@
 | 2026-10-29 | 明确「规则文案与接口字段不一致」时以字段为准 | `docs/api/samples/today-accumulate/`：手机考试 `MaxAccumulate=16`、`Accumulate=6`，模拟考试 `MaxAccumulate=8` |
 | 2026-10-29 | 新增手机练习链路 4 条登记（`SetOnlineStuday` / `OnlineStuday` 页 / `SetQuestionOne` / `SyncPersonStat`），均为 `observed`，配套《手机练习接口文档》v1.0 | 2026-10-29 账号持有人授权 Playwright 真实环境实测（对/错两题双向验证提交语义）；v1 范围外仅取证，升级 `verified` 待独立复核 |
 | 2026-10-30 | 新增 `P_PaperScore/GetChildList`（试卷出题数配置）登记为 `observed`；补充 `SelectCanRunListOne` 不返回题数的说明 | 账号持有人授权实测 4 份试卷：题数 = 各条 `出题数` 之和；同题库两份试卷题型分配不同，证明按试卷人工配置、与题库大小无关。样本 `docs/api/samples/paper-score-config/` |
+| 2026-10-30 | 补登记 `SaveExamPaperIdOne`（选试卷学习）为 `observed`；此前文档有描述但**从未登记证据级别**。同时澄清 `SelectPaper` 页面不调用它 | 账号持有人授权实测：`success=true`、`data` 返回当前题库 ID、题库前后未变 |
 
